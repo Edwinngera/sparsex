@@ -1,6 +1,7 @@
 from sklearn.feature_extraction.image import extract_patches_2d
 from PIL import Image
 import numpy as np
+import os
 
 # source : http://stackoverflow.com/questions/13990465/3d-numpy-array-to-2d
 def get_giant_patch_image(patches, dtype='uint8', scale=False):
@@ -26,3 +27,9 @@ def get_image_from_file(image_filename, dtype='float'):
     image_pil = Image.open(image_filename)
     image = np.array(image_pil).astype(dtype)
     return image
+
+
+def resize_image_to_64x64(image_filename):
+    image_pil_64x64 = Image.open(image_filename).resize((64,64))
+    new_image_filename = image_filename.split(".")[0] + "_64x64." + image_filename.split(".")[1] 
+    image_pil_64x64.save(new_image_filename)
