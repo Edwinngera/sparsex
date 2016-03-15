@@ -9,8 +9,8 @@ def get_giant_patch_image(patches, dtype='uint8', scale=False):
     if scale:
         original_patches_shape = patches.shape
         patches = patches.reshape((patches.shape[0], -1))
-        patches = patches + np.abs(patches.max(axis=1)[:, np.newaxis]) + 0.01
-        patches = patches * (255.0 / np.abs((patches.max(axis=1) - patches.min(axis=1))[:, np.newaxis] + 0.0001))
+        patches = patches - patches.min(axis=1)[:, np.newaxis]
+        patches = patches * (255.0 / np.abs((patches.max(axis=1) - patches.min(axis=1))[:, np.newaxis]))
         patches = patches.reshape(original_patches_shape)
     sqrt_of_rows = int(np.sqrt(patches.shape[0]))
     broken_patches = patches.reshape(sqrt_of_rows, sqrt_of_rows, patches.shape[1], patches.shape[2])
@@ -18,7 +18,7 @@ def get_giant_patch_image(patches, dtype='uint8', scale=False):
     return giant_patch_image.astype(dtype)
 
 
-def save_image(image_array, destination_filename="~/home/nitish/Desktop/hello.jpg", dtype='uint8'):
+def save_image(image_array, destination_filename, dtype='uint8'):
     image_pil = Image.fromarray(image_array.astype(dtype))
     image_pil.save(destination_filename)
 
