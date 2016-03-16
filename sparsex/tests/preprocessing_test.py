@@ -2,110 +2,84 @@ from ..customutils.customutils import save_image, get_image_from_file, get_giant
 from ..preprocessing.preprocessing import Preprocessing
 from PIL import Image
 from skimage.util.montage import montage2d
-from scipy.misc import imshow
+from scipy.misc import imshow, imsave
 import numpy as np
 import os
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
-def test_patch_extraction(image_filename):
+def show_and_save_montage_of_patches(patches, is_show, is_save, save_filename=None):
+    if is_show or is_save:
+        if patches.ndim == 3:
+            patches_montage = montage2d(patches)
+        else:
+            patches_montage = patches
+
+        if is_show:
+            imshow(patches_montage)
+        if is_save and (save_filename is not None):
+            save_filename = os.path.join(THIS_FILE_PATH, save_filename)
+            imsave(save_filename, patches_montage)
+
+def test_patch_extraction(image_filename, show_montage=True, save_montage=True):
     # get instance of Preprocessing
     preprocessing = Preprocessing()
 
     # get original image array
+    print "Original Image"
     image_array = get_image_from_file(image_filename)
-    # print image_array.shape
-    # print image_array.dtype
-
-    # save original image
-    destination_filename = os.path.join(THIS_FILE_PATH, "./data/01_original_image.jpg")
-    save_image(image_array.astype('uint8'), destination_filename=destination_filename)
+    print image_array.shape
+    print image_array.dtype
     
     # get patches
     print "Extracting patches"
     patches = preprocessing.extract_patches(image_array, patch_size=(8,8))
     print patches.shape
 
-    # get montage
-    patches_montage = montage2d(patches)
-
-    # show image
-    imshow(patches_montage)
-
-    # get giant patch image
-    # giant_patch_image_array = get_giant_patch_image(patches, dtype='uint8', scale=False)
-    # print giant_patch_image_array.shape
-
-    # save giant image
-    # destination_filename = os.path.join(THIS_FILE_PATH, "./data/02_patch_extraction_giant_image.jpg")
-    # save_image(giant_patch_image_array, destination_filename=destination_filename)
+    show_and_save_montage_of_patches(image_array, show_montage, save_montage,
+                                     "./data/01_original_image.jpg")
+    show_and_save_montage_of_patches(patches, show_montage, save_montage,
+                                     "./data/02_patch_extraction_montage.jpg")
 
     return patches
 
 
-def test_contrast_normalization(image_filename):
+def test_contrast_normalization(image_filename, show_montage=True, save_montage=True):
     # get instance of Preprocessing
     preprocessing = Preprocessing()
 
     # get patches
-    patches = test_patch_extraction(image_filename)
+    patches = test_patch_extraction(image_filename, show_montage, save_montage)
 
     # get normalized patches
     print "Normalizing"
     normalized_patches = preprocessing.get_contrast_normalized_patches(patches)
     print normalized_patches.shape
-    print normalized_patches[0]
 
     # get variance of normalized patches (each patch is reshaped along axis=1)
+    print "Normalized patches variance"
     print normalized_patches.reshape((normalized_patches.shape[0], -1)).var(axis=1)[:10]
 
-    # get montage
-    normalized_patches_montage = montage2d(normalized_patches)
-
-    # show image
-    imshow(normalized_patches_montage)
-
-    # get giant normalized patch image array
-    # giant_normalized_patch_image_array = get_giant_patch_image(normalized_patches, dtype='uint8', scale=True)
-    # print giant_normalized_patch_image_array.shape
-    # print giant_normalized_patch_image_array[:8,:8]
-
-    # save giant normalized image
-    # destination_filename = os.path.join(THIS_FILE_PATH, "./data/03_normalized_patches_giant_image.jpg")
-    # save_image(giant_normalized_patch_image_array, destination_filename=destination_filename)
+    show_and_save_montage_of_patches(normalized_patches, show_montage, save_montage,
+                                     "./data/03_normalized_patches_montage.jpg")
 
     return normalized_patches
 
 
-def test_whitening(image_filename):
+def test_whitening(image_filename, show_montage=True, save_montage=True):
     # get instance of Preprocessing
     preprocessing = Preprocessing()
 
     # get normalized patches
-    normalized_patches = test_contrast_normalization(image_filename)
+    normalized_patches = test_contrast_normalization(image_filename, show_montage, save_montage)
 
     # get whitened patches
     print "Whitening"
-    whitened_patches = preprocessing.zca_whitening(normalized_patches)
+    whitened_patches = preprocessing.get_whitened_patches(normalized_patches)
     print whitened_patches.shape
-    print whitened_patches[0]
 
-    # get montage
-    whitened_patches_montage = montage2d(whitened_patches)
-
-    # show image
-    imshow(whitened_patches_montage)
-
-    # get giant whitened patch image array
-    giant_whitened_patch_image_array = get_giant_patch_image(whitened_patches, dtype='uint8', scale=True)
-    print giant_whitened_patch_image_array.shape
-    print giant_whitened_patch_image_array
-
-    imshow(giant_whitened_patch_image_array)
-
-    # save giant whitened image
-    # destination_filename = os.path.join(THIS_FILE_PATH, "./data/04_whitened_patches_giant_image.jpg")
-    # save_image(giant_whitened_patch_image_array, destination_filename=destination_filename, show=True)
+    show_and_save_montage_of_patches(whitened_patches, show_montage, save_montage,
+                                     "./data/04_whitened_patches_montage.jpg")
 
     return whitened_patches
     
@@ -114,11 +88,11 @@ if __name__ == "__main__":
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/yaleB01_P00A-005E-10_64x64.pgm"))
     
     # test patch extraction
-    # test_patch_extraction(image_filename)
+    # test_patch_extraction(image_filename, show_montage=True, save_montage=True)
 
     # test contrast normalization
-    # test_contrast_normalization(image_filename)
+    # test_contrast_normalization(image_filename, show_montage=True, save_montage=True)
 
     # test whitening
-    test_whitening(image_filename)
+    test_whitening(image_filename, show_montage=True, save_montage=True)
     
