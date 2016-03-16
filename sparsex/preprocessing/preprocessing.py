@@ -21,27 +21,38 @@ class Preprocessing:
 
     ## Pipeline - Step 3
     def get_whitened_patches(self, normalized_patches):
-        patches = normalized_patches # alias for convenience
-        for i in range(patches.shape[0]):
-            sigma = np.cov(patches[i].copy().T)
-            u, s, v = np.linalg.svd(sigma, full_matrices=True)
-            #eps = np.finfo(s.dtype).eps
-            eps = 0.01
-            whitener = np.dot(u, np.dot(np.diag( 1./ np.sqrt(s) + eps), u.T))
-            patches[i] = np.dot(whitener, patches[i])
-        return patches
+        # original patches shape
+        original_patches_shape = normalized_patches.shape
 
-    ## Pipeline - Step 3 (Alternative)
-    def zca_whitening(self, normalized_patches):
-        patches = normalized_patches # alias for convenience
-        for i in range(patches.shape[0]):
-            inputs = patches[i].copy()
-            sigma = np.dot(inputs, inputs.T)/inputs.shape[1] #Correlation matrix
-            U,S,V = np.linalg.svd(sigma) #Singular Value Decomposition
-            epsilon = 0.1                #Whitening constant, it prevents division by zero
-            ZCAMatrix = np.dot(np.dot(U, np.diag(1.0/np.sqrt(np.diag(S) + epsilon))), U.T)                     #ZCA Whitening matrix
-            patches[i] = np.dot(ZCAMatrix, inputs)   #Data whitening
-        return patches
+        # alias for convenience
+        patches = normalized_patches
+
+        # flatten individual patches such that rows = no. of patches, columns = pixel values
+        patches = patches.reshape((patches.shape[0], -1))
+
+        # Transpose to get matrix A
+        A = patches.T
+
+        # sigma = (1/(n-1)) * np.dot(A,A.T), where A = patches.T
+        sigma = (1.0 / (A.shape[1] - 1)) * np.dot(A, A.T)
+
+        # decompose and reconstruct
+        u, s, v = np.linalg.svd(sigma, full_matrices=True)
+
+        # whitening matrix
+        epsilon = 0.01
+        whitening_matrix = np.dot(u, np.dot((1.0 / (np.sqrt(np.diag(s)) + epsilon)), u.T))
+
+        # Awhite = W.A
+        whitened_A = np.dot(whitening_matrix, A)
+
+        # Transpose to get back normalized patches
+        whitened_patches = whitened_A.T
+
+        # reshape whitened patches
+        whitened_patches = whitened_patches.reshape(original_patches_shape)
+
+        return whitened_patches
 
 
     ## Pipeline Combined
