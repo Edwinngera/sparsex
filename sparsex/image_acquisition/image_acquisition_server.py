@@ -27,36 +27,42 @@ class ImageAcquisitionServer:
 
         try:
             socket.bind("tcp://%s:%s" %(self.ip, self.port))
-            print "Bound to port..."
+            print "Server bound to port..."
             print
         except zmq.ZMQError as err:
-            print "ERROR..."
+            print "Server ZMQERROR..."
             print err.args
             raise
 
             
         ## process requests
         while True:
-            print "Waiting to receive..."
+            print "Server waiting to receive..."
             sys.stdout.flush()
             msg = socket.recv()
             
-            print "Received..."
-            print type(msg) # Image as a string message
+            print "Server has received a message..."
+            # Image as a string message
+            print type(msg) 
             
-            tempImage_strio = StringIO(msg) # convert string to file object
+            # convert string to file object
+            tempImage_strio = StringIO(msg)
             print type(tempImage_strio)
             
-            tempImage_pil = Image.open(tempImage_strio).convert('L') # convert file object to Grayscale PIL Image
+            # convert file object to Grayscale PIL Image
+            tempImage_pil = Image.open(tempImage_strio).convert('L')
             print type(tempImage_pil)
             
-            tempImage = np.array(tempImage_pil.convert('L')).astype(float) # convert PIL Image to numpy array
+            # convert PIL Image to numpy array
+            tempImage = np.array(tempImage_pil.convert('L')).astype(float)
             print type(tempImage)
             
+            # apply callback on image array
             result = callback(tempImage)
             
-            socket.send(result)
-            print
+            # publish result
+            socket.send(str(result.shape)) ## TEMPORARY
+
             sys.stdout.flush()
             time.sleep(0.1)
 
@@ -66,3 +72,4 @@ def main():
         
 if __name__ == "__main__":
     main()
+    

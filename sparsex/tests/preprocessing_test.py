@@ -6,7 +6,7 @@ from scipy.misc import imshow
 import numpy as np
 import os
 
-this_file_path = os.path.dirname(os.path.realpath(__file__))
+THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 def test_patch_extraction(image_filename):
     # get instance of Preprocessing
@@ -18,7 +18,7 @@ def test_patch_extraction(image_filename):
     # print image_array.dtype
 
     # save original image
-    destination_filename = os.path.join(this_file_path, "./data/01_original_image.jpg")
+    destination_filename = os.path.join(THIS_FILE_PATH, "./data/01_original_image.jpg")
     save_image(image_array.astype('uint8'), destination_filename=destination_filename)
     
     # get patches
@@ -37,7 +37,7 @@ def test_patch_extraction(image_filename):
     # print giant_patch_image_array.shape
 
     # save giant image
-    # destination_filename = os.path.join(this_file_path, "./data/02_patch_extraction_giant_image.jpg")
+    # destination_filename = os.path.join(THIS_FILE_PATH, "./data/02_patch_extraction_giant_image.jpg")
     # save_image(giant_patch_image_array, destination_filename=destination_filename)
 
     return patches
@@ -71,7 +71,7 @@ def test_contrast_normalization(image_filename):
     # print giant_normalized_patch_image_array[:8,:8]
 
     # save giant normalized image
-    # destination_filename = os.path.join(this_file_path, "./data/03_normalized_patches_giant_image.jpg")
+    # destination_filename = os.path.join(THIS_FILE_PATH, "./data/03_normalized_patches_giant_image.jpg")
     # save_image(giant_normalized_patch_image_array, destination_filename=destination_filename)
 
     return normalized_patches
@@ -104,14 +104,14 @@ def test_whitening(image_filename):
     imshow(giant_whitened_patch_image_array)
 
     # save giant whitened image
-    # destination_filename = os.path.join(this_file_path, "./data/04_whitened_patches_giant_image.jpg")
+    # destination_filename = os.path.join(THIS_FILE_PATH, "./data/04_whitened_patches_giant_image.jpg")
     # save_image(giant_whitened_patch_image_array, destination_filename=destination_filename, show=True)
 
     return whitened_patches
     
 
 if __name__ == "__main__":
-    image_filename = os.path.realpath(os.path.join(this_file_path, "./data/yaleB01_P00A-005E-10_64x64.pgm"))
+    image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/yaleB01_P00A-005E-10_64x64.pgm"))
     
     # test patch extraction
     # test_patch_extraction(image_filename)

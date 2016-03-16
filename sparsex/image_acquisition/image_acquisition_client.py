@@ -2,9 +2,11 @@
 
 import threading
 import zmq
-import sys
+import sys, os
 import time
 import base64
+
+THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 class ImageAcquisitionClient:
     def __init__(self, ip="127.0.0.1", port="5556", is_debug=True):
@@ -21,23 +23,23 @@ class ImageAcquisitionClient:
         ## Creating client
         context = zmq.Context()
         socket = context.socket(zmq.REQ)
-        print "Connecting..."
+        print "Clinet connecting..."
         socket.connect("tcp://%s:%s" %(self.ip,self.port))
-        print "Connected...."
+        print "Client connected...."
         print
 
         # send file every few seconds
         while True:
-            print "Sending..."
+            print "Client sending..."
             socket.send(request_data)
-            print "Sent..."
+            print "Client sent..."
 
-            print "Waiting on server..."
+            print "Client waiting on server..."
             sys.stdout.flush()
             msg = socket.recv()
-            print "Received message : \n%s\n" %(msg)
+            print "Client received message : \n%s\n" %(msg)
 
-            print "Going to sleep..."
+            print "Client going to sleep..."
             print
             sys.stdout.flush()
             time.sleep(loop_delay_time)
@@ -54,25 +56,25 @@ class ImageAcquisitionClient:
         ## Creating client
         context = zmq.Context()
         socket = context.socket(zmq.REQ)
-        print "Connecting..."
+        print "Client connecting..."
         socket.connect("tcp://%s:%s" %(self.ip,self.port))
-        print "Connected...."
+        print "Client connected...."
         print
 
-        print "Sending Request..."
+        print "Client sending Request..."
         socket.send(request_data)
-        print "Sent..."
+        print "Client sent..."
 
-        print "Waiting on server..."
+        print "Client waiting on server..."
         sys.stdout.flush()
         msg = socket.recv()
-        print "Received message : \n%s\n" %(msg)
+        print "Clinet received message : \n%s\n" %(msg)
 
         return
     
 
 def main():
-    image_filename = "../../datasets/yale_face_b_ext_cropped/CroppedYale_64x64/yaleB01/yaleB01_P00A+000E+00.pgm"
+    image_filename = os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm")
     image_acq_client = ImageAcquisitionClient()   
     image_bytearray = image_acq_client.get_image_bytearray(image_filename)
     image_acq_client.loop_request(request_data=image_bytearray)
@@ -81,3 +83,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
