@@ -21,7 +21,7 @@ def show_and_save_montage_of_patches(patches, is_show, is_save, save_filename=No
             save_filename = os.path.join(THIS_FILE_PATH, save_filename)
             imsave(save_filename, patches_montage)
 
-def test_patch_extraction(image_filename, show_montage=True, save_montage=True):
+def test_resizing_image(image_filename, show_image=True, save_image=True):
     # get instance of Preprocessing
     preprocessing = Preprocessing()
 
@@ -30,16 +30,33 @@ def test_patch_extraction(image_filename, show_montage=True, save_montage=True):
     image_array = get_image_from_file(image_filename)
     print image_array.shape
     print image_array.dtype
+
+    # get resized image
+    print "Resizing Image"
+    resized_image_array = preprocessing.get_resized_image(image_array, image_size=(64,64))
+    print resized_image_array.shape
+
+    show_and_save_montage_of_patches(image_array, show_image, save_image,
+                                     "./data/01_original_image.jpg")
+    show_and_save_montage_of_patches(resized_image_array, show_image, save_image,
+                                     "./data/02_resized_image.jpg")
+
+    return resized_image_array
+
+def test_patch_extraction(image_filename, show_montage=True, save_montage=True):
+    # get instance of Preprocessing
+    preprocessing = Preprocessing()
+
+    # get resized image array
+    resized_image_array = test_resizing_image(image_filename, show_montage, save_montage)
     
     # get patches
     print "Extracting patches"
-    patches = preprocessing.extract_patches(image_array, patch_size=(8,8))
+    patches = preprocessing.extract_patches(resized_image_array, patch_size=(8,8))
     print patches.shape
 
-    show_and_save_montage_of_patches(image_array, show_montage, save_montage,
-                                     "./data/01_original_image.jpg")
     show_and_save_montage_of_patches(patches, show_montage, save_montage,
-                                     "./data/02_patch_extraction_montage.jpg")
+                                     "./data/03_patch_extraction_montage.jpg")
 
     return patches
 
@@ -61,7 +78,7 @@ def test_contrast_normalization(image_filename, show_montage=True, save_montage=
     print normalized_patches.reshape((normalized_patches.shape[0], -1)).var(axis=1)[:10]
 
     show_and_save_montage_of_patches(normalized_patches, show_montage, save_montage,
-                                     "./data/03_normalized_patches_montage.jpg")
+                                     "./data/04_normalized_patches_montage.jpg")
 
     return normalized_patches
 
@@ -79,7 +96,7 @@ def test_whitening(image_filename, show_montage=True, save_montage=True):
     print whitened_patches.shape
 
     show_and_save_montage_of_patches(whitened_patches, show_montage, save_montage,
-                                     "./data/04_whitened_patches_montage.jpg")
+                                     "./data/05_whitened_patches_montage.jpg")
 
     return whitened_patches
     
@@ -87,6 +104,9 @@ def test_whitening(image_filename, show_montage=True, save_montage=True):
 if __name__ == "__main__":
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/yaleB01_P00A-005E-10_64x64.pgm"))
     
+    # test resizing image
+    #test_resizing_image(image_filename, show_image=True, save_image=True)
+
     # test patch extraction
     # test_patch_extraction(image_filename, show_montage=True, save_montage=True)
 

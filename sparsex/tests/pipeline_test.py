@@ -10,7 +10,7 @@ THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 def main():
     try:
-        print "Creating thread"
+        print "Creating Client thread"
         image_filename = os.path.join(THIS_FILE_PATH, "./data/yaleB01_P00A-005E-10_64x64.pgm")
         image_acq_client = ImageAcquisitionClient(ip="127.0.0.1",port="5556")
         image_acq_client_thread = threading.Thread(name='image_acq_client_thread',

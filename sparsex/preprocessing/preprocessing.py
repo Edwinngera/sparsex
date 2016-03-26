@@ -1,14 +1,22 @@
 from sklearn.feature_extraction.image import extract_patches_2d
+from scipy.misc import imresize
 import numpy as np
 
 class Preprocessing:
     def __init__(self):
         pass
 
+    ## Pipeline - Step 0
+    def get_resized_image(self, image_array, image_size=(64,64)):
+        resized_image_array = imresize(image_array, image_size)
+        return resized_image_array
+
+
     ## Pipeline - Step 1
     def extract_patches(self, image_array, patch_size=(8,8)):
         patches = extract_patches_2d(image_array, patch_size)
         return patches
+
 
     ## Pipeline - Step 2
     def get_contrast_normalized_patches(self, patches):
@@ -57,7 +65,8 @@ class Preprocessing:
 
     ## Pipeline Combined
     def get_whitened_patches_from_image_array(self, image_array):
-        patches = self.extract_patches(image_array)
+        resized_image_array = self.get_resized_image(image_array)
+        patches = self.extract_patches(resized_image_array)
         normalized_patches = self.get_contrast_normalized_patches(patches)
         whitened_patches = self.get_whitened_patches(normalized_patches)
         return whitened_patches

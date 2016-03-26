@@ -34,7 +34,6 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 ### To-Do
 
 #### Priority
-* Preprocessing, Add "reshape to some fixed image size" functionality to preprocessing. The incoming images must be reshaped to a standard/pre-defined image-size in the pipeline. Make sure that there is one constant image size for the entirety of the pipeline from training to classification.
 * Feature extraction, save and load dictionary to file functionality. Save to a fixed folder. Use timestamps for naming.
 * Feature extraction, get dictionary-encoded weight-vector of an image
 * Feature extraction, feature sign-split
