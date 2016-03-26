@@ -13,3 +13,9 @@ datasets/
 
 # Python egg metadata, regenerated from source files by setuptools.
 /*.egg-info
+
+# Preprocessing test outputs
+sparsex/tests/data/01_original_image.jpg
+sparsex/tests/data/02_patch_extraction_montage.jpg
+sparsex/tests/data/03_normalized_patches_montage.jpg
+sparsex/tests/data/04_whitened_patches_montage.jpg
