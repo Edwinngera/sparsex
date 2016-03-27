@@ -29,8 +29,6 @@ def test_save_model_weights(filename=None, default_state=True):
         sparse_coding.save_model_weights(filename)
 
 
-
-
 def test_load_model_params(filename):
     print "\n\nLoading Sparse Code Params Test"
     sparse_coding = SparseCoding(model_params_file=filename)
@@ -62,6 +60,7 @@ def test_load_model_weights(filename):
     print "Sparse Code Shape :"
     print sparse_code.shape
 
+
 def test_load_params_and_weights(model_params_file, model_weights_file):
     print "\n\nLoading Sparse Code Params and Weights Test"
     sparse_coding = SparseCoding(model_params_file=model_params_file, model_weights_file=model_weights_file)
@@ -78,22 +77,43 @@ def test_load_params_and_weights(model_params_file, model_weights_file):
     print sparse_code.shape
 
 
+def test_get_sparse_code():
+    # create sparse coding object
+    sparse_coding = SparseCoding()
+
+    # testing pipeline on sparse coding object
+    image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
+    whitened_patches = test_whitening(image_filename, False, False)
+    whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
+    # sparse_coding.learn_dictionary(whitened_patches[:100]) # not learning dictionary - only testing getting sparse code
+    sparse_code = sparse_coding.get_sparse_code(whitened_patches)
+    print "Sparse code Shape :"
+    print sparse_code.shape
+    print "Sparse code"
+    print sparse_code[0]
+    print "Sparse code norm :", np.linalg.norm(sparse_code)
+
+
+
 if __name__ == "__main__":
     model_params_file = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/model_params_test.json"))
     model_weights_file = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/model_weights_test.h5"))
 
     # test saving model params
-    test_save_model_params(model_params_file)
+    # test_save_model_params(model_params_file)
 
     # test saving model weights
-    test_save_model_weights(model_weights_file, default_state=False)
+    # test_save_model_weights(model_weights_file, default_state=False)
 
     # test loading model params
-    test_load_model_params(model_params_file)
+    # test_load_model_params(model_params_file)
 
     # test loading model weights
-    test_load_model_weights(model_weights_file)
+    # test_load_model_weights(model_weights_file)
 
     # test loading model params & weights
-    test_load_params_and_weights(model_params_file, model_weights_file)
+    # test_load_params_and_weights(model_params_file, model_weights_file)
+
+    # test get sparse code
+    test_get_sparse_code()
     

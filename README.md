@@ -34,7 +34,6 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 ### To-Do
 
 #### Priority
-* Feature extraction, get dictionary-encoded weight-vector of an image
 * Feature extraction, feature sign-split
 * Feature extraction, pooling
 * Feature extraction, combined pipeline
