@@ -128,14 +128,19 @@ class SparseCoding:
         self.DL_obj.fit(whitened_patches)
 
 
-    def get_sparse_code(self, whitened_patches):
+    def get_sparse_features(self, whitened_patches):
         # assert correct dimensionality of input data
-        assert whitened_patches.ndim == 2, \
-        "Whitened patches ndim is %d instead of 2" %whitened_patches.ndim
-
+        assert whitened_patches.ndim == 2, "Whitened patches ndim is %d instead of 2" %whitened_patches.ndim
         sparse_code = self.DL_obj.transform(whitened_patches)
-
         return sparse_code
+
+
+    def get_sign_split_features(self, sparse_features):
+        n_samples, n_components = sparse_features.shape
+        sign_split_features = np.empty((n_samples, 2 * n_components))
+        sign_split_features[:, :n_components] = np.maximum(sparse_features, 0)
+        sign_split_features[:, n_components:] = -np.minimum(sparse_features, 0)
+        return sign_split_features
 
 
 if __name__ == "__main__":
@@ -151,16 +156,22 @@ if __name__ == "__main__":
     sparse_coding = SparseCoding()
 
     # learn dictionary on whitened patches
-    sparse_coding.learn_dictionary(whitened_patches[:10])
+    sparse_coding.learn_dictionary(whitened_patches[:100])
     
     # get sparse code
-    sparse_code = sparse_coding.get_sparse_code(whitened_patches[100:101])
+    sparse_features = sparse_coding.get_sparse_features(whitened_patches)
+
+    # get feature sign split
+    sign_split_features = sparse_coding.get_sign_split_features(sparse_features)
 
     print "Dictionary Shape :"
     print sparse_coding.DL_obj.components_.shape
 
-    print "Sparse Code :"
-    print sparse_code.shape
+    print "sparse features shape :"
+    print sparse_features.shape
+
+    print "sign split features shape :"
+    print sign_split_features.shape
 
 
 
