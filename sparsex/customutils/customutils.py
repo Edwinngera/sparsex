@@ -2,6 +2,8 @@ from sklearn.feature_extraction.image import extract_patches_2d
 from PIL import Image
 import numpy as np
 import os
+import json, h5py
+import datetime, time
 
 # source : http://stackoverflow.com/questions/13990465/3d-numpy-array-to-2d
 def get_giant_patch_image(patches, dtype='uint8', scale=False):
@@ -33,3 +35,38 @@ def resize_image_to_64x64(image_filename):
     image_pil_64x64 = Image.open(image_filename).resize((64,64))
     new_image_filename = image_filename.split(".")[0] + "_64x64." + image_filename.split(".")[1] 
     image_pil_64x64.save(new_image_filename)
+
+## json
+def get_json_from_dictionary(dictionary):
+    json_string = json.dumps(dictionary)
+    return json_string
+
+def write_dictionary_to_json_file(filename, dictionary):
+    json_string = get_json_from_dictionary(dictionary)
+    with open(filename, "w") as f:
+        f.write(json_string)
+
+def read_dictionary_from_json_file(filename):
+    with open(filename, 'r') as f:
+        json_string = f.read()
+        dictionary = json.loads(json_string)
+    return dictionary
+
+## h5py
+def write_dictionary_to_h5_file(filename, dictionary):
+    with h5py.File(filename, 'w') as f:
+        for key in dictionary.keys():
+            f.create_dataset(key, data=dictionary[key])
+
+def read_dictionary_from_h5_file(filename):
+    with h5py.File(filename, 'r') as f:
+        dictionary = {}
+        for key in f.keys():
+            dictionary[key] = f[key][:]
+    return dictionary
+
+
+# source : http://stackoverflow.com/questions/13890935/does-pythons-time-time-return-the-local-or-utc-timestamp
+def get_current_string_timestamp(datetime_format="%Y-%m-%d_%H:%M:%S.%f"):
+    string_timestamp = datetime.datetime.fromtimestamp(time.time()).strftime(datetime_format)
+    return string_timestamp
