@@ -55,6 +55,9 @@ class SparseCoding:
                                        split_sign=False,
                                        random_state=self.random_state)
 
+        # one time fit call to prevent NotFittedError - DIRTY HACK
+        self.DL_obj.fit(np.random.rand(1,self.n_features))
+
 
     def save_model_params(self, model_params_file=None):
         # generate model params filename if not provided

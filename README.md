@@ -42,6 +42,7 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 
 #### Backlog
 * Feature extraction, dictionary learning
+* Feature extraction, prevent NotFittedError after load_weights. Currently using a dirty hack to fix this.
 * Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
 * Pipeline, create a "command-dictionary" for client-server communication. It can include:
     * "action:classify/train/get_encoding/etc"
