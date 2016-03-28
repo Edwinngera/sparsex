@@ -34,7 +34,7 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 ### To-Do
 
 #### Priority
-* Feature extraction, combined pipeline
+* Classification, get class after extracting features.
 
 
 #### Backlog
@@ -46,7 +46,6 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
     * "image_type:jpg_image/png_image/np_array"
     * "image_shape:(600,100)/None/etc"
     * "image_data:...."
-* Classification, get class after extracting features.
 * Training, train classifier after extracting features for one image.
 * Pipeline, be able to choose the dictionary learning library.
 * Pipeline, be able to choose which classifier/classifier-library.

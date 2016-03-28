@@ -122,6 +122,8 @@ class SparseCoding:
 
     def learn_dictionary(self, whitened_patches):
         # assert correct dimensionality of input data
+        if whitened_patches.ndim == 3:
+            whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
         assert whitened_patches.ndim == 2, \
         "Whitened patches ndim is %d instead of 2" %whitened_patches.ndim
 
@@ -131,6 +133,8 @@ class SparseCoding:
 
     def get_sparse_features(self, whitened_patches):
         # assert correct dimensionality of input data
+        if whitened_patches.ndim == 3:
+            whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
         assert whitened_patches.ndim == 2, "Whitened patches ndim is %d instead of 2" %whitened_patches.ndim
         sparse_code = self.DL_obj.transform(whitened_patches)
         return sparse_code
@@ -173,14 +177,19 @@ class SparseCoding:
         return pooled_feature_map
 
 
+    # Combined Pipeline
+    def get_pooled_features_from_whitened_patches(self, whitened_patches):
+        sparse_features = self.get_sparse_features(whitened_patches)
+        sign_split_features = self.get_sign_split_features(sparse_features)
+        pooled_features = self.get_pooled_features(sign_split_features)
+        return pooled_features
+
+
 if __name__ == "__main__":
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     
     # get whitened patches
     whitened_patches = test_whitening(image_filename, False, False)
-
-    # flatten individual patches
-    whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
 
     # create sparse coding object
     sparse_coding = SparseCoding()
@@ -209,3 +218,8 @@ if __name__ == "__main__":
     print "pooled features shape :"
     print pooled_features.shape
 
+    # get pooled features directly from whitened patches using feature extraction pipeline
+    pooled_features_from_whitened_patches = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches)
+
+    print "pooled features from whitened patches shape :"
+    print pooled_features_from_whitened_patches.shape

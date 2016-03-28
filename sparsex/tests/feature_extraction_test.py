@@ -1,5 +1,5 @@
 from ..feature_extraction.feature_extraction import SparseCoding
-from preprocessing_test import test_whitening
+from preprocessing_test import test_whitening, test_preprocessing_combined_pipeline
 import numpy as np
 import os
 
@@ -19,7 +19,6 @@ def test_save_model_weights(filename=None, default_state=True):
         # testing pipeline on sparse coding object which has loaded weights
         image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
         whitened_patches = test_whitening(image_filename, False, False)
-        whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
         sparse_coding.learn_dictionary(whitened_patches[:10])
         sparse_features = sparse_coding.get_sparse_features(whitened_patches[100:101])
         print "Dictionary Shape :\n", sparse_coding.DL_obj.components_.shape
@@ -35,7 +34,6 @@ def test_load_model_params(filename):
     # testing pipeline on sparse coding object which has loaded weights
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     whitened_patches = test_whitening(image_filename, False, False)
-    whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
     sparse_coding.learn_dictionary(whitened_patches[:10])
     sparse_features = sparse_coding.get_sparse_features(whitened_patches[100:101])
     print "Dictionary Shape :\n", sparse_coding.DL_obj.components_.shape
@@ -49,7 +47,6 @@ def test_load_model_weights(filename):
     # testing pipeline on sparse coding object which has loaded weights
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     whitened_patches = test_whitening(image_filename, False, False)
-    whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
     sparse_coding.learn_dictionary(whitened_patches[:10])
     sparse_features = sparse_coding.get_sparse_features(whitened_patches[100:101])
     print "Dictionary Shape :\n", sparse_coding.DL_obj.components_.shape
@@ -63,7 +60,6 @@ def test_load_params_and_weights(model_params_file, model_weights_file):
     # testing pipeline on sparse coding object which has loaded weights
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     whitened_patches = test_whitening(image_filename, False, False)
-    whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
     sparse_coding.learn_dictionary(whitened_patches[:10])
     sparse_features = sparse_coding.get_sparse_features(whitened_patches[100:101])
     print "Dictionary Shape :\n", sparse_coding.DL_obj.components_.shape
@@ -78,7 +74,6 @@ def test_get_sparse_features():
     # testing pipeline on sparse coding object
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     whitened_patches = test_whitening(image_filename, False, False)
-    whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
     # sparse_coding.learn_dictionary(whitened_patches[:100]) # not learning dictionary - only testing getting sparse code
     sparse_features = sparse_coding.get_sparse_features(whitened_patches)
     print "sparse features shape :\n", sparse_features.shape
@@ -94,7 +89,6 @@ def test_get_sign_split_features():
     # testing pipeline on sparse coding object
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     whitened_patches = test_whitening(image_filename, False, False)
-    whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
     # sparse_coding.learn_dictionary(whitened_patches[:100]) # not learning dictionary - only testing getting sparse code
     sparse_features = sparse_coding.get_sparse_features(whitened_patches)
     sign_split_features = sparse_coding.get_sign_split_features(sparse_features)
@@ -116,7 +110,6 @@ def test_get_pooled_features():
     # testing pipeline on sparse coding object
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     whitened_patches = test_whitening(image_filename, False, False)
-    whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
     # sparse_coding.learn_dictionary(whitened_patches[:100]) # not learning dictionary - only testing getting sparse code
     sparse_features = sparse_coding.get_sparse_features(whitened_patches)
     sign_split_features = sparse_coding.get_sign_split_features(sparse_features)
@@ -134,30 +127,49 @@ def test_get_pooled_features():
     print "pooled features :\n", pooled_features
 
 
+def test_get_pooled_features_from_whitened_patches():
+    print "\n\nGet Pooled Features From Whitened Patches (Combined Pipeline) Test"
+    # create sparse coding object
+    sparse_coding = SparseCoding()
+
+    # get whitened patches from preprocessing combined pipeline
+    image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
+    whitened_patches = test_preprocessing_combined_pipeline(image_filename, False, False)
+    pooled_features = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches)
+
+    print "pooled features shape :\n", pooled_features.shape 
+    print "pooled features :\n", pooled_features
+
+    return pooled_features
+
+
 if __name__ == "__main__":
     model_params_file = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/model_params_test.json"))
     model_weights_file = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/model_weights_test.h5"))
 
     # test saving model params
-    test_save_model_params(model_params_file)
+    # test_save_model_params(model_params_file)
 
     # test saving model weights
-    test_save_model_weights(model_weights_file, default_state=False)
+    # test_save_model_weights(model_weights_file, default_state=False)
 
     # test loading model params
-    test_load_model_params(model_params_file)
+    # test_load_model_params(model_params_file)
 
     # test loading model weights
-    test_load_model_weights(model_weights_file)
+    # test_load_model_weights(model_weights_file)
 
     # test loading model params & weights
-    test_load_params_and_weights(model_params_file, model_weights_file)
+    # test_load_params_and_weights(model_params_file, model_weights_file)
 
     # test get sparse features
-    test_get_sparse_features()
+    # test_get_sparse_features()
 
     # test get sign split features
-    test_get_sign_split_features()
+    # test_get_sign_split_features()
 
     # test get pooled features
-    test_get_pooled_features()
+    # test_get_pooled_features()
+
+    # test feature extraction combined pipeline
+    test_get_pooled_features_from_whitened_patches()
