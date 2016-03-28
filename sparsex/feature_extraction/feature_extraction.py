@@ -159,22 +159,27 @@ class SparseCoding:
             input_feature_map = input_feature_map.reshape((input_feature_map_side, input_feature_map_side, input_feature_map_shape[-1]))
         assert input_feature_map.ndim == 3, "Input features dimension is %d instead of 3" %input_feature_map.ndim
 
-        # calculate norms = (57,57,20) = (57,57)
-        input_feature_map_norms = np.linalg.norm(input_feature_map, ord=2, axis=-1)
-        assert input_feature_map_norms.ndim == 2, "Input feature norms dimension is %d instead of 2" %input_feature_map_norms.ndim
+        # get windows (57,57,20) to (3,3,1,19,19,20)
+        input_feature_map_windows = view_as_windows(input_feature_map,
+                                                    window_shape=(filter_size[0], filter_size[1], input_feature_map.shape[-1]),
+                                                    step=filter_size[0])
 
-        # extract pooling windows with stride = side, n_windows = (3,3) ndim_window = (19,19) ndim_windows = (3,3,19,19)
-        input_feature_map_norms_pooling_windows = view_as_windows(input_feature_map_norms,
-                                                  window_shape=filter_size,
-                                                  step=filter_size[0])
-        assert input_feature_map_norms_pooling_windows.ndim == 4, "Pooling windows dimension is %d instead of 4" %input_feature_map_norms_pooling_windows.ndim
+        # reshape windows (3,3,1,19,19,20) to (3**2, 19**2, 20) == (9, 361, 20)
+        input_feature_map_windows = input_feature_map_windows.reshape((input_feature_map_windows.shape[0]**2,
+                                                                       filter_size[0]**2,
+                                                                       input_feature_map.shape[-1]))
 
-        # choose maximums from the from windows such that (3,3,19,19) = (3,3)
-        pooled_feature_map = np.amax(input_feature_map_norms_pooling_windows, axis=(-2,-1))
-        assert pooled_feature_map.ndim == 2, "Pooled features dimension is %d instead of 2" %pooled_feature_map.ndim
+        # calculate norms (9, 361, 20) to (9,361)
+        input_feature_map_window_norms = np.linalg.norm(input_feature_map_windows, ord=2, axis=-1)
+
+        # calculate indexes of max norms per window (9,361) to (9,1). One max index per window.
+        max_norm_indexes = np.argmax(input_feature_map_window_norms, axis=-1)
+
+        # max pooled features are the features that have max norm indexes (9, 361, 20) to (9,20). One max index per window.
+        pooled_features = input_feature_map_windows[np.arange(input_feature_map_windows.shape[0]), max_norm_indexes]
 
         # return pooled feature map
-        return pooled_feature_map
+        return pooled_features
 
 
     # Combined Pipeline
@@ -221,5 +226,5 @@ if __name__ == "__main__":
     # get pooled features directly from whitened patches using feature extraction pipeline
     pooled_features_from_whitened_patches = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches)
 
-    print "pooled features from whitened patches shape :"
+    print "pooled features from whitened patches shape (combined pipeline):"
     print pooled_features_from_whitened_patches.shape

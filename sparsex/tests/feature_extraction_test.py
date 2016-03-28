@@ -123,8 +123,7 @@ def test_get_pooled_features():
     print "sign split features :\n", sign_split_features[0]
     print "sign split features norm :\n", np.linalg.norm(sign_split_features)
 
-    print "pooled features shape :\n", pooled_features.shape 
-    print "pooled features :\n", pooled_features
+    print "pooled features shape :\n", pooled_features.shape
 
 
 def test_get_pooled_features_from_whitened_patches():
@@ -137,8 +136,7 @@ def test_get_pooled_features_from_whitened_patches():
     whitened_patches = test_preprocessing_combined_pipeline(image_filename, False, False)
     pooled_features = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches)
 
-    print "pooled features shape :\n", pooled_features.shape 
-    print "pooled features :\n", pooled_features
+    print "pooled features shape :\n", pooled_features.shape
 
     return pooled_features
 
@@ -169,7 +167,7 @@ if __name__ == "__main__":
     # test_get_sign_split_features()
 
     # test get pooled features
-    # test_get_pooled_features()
+    test_get_pooled_features()
 
     # test feature extraction combined pipeline
     test_get_pooled_features_from_whitened_patches()
