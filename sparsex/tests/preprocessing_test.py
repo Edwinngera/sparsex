@@ -101,6 +101,30 @@ def test_whitening(image_filename, show_montage=True, save_montage=True):
     return whitened_patches
     
 
+def test_preprocessing_combined_pipeline(image_filename, show_montage=True, save_montage=True):
+    print "\n\nPreprocessing Combined Pipeline Test"
+
+    # get image array
+    image_array = get_image_from_file(image_filename)
+
+    # get instance of Preprocessing
+    preprocessing = Preprocessing()
+
+    # whiten patches using combined pipeline
+    whitened_patches = preprocessing.get_whitened_patches_from_image_array(image_array)
+
+    print "original image shape :\n", image_array.shape
+
+    print "whitened patches shape :\n", whitened_patches.shape
+
+    show_and_save_montage_of_patches(image_array, show_montage, save_montage,
+                                     "./data/01_original_image.jpg")
+    show_and_save_montage_of_patches(whitened_patches, show_montage, save_montage,
+                                     "./data/05_whitened_patches_montage.jpg")
+
+    return whitened_patches
+
+
 if __name__ == "__main__":
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/yaleB01_P00A-005E-10_64x64.pgm"))
     
@@ -114,5 +138,7 @@ if __name__ == "__main__":
     # test_contrast_normalization(image_filename, show_montage=True, save_montage=True)
 
     # test whitening
-    test_whitening(image_filename, show_montage=True, save_montage=True)
-    
+    # test_whitening(image_filename, show_montage=True, save_montage=True)
+
+    # test combined pipeline
+    test_preprocessing_combined_pipeline(image_filename, show_montage=True, save_montage=True)
