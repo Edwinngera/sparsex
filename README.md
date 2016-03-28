@@ -34,7 +34,6 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 ### To-Do
 
 #### Priority
-* Feature extraction, pooling
 * Feature extraction, combined pipeline
 
 
@@ -60,9 +59,11 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 * Project, documentation
     * Latex Folder with .tex file and .pdf
 * Project, update license
+* Tests, making feature extraction tests more dynamic. Tests are working great but its just that if we need to be able to test different things then there is no API to do it.
 
 
 #### Wishlist
+* Pipeline, handle different color channels.
 * Logging functionality
 * Continuity functionality
     * If there's an error in the code and the process breaks. You can pickup where you left off after you fix the bug.

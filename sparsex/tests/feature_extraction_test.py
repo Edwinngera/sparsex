@@ -71,6 +71,7 @@ def test_load_params_and_weights(model_params_file, model_weights_file):
 
 
 def test_get_sparse_features():
+    print "\n\nGet Sparse Features Test"
     # create sparse coding object
     sparse_coding = SparseCoding()
 
@@ -86,6 +87,7 @@ def test_get_sparse_features():
 
 
 def test_get_sign_split_features():
+    print "\n\nGet Sign Split Features Test"
     # create sparse coding object
     sparse_coding = SparseCoding()
 
@@ -104,6 +106,32 @@ def test_get_sign_split_features():
     print "sign split features shape :\n", sign_split_features.shape 
     print "sign split features :\n", sign_split_features[0]
     print "sign split features norm :\n", np.linalg.norm(sign_split_features)
+
+
+def test_get_pooled_features():
+    print "\n\nGet Pooled Features Test"
+    # create sparse coding object
+    sparse_coding = SparseCoding()
+
+    # testing pipeline on sparse coding object
+    image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
+    whitened_patches = test_whitening(image_filename, False, False)
+    whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
+    # sparse_coding.learn_dictionary(whitened_patches[:100]) # not learning dictionary - only testing getting sparse code
+    sparse_features = sparse_coding.get_sparse_features(whitened_patches)
+    sign_split_features = sparse_coding.get_sign_split_features(sparse_features)
+    pooled_features = sparse_coding.get_pooled_features(sign_split_features)
+
+    print "sparse features shape :\n", sparse_features.shape
+    print "sparse features :\n", sparse_features[0]
+    print "sparse features norm :", np.linalg.norm(sparse_features)
+
+    print "sign split features shape :\n", sign_split_features.shape 
+    print "sign split features :\n", sign_split_features[0]
+    print "sign split features norm :\n", np.linalg.norm(sign_split_features)
+
+    print "pooled features shape :\n", pooled_features.shape 
+    print "pooled features :\n", pooled_features
 
 
 if __name__ == "__main__":
@@ -130,3 +158,6 @@ if __name__ == "__main__":
 
     # test get sign split features
     test_get_sign_split_features()
+
+    # test get pooled features
+    test_get_pooled_features()

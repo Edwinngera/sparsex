@@ -1,4 +1,5 @@
 from sklearn.decomposition import DictionaryLearning
+from skimage.util.shape import view_as_windows
 from ..tests.preprocessing_test import test_whitening
 from ..customutils import customutils
 import numpy as np
@@ -143,6 +144,35 @@ class SparseCoding:
         return sign_split_features
 
 
+    def get_pooled_features(self, input_feature_map, filter_size=(19,19)):
+        # assuming square filters and images
+        filter_side = filter_size[0]
+
+        # reshaping incoming features from 2d to 3d i.e. (3249,20) to (57,57,20)
+        input_feature_map_shape = input_feature_map.shape
+        if input_feature_map.ndim == 2:
+            input_feature_map_side = int(np.sqrt(input_feature_map.shape[0]))
+            input_feature_map = input_feature_map.reshape((input_feature_map_side, input_feature_map_side, input_feature_map_shape[-1]))
+        assert input_feature_map.ndim == 3, "Input features dimension is %d instead of 3" %input_feature_map.ndim
+
+        # calculate norms = (57,57,20) = (57,57)
+        input_feature_map_norms = np.linalg.norm(input_feature_map, ord=2, axis=-1)
+        assert input_feature_map_norms.ndim == 2, "Input feature norms dimension is %d instead of 2" %input_feature_map_norms.ndim
+
+        # extract pooling windows with stride = side, n_windows = (3,3) ndim_window = (19,19) ndim_windows = (3,3,19,19)
+        input_feature_map_norms_pooling_windows = view_as_windows(input_feature_map_norms,
+                                                  window_shape=filter_size,
+                                                  step=filter_size[0])
+        assert input_feature_map_norms_pooling_windows.ndim == 4, "Pooling windows dimension is %d instead of 4" %input_feature_map_norms_pooling_windows.ndim
+
+        # choose maximums from the from windows such that (3,3,19,19) = (3,3)
+        pooled_feature_map = np.amax(input_feature_map_norms_pooling_windows, axis=(-2,-1))
+        assert pooled_feature_map.ndim == 2, "Pooled features dimension is %d instead of 2" %pooled_feature_map.ndim
+
+        # return pooled feature map
+        return pooled_feature_map
+
+
 if __name__ == "__main__":
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     
@@ -164,6 +194,9 @@ if __name__ == "__main__":
     # get feature sign split
     sign_split_features = sparse_coding.get_sign_split_features(sparse_features)
 
+    # get pooled features
+    pooled_features = sparse_coding.get_pooled_features(input_feature_map=sign_split_features)
+
     print "Dictionary Shape :"
     print sparse_coding.DL_obj.components_.shape
 
@@ -173,5 +206,6 @@ if __name__ == "__main__":
     print "sign split features shape :"
     print sign_split_features.shape
 
-
+    print "pooled features shape :"
+    print pooled_features.shape
 
