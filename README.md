@@ -31,28 +31,32 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 
 
 # Development
-### To-Do
 
 #### Priority
-* Classification, get class after extracting features using sklearn.LinearSVC.
-* Classification, basic framework for training the classifier. This is to get an idea of API for classification so that we 
+* Classification, test case for predicting classes.
+* Classification, handle NotFittedError.
 
 
 #### Backlog
-* Feature extraction, dictionary learning
 * Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
 * Pipeline, create a "command-dictionary" for client-server communication. It can include:
     * "action:classify/train/get_encoding/etc"
     * "image_type:jpg_image/png_image/np_array"
     * "image_shape:(600,100)/None/etc"
     * "image_data:...."
+* Training, dictionary learning.
 * Training, train classifier after extracting features for one image.
+* Feature extraction, use Spams.
+* Classification, use Joachim's SVM-Light.
+* Classification, the classifier needs to know how many features it is requires so that we can put a check if number of incoming/input features is the same as number of features required by the classifier.
 * Pipeline, be able to choose the dictionary learning library.
 * Pipeline, be able to choose which classifier/classifier-library.
-* Pipeline, classification pipeline, finish simple-classifier, server-classifier, server-thread-classifier
+* Pipeline, classification pipeline, finish simple-classifier, server-classifier, server-thread-classifier.
 * Pipeline, server-client image acquisition, attributes and data transfer dictionary.
 * Pipeline, make sure its an image when received before proceeding to preprocessing after receiving an image on the server.
 * Pipeline, make sure image array is always float once received by server.
+* Pipeline, come up with standardized shapes for preprocessing, feature_extraction and classification. i.e. whether the incoming image arrays, patches or features are flattened or 2-d or 3-d etc.
+* Pipeline, API / function calls for single images or multi-images. This is mostly to avoid confusion in expecting shapes of incoming/input arrays when extracting features or classifying. Should be part of the standardization of shapes.
 * Preprocessing, Inplace = True/False option for some of the preprocessing steps. Perhaps for memory conservation.
 * Project, fully setuptools/pip installable
 * Project, documentation
