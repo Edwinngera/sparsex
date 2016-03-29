@@ -74,11 +74,14 @@ class SparseCoding:
         # assert correct dimensionality of input data
         if whitened_patches.ndim == 3:
             whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
-        assert whitened_patches.ndim == 2, \
-        "Whitened patches ndim is %d instead of 2" %whitened_patches.ndim
+        assert whitened_patches.ndim == 2, "Whitened patches ndim is %d instead of 2" %whitened_patches.ndim
 
         # learn dictionary
         self.DL_obj.fit(whitened_patches)
+
+
+    def get_dictionary(self):
+        return self.DL_obj.components_
 
 
     def get_sparse_features(self, whitened_patches):
@@ -161,8 +164,8 @@ if __name__ == "__main__":
     # get pooled features
     pooled_features = sparse_coding.get_pooled_features(input_feature_map=sign_split_features)
 
-    print "Dictionary Shape :"
-    print sparse_coding.DL_obj.components_.shape
+    print "dictionary Shape :"
+    print sparse_coding.get_dictionary().shape
 
     print "sparse features shape :"
     print sparse_features.shape
@@ -186,6 +189,9 @@ if __name__ == "__main__":
     print "reloading model"
     model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/feature_extraction_model.pkl"))
     sparse_coding = SparseCoding(model_filename=model_filename)
+
+    print "dictionary Shape :"
+    print sparse_coding.get_dictionary().shape
 
     sparse_features = sparse_coding.get_sparse_features(whitened_patches)
     print "sparse features shape from loaded model :"

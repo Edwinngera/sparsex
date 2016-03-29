@@ -16,7 +16,7 @@ def test_save_model(filename, train_model=False):
         sparse_coding = SparseCoding()
         sparse_coding.learn_dictionary(whitened_patches[:10])
         sparse_features = sparse_coding.get_sparse_features(whitened_patches[100:101])
-        print "check if dictionary is computed, dictionary shape :\n", sparse_coding.DL_obj.components_.shape
+        print "check if dictionary is computed, dictionary shape :\n", sparse_coding.get_dictionary().shape
         # save weights
         print "saving feature extraction model to file :\n", filename
         sparse_coding.save_model(filename)
@@ -33,7 +33,7 @@ def test_load_model(filename):
 
     # test if model is trained or not
     try:
-        print "check if dictionary is computed, dictionary shape :\n", sparse_coding.DL_obj.components_.shape
+        print "check if dictionary is computed, dictionary shape :\n", sparse_coding.get_dictionary().shape
         print "dictionary computed, trained model"
     except AttributeError:
         print "dictionary not computed, untrained model"
