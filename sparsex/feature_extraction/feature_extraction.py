@@ -7,6 +7,8 @@ from ..customutils import customutils
 import numpy as np
 import os
 
+from sklearn.utils.validation import NotFittedError
+
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 class SparseCoding:
@@ -48,9 +50,6 @@ class SparseCoding:
                                        split_sign=False,
                                        random_state=self.random_state)
 
-        # one time fit call to prevent NotFittedError - DIRTY HACK
-        self.DL_obj.fit(np.random.rand(1,self.n_features))
-
 
     def save_model(self, filename):
         # save DL object to file, compress is also to prevent multiple model files.
@@ -81,7 +80,11 @@ class SparseCoding:
 
 
     def get_dictionary(self):
-        return self.DL_obj.components_
+        try:
+            return self.DL_obj.components_
+        except AttributeError:
+            raise AttributeError("Feature extraction dictionary has not yet been learnt for this model. " \
+                                 + "Train the feature extraction model at least once to prevent this error.")
 
 
     def get_sparse_features(self, whitened_patches):
@@ -89,7 +92,12 @@ class SparseCoding:
         if whitened_patches.ndim == 3:
             whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
         assert whitened_patches.ndim == 2, "Whitened patches ndim is %d instead of 2" %whitened_patches.ndim
-        sparse_code = self.DL_obj.transform(whitened_patches)
+        try:
+            sparse_code = self.DL_obj.transform(whitened_patches)
+        except NotFittedError:
+            raise NotFittedError("Feature extraction dictionary has not yet been learnt for this model, " \
+                                 + "therefore Sparse Codes cannot be extracted. Train the feature extraction model " \
+                                 + "at least once to prevent this error.")
         return sparse_code
 
 
@@ -153,8 +161,11 @@ if __name__ == "__main__":
     sparse_coding = SparseCoding()
 
     # learn dictionary on whitened patches
-    sparse_coding.learn_dictionary(whitened_patches[:100])
+    sparse_coding.learn_dictionary(whitened_patches[:100]) # making sure the model has a trained dictionary
     
+    print "dictionary Shape :"
+    print sparse_coding.get_dictionary().shape
+
     # get sparse code
     sparse_features = sparse_coding.get_sparse_features(whitened_patches)
 

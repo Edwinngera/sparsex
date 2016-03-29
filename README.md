@@ -34,8 +34,6 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 ### To-Do
 
 #### Priority
-* Feature extraction, prevent NotFittedError after load_weights. Currently using a dirty hack to fix this.
-* Feature extraction, catch NotFittedError and raise error with custom message along the lines of "Feature extraction dictionary has not been learnt yet for this model. Train the feature extraction model at least once to prevent this error."
 * Classification, get class after extracting features using sklearn.LinearSVC.
 * Classification, basic framework for training the classifier. This is to get an idea of API for classification so that we 
 

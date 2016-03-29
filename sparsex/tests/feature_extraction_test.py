@@ -14,7 +14,7 @@ def test_save_model(filename, train_model=False):
         image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
         whitened_patches = test_whitening(image_filename, False, False)
         sparse_coding = SparseCoding()
-        sparse_coding.learn_dictionary(whitened_patches[:10])
+        sparse_coding.learn_dictionary(whitened_patches[:100]) # making sure the model has a trained dictionary
         sparse_features = sparse_coding.get_sparse_features(whitened_patches[100:101])
         print "check if dictionary is computed, dictionary shape :\n", sparse_coding.get_dictionary().shape
         # save weights
@@ -47,7 +47,7 @@ def test_get_sparse_features():
     # testing pipeline on sparse coding object
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     whitened_patches = test_whitening(image_filename, False, False)
-    # sparse_coding.learn_dictionary(whitened_patches[:100]) # not learning dictionary - only testing getting sparse code
+    sparse_coding.learn_dictionary(whitened_patches[:100]) # making sure the model has a trained dictionary
     sparse_features = sparse_coding.get_sparse_features(whitened_patches)
     print "sparse features shape :\n", sparse_features.shape
     print "sparse features :\n", sparse_features[0]
@@ -62,7 +62,7 @@ def test_get_sign_split_features():
     # testing pipeline on sparse coding object
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     whitened_patches = test_whitening(image_filename, False, False)
-    # sparse_coding.learn_dictionary(whitened_patches[:100]) # not learning dictionary - only testing getting sparse code
+    sparse_coding.learn_dictionary(whitened_patches[:100]) # making sure the model has a trained dictionary
     sparse_features = sparse_coding.get_sparse_features(whitened_patches)
     sign_split_features = sparse_coding.get_sign_split_features(sparse_features)
 
@@ -83,7 +83,7 @@ def test_get_pooled_features():
     # testing pipeline on sparse coding object
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     whitened_patches = test_whitening(image_filename, False, False)
-    # sparse_coding.learn_dictionary(whitened_patches[:100]) # not learning dictionary - only testing getting sparse code
+    sparse_coding.learn_dictionary(whitened_patches[:100]) # making sure the model has a trained dictionary
     sparse_features = sparse_coding.get_sparse_features(whitened_patches)
     sign_split_features = sparse_coding.get_sign_split_features(sparse_features)
     pooled_features = sparse_coding.get_pooled_features(sign_split_features)
@@ -107,6 +107,7 @@ def test_get_pooled_features_from_whitened_patches():
     # get whitened patches from preprocessing combined pipeline
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     whitened_patches = test_preprocessing_combined_pipeline(image_filename, False, False)
+    sparse_coding.learn_dictionary(whitened_patches[:100]) # making sure the model has a trained dictionary
     pooled_features = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches)
 
     print "pooled features shape :\n", pooled_features.shape
@@ -115,8 +116,6 @@ def test_get_pooled_features_from_whitened_patches():
 
 
 if __name__ == "__main__":
-    model_params_file = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/model_params_test.json"))
-    model_weights_file = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/model_weights_test.h5"))
     model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/feature_extraction_model.pkl"))
 
     # test saving model, don't train model
