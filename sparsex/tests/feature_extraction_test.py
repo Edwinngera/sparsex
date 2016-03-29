@@ -6,68 +6,41 @@ import os
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
-def test_save_model_params(filename=None):
-    sparse_coding = SparseCoding()
-    sparse_coding.save_model_params(filename)
-
-
-def test_save_model_weights(filename=None, default_state=True):
-    sparse_coding = SparseCoding()
-    if default_state:
-        sparse_coding.save_model_weights(filename)
-    else:
-        # testing pipeline on sparse coding object which has loaded weights
+def test_save_model(filename, train_model=False):
+    print "##### Testing Save Feature Extraction Model, train_model={0}".format(train_model)
+    # train the DL object such that it does not throw NotFittedError, or save untrained DL object
+    if train_model:
+        # force the DL object to be trained and then save the model
         image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
         whitened_patches = test_whitening(image_filename, False, False)
+        sparse_coding = SparseCoding()
         sparse_coding.learn_dictionary(whitened_patches[:10])
         sparse_features = sparse_coding.get_sparse_features(whitened_patches[100:101])
-        print "Dictionary Shape :\n", sparse_coding.DL_obj.components_.shape
-        print "sparse features shape :\n", sparse_features.shape
-        # SAVE WEIGHTS of non default
-        sparse_coding.save_model_weights(filename)
+        print "check if dictionary is computed, dictionary shape :\n", sparse_coding.DL_obj.components_.shape
+        # save weights
+        print "saving feature extraction model to file :\n", filename
+        sparse_coding.save_model(filename)
+    else:
+        sparse_coding = SparseCoding()
+        print "default instance, dictionary not computed"
+        print "saving feature extraction model to file :\n", filename
+        sparse_coding.save_model(filename)
 
 
-def test_load_model_params(filename):
-    print "\n\nLoading Sparse Code Params Test"
-    sparse_coding = SparseCoding(model_params_file=filename)
+def test_load_model(filename):
+    print "##### Testing Load Feature Extraction Model"
+    sparse_coding = SparseCoding(model_filename=filename)
 
-    # testing pipeline on sparse coding object which has loaded weights
-    image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
-    whitened_patches = test_whitening(image_filename, False, False)
-    sparse_coding.learn_dictionary(whitened_patches[:10])
-    sparse_features = sparse_coding.get_sparse_features(whitened_patches[100:101])
-    print "Dictionary Shape :\n", sparse_coding.DL_obj.components_.shape
-    print "sparse features shape :\n", sparse_features.shape
-
-
-def test_load_model_weights(filename):
-    print "\n\nLoading Sparse Code Weights Test"
-    sparse_coding = SparseCoding(model_weights_file=filename)
-
-    # testing pipeline on sparse coding object which has loaded weights
-    image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
-    whitened_patches = test_whitening(image_filename, False, False)
-    sparse_coding.learn_dictionary(whitened_patches[:10])
-    sparse_features = sparse_coding.get_sparse_features(whitened_patches[100:101])
-    print "Dictionary Shape :\n", sparse_coding.DL_obj.components_.shape
-    print "sparse features shape :\n", sparse_features.shape
-
-
-def test_load_params_and_weights(model_params_file, model_weights_file):
-    print "\n\nLoading Sparse Code Params and Weights Test"
-    sparse_coding = SparseCoding(model_params_file=model_params_file, model_weights_file=model_weights_file)
-
-    # testing pipeline on sparse coding object which has loaded weights
-    image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
-    whitened_patches = test_whitening(image_filename, False, False)
-    sparse_coding.learn_dictionary(whitened_patches[:10])
-    sparse_features = sparse_coding.get_sparse_features(whitened_patches[100:101])
-    print "Dictionary Shape :\n", sparse_coding.DL_obj.components_.shape
-    print "sparse features shape :\n", sparse_features.shape
-
+    # test if model is trained or not
+    try:
+        print "check if dictionary is computed, dictionary shape :\n", sparse_coding.DL_obj.components_.shape
+        print "dictionary computed, trained model"
+    except AttributeError:
+        print "dictionary not computed, untrained model"
+    
 
 def test_get_sparse_features():
-    print "\n\nGet Sparse Features Test"
+    print "##### Testing Get Sparse Features"
     # create sparse coding object
     sparse_coding = SparseCoding()
 
@@ -82,7 +55,7 @@ def test_get_sparse_features():
 
 
 def test_get_sign_split_features():
-    print "\n\nGet Sign Split Features Test"
+    print "##### Testing Get Sign Split Features"
     # create sparse coding object
     sparse_coding = SparseCoding()
 
@@ -103,7 +76,7 @@ def test_get_sign_split_features():
 
 
 def test_get_pooled_features():
-    print "\n\nGet Pooled Features Test"
+    print "##### Testing Get Pooled Features"
     # create sparse coding object
     sparse_coding = SparseCoding()
 
@@ -127,7 +100,7 @@ def test_get_pooled_features():
 
 
 def test_get_pooled_features_from_whitened_patches():
-    print "\n\nGet Pooled Features From Whitened Patches (Combined Pipeline) Test"
+    print "##### Testing Get Pooled Features From Whitened Patches (Combined Pipeline)"
     # create sparse coding object
     sparse_coding = SparseCoding()
 
@@ -144,27 +117,25 @@ def test_get_pooled_features_from_whitened_patches():
 if __name__ == "__main__":
     model_params_file = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/model_params_test.json"))
     model_weights_file = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/model_weights_test.h5"))
+    model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/feature_extraction_model.pkl"))
 
-    # test saving model params
-    # test_save_model_params(model_params_file)
+    # test saving model, don't train model
+    test_save_model(model_filename, train_model=False)
 
-    # test saving model weights
-    # test_save_model_weights(model_weights_file, default_state=False)
+    # test loading untrained model
+    test_load_model(model_filename)
 
-    # test loading model params
-    # test_load_model_params(model_params_file)
+    # test saving model, train model
+    test_save_model(model_filename, train_model=True)
 
-    # test loading model weights
-    # test_load_model_weights(model_weights_file)
-
-    # test loading model params & weights
-    # test_load_params_and_weights(model_params_file, model_weights_file)
+    # test loading trained model
+    test_load_model(model_filename)
 
     # test get sparse features
-    # test_get_sparse_features()
+    test_get_sparse_features()
 
     # test get sign split features
-    # test_get_sign_split_features()
+    test_get_sign_split_features()
 
     # test get pooled features
     test_get_pooled_features()

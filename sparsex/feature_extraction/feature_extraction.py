@@ -1,5 +1,7 @@
 from sklearn.decomposition import DictionaryLearning
 from skimage.util.shape import view_as_windows
+from sklearn.externals import joblib
+import pickle
 from ..tests.preprocessing_test import test_whitening
 from ..customutils import customutils
 import numpy as np
@@ -13,35 +15,25 @@ class SparseCoding:
         'n_components' : 10,
         'n_features' : 64,
         'max_iter' : 5,
-        'random_state' : 1111
+        'random_state' : 1,
+        'dict_init' : None,
+        'code_init' : None
     }
 
-    def __init__(self, model_params_file=None, model_weights_file=None):
-        # load parameters
-        self.model_params_file = model_params_file
-        if self.model_params_file is not None:
-            self.load_model_params(self.model_params_file)
+    def __init__(self, model_filename=None):
+        if model_filename is not None:
+            self.load_model(model_filename)
         else:
             # default model params
             self.n_components = SparseCoding.DEFAULT_MODEL_PARAMS['n_components']
             self.n_features = SparseCoding.DEFAULT_MODEL_PARAMS['n_features']
             self.max_iter = SparseCoding.DEFAULT_MODEL_PARAMS['max_iter']
             self.random_state = SparseCoding.DEFAULT_MODEL_PARAMS['random_state']
+            self.dict_init = SparseCoding.DEFAULT_MODEL_PARAMS['dict_init']
+            self.code_init = SparseCoding.DEFAULT_MODEL_PARAMS['code_init']
 
-        # load weights
-        self.model_weights_file = model_weights_file
-        if self.model_weights_file is not None:
-            self.load_model_weights(self.model_weights_file)
-            # setting the components_ (a.k.a dictionary atoms) of past model as dict_init of this model
-            if self.components_ is not None:
-                self.dict_init = self.components_
-        else:
-            # default weights init
-            self.dict_init = None
-            self.code_init = None
-            self.components_ = None
-
-        self.DL_obj = DictionaryLearning(n_components=self.n_components,
+            # initialize Dictionary Learning object with default params and weights
+            self.DL_obj = DictionaryLearning(n_components=self.n_components,
                                        alpha=1,
                                        max_iter=self.max_iter,
                                        tol=1e-08,
@@ -60,64 +52,22 @@ class SparseCoding:
         self.DL_obj.fit(np.random.rand(1,self.n_features))
 
 
-    def save_model_params(self, model_params_file=None):
-        # generate model params filename if not provided
-        if model_params_file is None:
-            string_timestamp = customutils.get_current_string_timestamp()
-            model_params_file = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/model_params_{0}.json".format(string_timestamp)))
-
-        # generate model_params dictionary
-        model_params = self.DL_obj.get_params(deep=True)
-
-        # delete non Json serializable keys (or) possibly very big keys (or) keys that come under model weights
-        for unwanted_key in ['code_init','dict_init']:
-            if unwanted_key in model_params:
-                del model_params[unwanted_key]
-
-        # write dictionary to json file
-        print "Saving model_params : ", model_params
-        customutils.write_dictionary_to_json_file(model_params_file, model_params)
-        print "Model_params saved to file :", model_params_file
+    def save_model(self, filename):
+        # save DL object to file, compress is also to prevent multiple model files.
+        joblib.dump(self.DL_obj, filename, compress=3)
 
 
-    def save_model_weights(self, model_weights_file=None):
-        # generate model weights filename if not provided
-        if model_weights_file is None:
-            string_timestamp = customutils.get_current_string_timestamp()
-            model_weights_file = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/model_weights_{0}.h5".format(string_timestamp)))
-        
-        # generate model weights
-        model_weights = {}
-        if self.code_init is not None: model_weights['code_init'] = self.code_init
-        if self.dict_init is not None: model_weights['dict_init'] = self.dict_init
-        if hasattr(self.DL_obj, 'components_'): model_weights['components_'] = self.DL_obj.components_
+    def load_model(self, filename):
+        # load DL Object from file
+        self.DL_obj = joblib.load(filename)
 
-        # write weights to hdf5 file
-        print "Saving model_weights :", model_weights.keys()
-        customutils.write_dictionary_to_h5_file(model_weights_file, model_weights)
-        print "Model weights saved to file :", model_weights_file
-
-
-    def load_model_params(self, model_params_file):
-        model_params = customutils.read_dictionary_from_json_file(model_params_file)
-        for wanted_key in SparseCoding.DEFAULT_MODEL_PARAMS.keys():
-            if wanted_key in model_params:
-                setattr(self, wanted_key, model_params[wanted_key])
-                print "Loaded model param :", wanted_key, model_params[wanted_key]
+        # set certain model params as class attributes. Get values from DL Obj.get_params() or use default values.
+        DL_params = self.DL_obj.get_params()
+        for param in SparseCoding.DEFAULT_MODEL_PARAMS:
+            if param in DL_params:
+                setattr(self, param, DL_params[param])
             else:
-                setattr(self, wanted_key, SparseCoding.DEFAULT_MODEL_PARAMS[wanted_key])
-                print "Loaded model param :", wanted_key, "DEFAULT:", SparseCoding.DEFAULT_MODEL_PARAMS[wanted_key]
-
-
-    def load_model_weights(self, model_weights_file):
-        model_weights = customutils.read_dictionary_from_h5_file(model_weights_file)
-        for wanted_key in ['code_init', 'dict_init', 'components_']:
-            if wanted_key in model_weights:
-                setattr(self, wanted_key, model_weights[wanted_key])
-                print "Loaded model weight :", wanted_key, model_weights[wanted_key].shape
-            else:
-                setattr(self, wanted_key, None)
-                print "Loaded model weight :", wanted_key, "None"   
+                setattr(self, param, SparseCoding.DEFAULT_MODEL_PARAMS[param])
 
 
     def learn_dictionary(self, whitened_patches):
@@ -228,3 +178,16 @@ if __name__ == "__main__":
 
     print "pooled features from whitened patches shape (combined pipeline):"
     print pooled_features_from_whitened_patches.shape
+
+    print "saving model"
+    model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/feature_extraction_model.pkl"))
+    sparse_coding.save_model(model_filename)
+
+    print "reloading model"
+    model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/feature_extraction_model.pkl"))
+    sparse_coding = SparseCoding(model_filename=model_filename)
+
+    sparse_features = sparse_coding.get_sparse_features(whitened_patches)
+    print "sparse features shape from loaded model :"
+    print sparse_features.shape
+

@@ -34,12 +34,14 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 ### To-Do
 
 #### Priority
-* Classification, get class after extracting features.
+* Feature extraction, prevent NotFittedError after load_weights. Currently using a dirty hack to fix this.
+* Feature extraction, catch NotFittedError and raise error with custom message along the lines of "Feature extraction dictionary has not been learnt yet for this model. Train the feature extraction model at least once to prevent this error."
+* Classification, get class after extracting features using sklearn.LinearSVC.
+* Classification, basic framework for training the classifier. This is to get an idea of API for classification so that we 
 
 
 #### Backlog
 * Feature extraction, dictionary learning
-* Feature extraction, prevent NotFittedError after load_weights. Currently using a dirty hack to fix this.
 * Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
 * Pipeline, create a "command-dictionary" for client-server communication. It can include:
     * "action:classify/train/get_encoding/etc"
@@ -58,6 +60,7 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 * Project, documentation
     * Latex Folder with .tex file and .pdf
 * Project, update license
+* Project, saving models with pickle.HIGHEST_PROTOCOL
 * Tests, making feature extraction tests more dynamic. Tests are working great but its just that if we need to be able to test different things then there is no API to do it.
 
 
