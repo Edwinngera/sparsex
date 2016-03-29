@@ -34,7 +34,7 @@ class Classifier():
         self.linSVC_obj.fit(X,Y)
 
 
-    def classify(self, X):
+    def get_predictions(self, X):
         assert X.ndim == 2, "Classifier prediction data X.ndim is %d instead of 2" %X.ndim
 
         # get classes
@@ -45,16 +45,16 @@ class Classifier():
 if __name__ == "__main__":
     image_filename_1 = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     image_filename_2 = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB02_P00A-005E-10_64x64.pgm"))
-    feature_extraction_model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/trained_feature_extraction_test_model.pkl"))
-    classification_model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/trained_classification_test_model.pkl"))
+    trained_feature_extraction_model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/trained_feature_extraction_test_model.pkl"))
+    classification_model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/classification_model.pkl"))
 
     # get whitened patches
     whitened_patches_1 = test_whitening(image_filename_1, False, False)
     whitened_patches_2 = test_whitening(image_filename_2, False, False)
 
     # create sparse coding object
-    print "loading trained feature extraction model from file :\n", feature_extraction_model_filename
-    sparse_coding = SparseCoding(model_filename=feature_extraction_model_filename)
+    print "loading trained feature extraction model from file :\n", trained_feature_extraction_model_filename
+    sparse_coding = SparseCoding(model_filename=trained_feature_extraction_model_filename)
 
     # get pooled features directly from whitened patches using feature extraction pipeline
     pooled_features_1 = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches_1)
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     classifier = Classifier(model_filename=classification_model_filename)
 
     # predict the class of X
-    Y_predict = classifier.classify(X_input)
+    Y_predict = classifier.get_predictions(X_input)
 
     print "pooled features 1 shape :\n", pooled_features_1.shape
     print "pooled features 2 shape :\n", pooled_features_2.shape

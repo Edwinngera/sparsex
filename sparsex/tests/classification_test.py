@@ -17,11 +17,11 @@ def test_save_model(filename, train_model=False):
         # force the LinSVC object to be trained and then save the model
         image_filename_1 = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
         image_filename_2 = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB02_P00A-005E-10_64x64.pgm"))
-        feature_extraction_model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/trained_feature_extraction_test_model.pkl"))
+        trained_feature_extraction_model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/trained_feature_extraction_test_model.pkl"))
         whitened_patches_1 = test_whitening(image_filename_1, False, False)
         whitened_patches_2 = test_whitening(image_filename_2, False, False)
-        print "loading trained feature extraction model from file :\n", feature_extraction_model_filename
-        sparse_coding = SparseCoding(model_filename=feature_extraction_model_filename)
+        print "loading trained feature extraction model from file :\n", trained_feature_extraction_model_filename
+        sparse_coding = SparseCoding(model_filename=trained_feature_extraction_model_filename)
         pooled_features_1 = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches_1)
         pooled_features_2 = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches_2)
         X_input_1 = pooled_features_1.ravel().reshape((1,-1)) # will be removed when pipeline has standardized shapes.
@@ -46,16 +46,41 @@ def test_load_model(filename):
     # test if model is trained or not
     try:
         image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
-        feature_extraction_model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/trained_feature_extraction_test_model.pkl"))
+        trained_feature_extraction_model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/trained_feature_extraction_test_model.pkl"))
         whitened_patches = test_whitening(image_filename, False, False)
-        print "loading trained feature extraction model from file :\n", feature_extraction_model_filename
-        sparse_coding = SparseCoding(model_filename=feature_extraction_model_filename)
+        print "loading trained feature extraction model from file :\n", trained_feature_extraction_model_filename
+        sparse_coding = SparseCoding(model_filename=trained_feature_extraction_model_filename)
         pooled_features = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches)
         X_input = pooled_features.ravel().reshape((1,-1)) # will be removed when pipeline has standardized shapes.
-        print "check if model can classify, Y_predict shape :\n", classifier.classify(X_input)
+        print "check if model can classify, Y_predict shape :\n", classifier.get_predictions(X_input)
         print "classifier was able to classify, trained model"
     except NotFittedError:
         print "classifier was unable to classify, untrained model"
+
+
+def test_get_predictions():
+    print "##### Testing Classification Get Predictions"
+    # load trained feature extraction model and trained classification model and test whether the model generates predictions
+    image_filename_1 = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
+    image_filename_2 = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB02_P00A-005E-10_64x64.pgm"))
+    trained_feature_extraction_model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/trained_feature_extraction_test_model.pkl"))
+    trained_classification_model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/trained_classification_test_model.pkl"))
+    whitened_patches_1 = test_whitening(image_filename_1, False, False)
+    whitened_patches_2 = test_whitening(image_filename_2, False, False)
+    print "loading trained feature extraction model from file :\n", trained_feature_extraction_model_filename
+    sparse_coding = SparseCoding(model_filename=trained_feature_extraction_model_filename)
+    pooled_features_1 = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches_1)
+    pooled_features_2 = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches_2)
+    X_input_1 = pooled_features_1.ravel().reshape((1,-1)) # will be removed when pipeline has standardized shapes.
+    X_input_2 = pooled_features_2.ravel().reshape((1,-1)) # will be removed when pipeline has standardized shapes.
+    X_input = np.vstack((X_input_1,X_input_2))
+    print "loading trained classification model from file :\n", trained_classification_model_filename
+    classifier = Classifier(model_filename=trained_classification_model_filename)
+    Y_predict = classifier.get_predictions(X_input)
+
+    print "X_input shape :\n", X_input.shape
+    print "Y_predict shape :\n", Y_predict.shape
+    print "Y_predict :\n", Y_predict
 
 
 
@@ -73,4 +98,7 @@ if __name__ == "__main__":
 
     # test load trained model
     test_load_model(classification_model_filename)
+
+    # test get predictions
+    test_get_predictions()
 
