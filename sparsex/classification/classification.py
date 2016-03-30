@@ -5,6 +5,8 @@ import os
 import numpy as np
 from ..tests.preprocessing_test import test_whitening
 
+from sklearn.utils.validation import NotFittedError
+
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -38,7 +40,11 @@ class Classifier():
         assert X.ndim == 2, "Classifier prediction data X.ndim is %d instead of 2" %X.ndim
 
         # get classes
-        return self.linSVC_obj.predict(X)
+        try:
+            return self.linSVC_obj.predict(X)
+        except NotFittedError:
+            raise NotFittedError("Classification model cannot preidct without being trained first. " \
+                                 + "Train the classification model at least once to prevent this error.")
 
 
 

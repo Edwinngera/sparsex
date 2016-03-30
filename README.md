@@ -33,16 +33,17 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 # Development
 
 #### Priority
-* Classification, handle NotFittedError.
-
-
-#### Backlog
-* Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
+* Pipeline, classification pipeline, finish simple-classifier, server-classifier, server-thread-classifier.
+* Pipeline, server-client image acquisition, attributes and data transfer dictionary.
 * Pipeline, create a "command-dictionary" for client-server communication. It can include:
     * "action:classify/train/get_encoding/etc"
     * "image_type:jpg_image/png_image/np_array"
     * "image_shape:(600,100)/None/etc"
     * "image_data:...."
+
+
+#### Backlog
+* Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
 * Training, dictionary learning.
 * Training, train classifier after extracting features for one image.
 * Feature extraction, use Spams.
@@ -50,8 +51,6 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 * Classification, the classifier needs to know how many features it is requires so that we can put a check if number of incoming/input features is the same as number of features required by the classifier.
 * Pipeline, be able to choose the dictionary learning library.
 * Pipeline, be able to choose which classifier/classifier-library.
-* Pipeline, classification pipeline, finish simple-classifier, server-classifier, server-thread-classifier.
-* Pipeline, server-client image acquisition, attributes and data transfer dictionary.
 * Pipeline, make sure its an image when received before proceeding to preprocessing after receiving an image on the server.
 * Pipeline, make sure image array is always float once received by server.
 * Pipeline, come up with standardized shapes for preprocessing, feature_extraction and classification. i.e. whether the incoming image arrays, patches or features are flattened or 2-d or 3-d etc.
