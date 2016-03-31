@@ -49,7 +49,7 @@ class Client:
 
         # if no request is provided, create an empty one
         if request is None:
-            request = self.create_request(request_type=Request.NONE)
+            request = self.create_request(request_type=Request.EMPTY_REQUEST)
 
         # serialize the request
         serialized_request = self.get_serialized_request(request)
@@ -79,11 +79,29 @@ if __name__ == "__main__":
     # creating client object
     client = Client()
 
-    # send None/Default Request
-    response = client.send_request()
+    # create empty request
+    request = Request()
+    request.request_type = Request.EMPTY_REQUEST
 
-    # sleep for 2 seconds
-    time.sleep(2.0)
+    # send None/Default Request
+    response = client.send_request(request=request)
+
+    # sleep for a few seconds before next request
+    time.sleep(4.0)
+
+
+
+    # create server SHUTDOWN request
+    request = Request()
+    request.request_type = Request.GET_FEATURES
+
+    # sending a request to the server
+    response = client.send_request(request=request)
+
+    # sleep for a few seconds before next request
+    time.sleep(4.0)
+
+
 
     # create server SHUTDOWN request
     request = Request()
@@ -91,4 +109,5 @@ if __name__ == "__main__":
 
     # sending a request to the server
     response = client.send_request(request=request)
+
     
