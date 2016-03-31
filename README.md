@@ -86,3 +86,18 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 * Make sure most dtypes are float when converting images from grayscale
 * sys.stdout.flush() seems to flush messages from both server and client stuff for some reason. Probably because in this case I am running server and client on my own system and they share stdout. This should be resolved in a more elegant manner. I am unsure why the messages from server would end on client side. Possible bug?
 * Which base datatype should be used before extracting patches. Size constraints? Computation constraints and bottlenecks?
+
+
+# Notes
+
+#### Protocol Buffer (Protobuf) Installation and Message Compilation
+1. Install Protobuf on your system such that the ```protoc``` command is available on the command line.
+    * Install Protobuf Compiler on Ubuntu 14.04
+        * ```sudo apt-get install protobuf-compiler```
+    * For more information, follow this [link](https://github.com/google/protobuf).
+2. Create a ```<FILENAME>.proto``` message file.
+    * Follow the instructions mentioned on this [link](https://developers.google.com/protocol-buffers/docs/pythontutorial#defining-your-protocol-format).
+3. Compile the message file to generate any available language compatible file.
+    * For Python, the command is:
+        * ```protoc -I=$SRC_DIR --python_out=$DST_DIR $SRC_DIR/<FILENAME>.proto```
+    * For more language options and support, follow this [link](https://developers.google.com/protocol-buffers/docs/pythontutorial#compiling-your-protocol-buffers).

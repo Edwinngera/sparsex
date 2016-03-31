@@ -1,0 +1,31 @@
+package sparsex;
+
+message Request {
+    enum Action {
+        NONE = 0;
+        SHUTDOWN = 1;
+        GET_FEATURES = 2;
+        GET_PREDICTIONS = 3;
+    }
+
+    required Action action = 1;
+
+    
+    enum InputType {
+        IMAGE = 0;
+        IMAGE_ARRAY = 1;
+    }
+
+    optional InputType input_type = 2;
+
+
+    enum DataType {
+        UINT8 = 0;
+        INT = 1;
+        FLOAT = 2;
+    }
+
+    optional DataType data_type = 3;
+    repeated int32 shape = 4;
+    optional bytes data = 5;
+}
