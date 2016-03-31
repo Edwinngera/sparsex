@@ -1,6 +1,5 @@
 import zmq
-import os, sys
-import time
+import os, sys, time
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -9,7 +8,7 @@ class ServerActions():
     def __init__(self):
         pass
 
-    def act_on_message(self, message):
+    def act_on_request(self, request):
         pass
 
 
@@ -37,34 +36,42 @@ class Server:
         # keep request count and stop when greater than max_requests. if max_requests = 0/-ve, loop forever
         request_count = 0
 
-        # flag to check if a request is being handling for clean closing
+        # flag to check if a client request is being handled, so that socket can be cleanly terminated if interrupted.
         is_handling_request = False
 
         # handling incoming requests
         print "server start"
         try:
             while True:
-                print "server waiting for request"
+                print "server waiting for request : {0}".format(request_count + 1)
                 sys.stdout.flush()
-                message = socket.recv()
+                request = socket.recv()
+
+                # set flag
                 is_handling_request = True
 
-                # incoming message type
-                print "server received message type :\n", type(message)
+                # incoming request type
+                print "server received request type :\n", type(request)
 
-                # perform actions on the message
-                results = self.server_actions.act_on_message(message)
+                # perform actions on the request
+                results = self.server_actions.act_on_request(request)
                 print "server results :\n", results
 
-                # stop server if results are empty or they ask for server to shutdown
-                if (results == 'shutdown') or (results is None):
-                    print "results are shutdown/None, server shutting down!"
-                    socket.send('server shutting down!')
+                # stop server if requested to shutdown
+                if results == 'shutdown':
+                    print "server received shutdown, server shutting down!"
+                    socket.send("server received shutdown, server shutting down!")
                     socket.close()
-                    break
+                    sys.exit()
 
                 # return results to client
-                socket.send(results)
+                if results == None:
+                    print "server has no results"
+                    socket.send("no results")
+                else:
+                    socket.send(results)
+
+                # un-set flag
                 is_handling_request = False
 
                 # increment result count
@@ -76,6 +83,7 @@ class Server:
                 elif request_count >= self.max_requests:
                     print "max_requests reached, server shutting down!"
                     socket.close()
+                    sys.exit()
 
                 # required breather, currently handling only 10 requests a second.
                 time.sleep(0.1)
