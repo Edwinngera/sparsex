@@ -13,13 +13,13 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='messages.proto',
   package='sparsex',
-  serialized_pb='\n\x0emessages.proto\x12\x07sparsex\"\xca\x02\n\x07Request\x12\'\n\x06\x61\x63tion\x18\x01 \x02(\x0e\x32\x17.sparsex.Request.Action\x12.\n\ninput_type\x18\x02 \x01(\x0e\x32\x1a.sparsex.Request.InputType\x12,\n\tdata_type\x18\x03 \x01(\x0e\x32\x19.sparsex.Request.DataType\x12\r\n\x05shape\x18\x04 \x03(\x05\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\x0c\"G\n\x06\x41\x63tion\x12\x08\n\x04NONE\x10\x00\x12\x0c\n\x08SHUTDOWN\x10\x01\x12\x10\n\x0cGET_FEATURES\x10\x02\x12\x13\n\x0fGET_PREDICTIONS\x10\x03\"\'\n\tInputType\x12\t\n\x05IMAGE\x10\x00\x12\x0f\n\x0bIMAGE_ARRAY\x10\x01\")\n\x08\x44\x61taType\x12\t\n\x05UINT8\x10\x00\x12\x07\n\x03INT\x10\x01\x12\t\n\x05\x46LOAT\x10\x02')
+  serialized_pb='\n\x0emessages.proto\x12\x07sparsex\"\xde\x02\n\x07Request\x12\x32\n\x0crequest_type\x18\x01 \x02(\x0e\x32\x1c.sparsex.Request.RequestType\x12.\n\ninput_type\x18\x02 \x01(\x0e\x32\x1a.sparsex.Request.InputType\x12,\n\tdata_type\x18\x03 \x01(\x0e\x32\x19.sparsex.Request.DataType\x12\r\n\x05shape\x18\x04 \x03(\x03\x12\x0c\n\x04\x64\x61ta\x18\x05 \x01(\x0c\"L\n\x0bRequestType\x12\x08\n\x04NONE\x10\x00\x12\x0c\n\x08SHUTDOWN\x10\x01\x12\x10\n\x0cGET_FEATURES\x10\x02\x12\x13\n\x0fGET_PREDICTIONS\x10\x03\"\'\n\tInputType\x12\t\n\x05IMAGE\x10\x00\x12\x0f\n\x0bIMAGE_ARRAY\x10\x01\"-\n\x08\x44\x61taType\x12\t\n\x05UINT8\x10\x00\x12\t\n\x05INT64\x10\x01\x12\x0b\n\x07\x46LOAT64\x10\x02\"\x93\x02\n\x08Response\x12\x35\n\rresponse_type\x18\x01 \x02(\x0e\x32\x1e.sparsex.Response.ResponseType\x12-\n\tdata_type\x18\x02 \x01(\x0e\x32\x1a.sparsex.Response.DataType\x12\x12\n\ndata_shape\x18\x03 \x03(\x03\x12\x0c\n\x04\x64\x61ta\x18\x04 \x01(\x0c\"P\n\x0cResponseType\x12\t\n\x05\x45RROR\x10\x00\x12\x08\n\x04NONE\x10\x01\x12\x0c\n\x08SHUTDOWN\x10\x02\x12\x0c\n\x08\x46\x45\x41TURES\x10\x03\x12\x0f\n\x0bPREDICTIONS\x10\x04\"-\n\x08\x44\x61taType\x12\t\n\x05UINT8\x10\x00\x12\t\n\x05INT64\x10\x01\x12\x0b\n\x07\x46LOAT64\x10\x02')
 
 
 
-_REQUEST_ACTION = _descriptor.EnumDescriptor(
-  name='Action',
-  full_name='sparsex.Request.Action',
+_REQUEST_REQUESTTYPE = _descriptor.EnumDescriptor(
+  name='RequestType',
+  full_name='sparsex.Request.RequestType',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -42,8 +42,8 @@ _REQUEST_ACTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=203,
-  serialized_end=274,
+  serialized_start=214,
+  serialized_end=290,
 )
 
 _REQUEST_INPUTTYPE = _descriptor.EnumDescriptor(
@@ -63,8 +63,8 @@ _REQUEST_INPUTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=276,
-  serialized_end=315,
+  serialized_start=292,
+  serialized_end=331,
 )
 
 _REQUEST_DATATYPE = _descriptor.EnumDescriptor(
@@ -78,18 +78,76 @@ _REQUEST_DATATYPE = _descriptor.EnumDescriptor(
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='INT', index=1, number=1,
+      name='INT64', index=1, number=1,
       options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
-      name='FLOAT', index=2, number=2,
+      name='FLOAT64', index=2, number=2,
       options=None,
       type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=317,
-  serialized_end=358,
+  serialized_start=333,
+  serialized_end=378,
+)
+
+_RESPONSE_RESPONSETYPE = _descriptor.EnumDescriptor(
+  name='ResponseType',
+  full_name='sparsex.Response.ResponseType',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='ERROR', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='NONE', index=1, number=1,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='SHUTDOWN', index=2, number=2,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='FEATURES', index=3, number=3,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='PREDICTIONS', index=4, number=4,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=529,
+  serialized_end=609,
+)
+
+_RESPONSE_DATATYPE = _descriptor.EnumDescriptor(
+  name='DataType',
+  full_name='sparsex.Response.DataType',
+  filename=None,
+  file=DESCRIPTOR,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='UINT8', index=0, number=0,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='INT64', index=1, number=1,
+      options=None,
+      type=None),
+    _descriptor.EnumValueDescriptor(
+      name='FLOAT64', index=2, number=2,
+      options=None,
+      type=None),
+  ],
+  containing_type=None,
+  options=None,
+  serialized_start=333,
+  serialized_end=378,
 )
 
 
@@ -101,7 +159,7 @@ _REQUEST = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='action', full_name='sparsex.Request.action', index=0,
+      name='request_type', full_name='sparsex.Request.request_type', index=0,
       number=1, type=14, cpp_type=8, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -123,7 +181,7 @@ _REQUEST = _descriptor.Descriptor(
       options=None),
     _descriptor.FieldDescriptor(
       name='shape', full_name='sparsex.Request.shape', index=3,
-      number=4, type=5, cpp_type=1, label=3,
+      number=4, type=3, cpp_type=2, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -140,7 +198,7 @@ _REQUEST = _descriptor.Descriptor(
   ],
   nested_types=[],
   enum_types=[
-    _REQUEST_ACTION,
+    _REQUEST_REQUESTTYPE,
     _REQUEST_INPUTTYPE,
     _REQUEST_DATATYPE,
   ],
@@ -148,22 +206,84 @@ _REQUEST = _descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=28,
-  serialized_end=358,
+  serialized_end=378,
 )
 
-_REQUEST.fields_by_name['action'].enum_type = _REQUEST_ACTION
+
+_RESPONSE = _descriptor.Descriptor(
+  name='Response',
+  full_name='sparsex.Response',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='response_type', full_name='sparsex.Response.response_type', index=0,
+      number=1, type=14, cpp_type=8, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='data_type', full_name='sparsex.Response.data_type', index=1,
+      number=2, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='data_shape', full_name='sparsex.Response.data_shape', index=2,
+      number=3, type=3, cpp_type=2, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='data', full_name='sparsex.Response.data', index=3,
+      number=4, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value="",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _RESPONSE_RESPONSETYPE,
+    _RESPONSE_DATATYPE,
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=381,
+  serialized_end=656,
+)
+
+_REQUEST.fields_by_name['request_type'].enum_type = _REQUEST_REQUESTTYPE
 _REQUEST.fields_by_name['input_type'].enum_type = _REQUEST_INPUTTYPE
 _REQUEST.fields_by_name['data_type'].enum_type = _REQUEST_DATATYPE
-_REQUEST_ACTION.containing_type = _REQUEST;
+_REQUEST_REQUESTTYPE.containing_type = _REQUEST;
 _REQUEST_INPUTTYPE.containing_type = _REQUEST;
 _REQUEST_DATATYPE.containing_type = _REQUEST;
+_RESPONSE.fields_by_name['response_type'].enum_type = _RESPONSE_RESPONSETYPE
+_RESPONSE.fields_by_name['data_type'].enum_type = _RESPONSE_DATATYPE
+_RESPONSE_RESPONSETYPE.containing_type = _RESPONSE;
+_RESPONSE_DATATYPE.containing_type = _RESPONSE;
 DESCRIPTOR.message_types_by_name['Request'] = _REQUEST
+DESCRIPTOR.message_types_by_name['Response'] = _RESPONSE
 
 class Request(_message.Message):
   __metaclass__ = _reflection.GeneratedProtocolMessageType
   DESCRIPTOR = _REQUEST
 
   # @@protoc_insertion_point(class_scope:sparsex.Request)
+
+class Response(_message.Message):
+  __metaclass__ = _reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _RESPONSE
+
+  # @@protoc_insertion_point(class_scope:sparsex.Response)
 
 
 # @@protoc_insertion_point(module_scope)

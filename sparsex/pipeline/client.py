@@ -10,11 +10,11 @@ class Client:
         pass
 
 
-    def create_request(self, action, input_type=None, data_type=None, data_shape=None, data=None):
+    def create_request(self, request_type, input_type=None, data_type=None, data_shape=None, data=None):
         request = Request()
 
         # action is required
-        request.action = action
+        request.request_type = request_type
 
         # only if there is an input_type, will there be any data in the request
         if input_type is not None:
@@ -41,7 +41,7 @@ class Client:
 
         # if no request is provided, create an empty one
         if request is None:
-            request = self.create_request(action=Request.NONE)
+            request = self.create_request(request_type=Request.NONE)
 
         # serialize the request
         request = self.serialize_request(request)

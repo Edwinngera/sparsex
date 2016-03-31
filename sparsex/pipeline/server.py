@@ -17,7 +17,7 @@ class ServerActions():
         request = Request()
         request.ParseFromString(serialized_request)
 
-        if request.action == Request.SHUTDOWN:
+        if request.request_type == Request.SHUTDOWN:
             return "shutdown"
         else:
             return request.__str__()

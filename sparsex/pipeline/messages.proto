@@ -1,14 +1,14 @@
 package sparsex;
 
 message Request {
-    enum Action {
+    enum RequestType {
         NONE = 0;
         SHUTDOWN = 1;
         GET_FEATURES = 2;
         GET_PREDICTIONS = 3;
     }
 
-    required Action action = 1;
+    required RequestType request_type = 1;
 
     
     enum InputType {
@@ -21,11 +21,36 @@ message Request {
 
     enum DataType {
         UINT8 = 0;
-        INT = 1;
-        FLOAT = 2;
+        INT64 = 1;
+        FLOAT64 = 2;
     }
 
     optional DataType data_type = 3;
-    repeated int32 shape = 4;
+    repeated int64 shape = 4;
     optional bytes data = 5;
+}
+
+
+
+message Response {
+    enum ResponseType {
+        ERROR = 0;
+        NONE = 1;
+        SHUTDOWN = 2;
+        FEATURES = 3;
+        PREDICTIONS = 4;
+    }
+
+    required ResponseType response_type = 1;
+
+
+    enum DataType {
+        UINT8 = 0;
+        INT64 = 1;
+        FLOAT64 = 2;
+    }
+
+    optional DataType data_type = 2;
+    repeated int64 data_shape = 3;
+    optional bytes data = 4;
 }
