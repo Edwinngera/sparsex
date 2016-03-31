@@ -1,5 +1,6 @@
 import zmq
 import os, sys, time
+from messages_pb2 import Request
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -8,8 +9,18 @@ class ServerActions():
     def __init__(self):
         pass
 
-    def act_on_request(self, request):
-        pass
+    def act_on_request(self, serialized_request):
+        # make sure incoming request is string before we can de-serialize it
+        assert isinstance(serialized_request, str), "client request is of type {0} instead of String".format(type(serialized_request))
+
+        # de-serialize request object
+        request = Request()
+        request.ParseFromString(serialized_request)
+
+        if request.action == Request.SHUTDOWN:
+            return "shutdown"
+        else:
+            return request.__str__()
 
 
 class Server:
@@ -96,7 +107,6 @@ class Server:
             print "\nkeyboard interrupt, server shutting down!"
             socket.close()
             sys.exit()
-
 
 
 if __name__ == "__main__":
