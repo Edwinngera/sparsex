@@ -33,13 +33,16 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 # Development
 
 #### Priority
-* Pipeline, classification pipeline, finish simple-classifier, server-classifier, server-thread-classifier.
-* Pipeline, server-client image acquisition, attributes and data transfer dictionary.
-* Pipeline, create a "command-dictionary" for client-server communication. It can include:
-    * "action:classify/train/get_encoding/etc"
-    * "image_type:jpg_image/png_image/np_array"
-    * "image_shape:(600,100)/None/etc"
-    * "image_data:...."
+* Pipeline, server actions, protobuf command message.
+    * action : "get predictions" / "get features" / "shutdown" etc
+    * input_type : "image" / "image array" etc
+    * data_type : "float" / "int" / "uint8" etc
+    * data_shape : array of ints e.g. [1,2,3]
+    * data = <image_bytearray_string>, <image_array_bytearray_string>
+* Pipeline, server actions, get predicitions pipeline.
+* Pipeline, server actions, get features pipeline.
+* Pipeline, server actions, shutdown server.
+* Pipeline, client actions.
 
 
 #### Backlog
