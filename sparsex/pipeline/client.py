@@ -11,6 +11,7 @@ class Client:
     def __init__(self):
         pass
 
+
     def create_request(self, request_type, input_type=None, data_type=None, data_shape=None, data=None):
         # create empty request
         request = Request()
@@ -24,6 +25,19 @@ class Client:
             request.data_type = data_type
             request.data_shape = data_shape
             request.data = data
+
+        return request
+
+
+    def create_request_from_image(self, request_type, image_filename):
+        # initialize basic request fields
+        request = Request()
+        request.request_type = request_type
+        request.input_type = Request.IMAGE
+
+        ## adding image byte string as request data
+        with open(image_filename, 'r') as image_file:
+            request.data = image_file.read()
 
         return request
 
@@ -80,27 +94,21 @@ if __name__ == "__main__":
     # creating client object
     client = Client()
 
-    # create empty request
-    request = Request()
-    request.request_type = Request.EMPTY_REQUEST
+    # # create empty request
+    # request = Request()
+    # request.request_type = Request.EMPTY_REQUEST
 
-    # send None/Default Request
-    response = client.send_request(request=request)
+    # # send None/Default Request
+    # response = client.send_request(request=request)
 
-    # sleep for a few seconds before next request
-    time.sleep(4.0)
+    # # sleep for a few seconds before next request
+    # time.sleep(4.0)
 
 
 
-    # create server FEATURES request with Image
-    request = Request()
-    request.request_type = Request.GET_FEATURES
-    request.input_type = Request.IMAGE
-
-    ## adding image byte string as request data
+    # request FEATURES from IMAGE
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
-    with open(image_filename, 'r') as image_file:
-        request.data = image_file.read()
+    request = client.create_request_from_image(Request.GET_FEATURES, image_filename)
 
     # sending a request to the server
     response = client.send_request(request=request)
@@ -120,11 +128,25 @@ if __name__ == "__main__":
 
 
 
-    # create server SHUTDOWN request
-    request = Request()
-    request.request_type = Request.SHUTDOWN
 
-    # sending a request to the server
-    response = client.send_request(request=request)
+    # create server FEATURES request with image array
+    request = Request()
+    request.request_type = Request.GET_FEATURES
+    request.input_type = Request.IMAGE_ARRAY
+
+    ## adding image array byte string as request data
+    image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
+    image_pil = Image.open(image_filename)
+    image_array = np.array(image_pil)
+
+
+
+
+    # # create server SHUTDOWN request
+    # request = Request()
+    # request.request_type = Request.SHUTDOWN
+
+    # # sending a request to the server
+    # response = client.send_request(request=request)
 
     
