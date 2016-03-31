@@ -35,7 +35,6 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 #### Priority
 * Pipeline, server actions, get predicitions pipeline.
 * Pipeline, server actions, get features pipeline.
-* Pipeline, server actions, shutdown server.
 * Pipeline, test on different Requests and Responses.
 
 
@@ -54,8 +53,8 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 * Pipeline, API / function calls for single images or multi-images. This is mostly to avoid confusion in expecting shapes of incoming/input arrays when extracting features or classifying. Should be part of the standardization of shapes.
 * Pipeline, catch TypeError in server-client communication for when wrong data format is being set.
 * Pipeline, catch all known Server related errors so that sockets and client connections can be cleanly terminated.
-* Pipeline, create pre-defined Response messages for "empty-results", "server-error", "server-interrupt" etc.
 * Pipeline, client and server timeout.
+* Pipeline, poll if server is available.
 * Preprocessing, Inplace = True/False option for some of the preprocessing steps. Perhaps for memory conservation.
 * Project, fully setuptools/pip installable
 * Project, documentation

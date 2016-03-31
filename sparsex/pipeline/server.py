@@ -1,6 +1,6 @@
 import zmq
 import os, sys, time
-from messages_pb2 import Request
+from messages_pb2 import Request, Response
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -9,18 +9,53 @@ class ServerActions():
     def __init__(self):
         pass
 
+
+    def get_serialized_response(self, response):
+        # serialize the response and return
+        return response.SerializeToString()
+
+    def get_deserialized_request(self, serialized_request):
+        # de-serialize request object
+        request = Request()
+        request.ParseFromString(serialized_request)
+        return request
+
+
     def act_on_request(self, serialized_request):
         # make sure incoming request is string before we can de-serialize it
         assert isinstance(serialized_request, str), "client request is of type {0} instead of String".format(type(serialized_request))
 
-        # de-serialize request object
-        request = Request()
-        request.ParseFromString(serialized_request)
+        request = self.get_deserialized_request(serialized_request)
+        print "server received request :\n", request
 
-        if request.request_type == Request.SHUTDOWN:
-            return "shutdown"
+        # handle requests / get response
+        if request.request_type == Request.NONE:
+            response = self.pipeline_none(request)
+        elif request.request_type == Request.SHUTDOWN:
+            response = self.pipeline_shutdown(request)
         else:
-            return request.__str__()
+            response = self.pipeline_none(request)
+
+        # serialize response
+        serialized_response = self.get_serialized_response(response)
+
+        # return response_type for any special server actions and return serialized response for the client
+        return response, serialized_response
+
+
+    def pipeline_none(self, request):
+        # generate NONE response and return
+        response = Response()
+        response.response_type = Response.NONE
+        return response
+
+
+    def pipeline_shutdown(self, request):
+        # generate SHUTDOWN response and return
+        response = Response()
+        response.response_type = Response.SHUTDOWN
+        return response
+
 
 
 class Server:
@@ -61,26 +96,19 @@ class Server:
                 # set flag
                 is_handling_request = True
 
-                # incoming request type
-                print "server received request type :\n", type(request)
-
                 # perform actions on the request
-                results = self.server_actions.act_on_request(request)
-                print "server results :\n", results
+                response, serialized_response = self.server_actions.act_on_request(request)
+                print "server sending response :\n", response
 
                 # stop server if requested to shutdown
-                if results == 'shutdown':
+                if response.response_type == Response.SHUTDOWN:
                     print "server received shutdown, server shutting down!"
-                    socket.send("server received shutdown, server shutting down!")
+                    socket.send(serialized_response)
                     socket.close()
                     sys.exit()
 
-                # return results to client
-                if results == None:
-                    print "server has no results"
-                    socket.send("no results")
-                else:
-                    socket.send(results)
+                # send serialized response to client
+                socket.send(serialized_response)
 
                 # un-set flag
                 is_handling_request = False
@@ -111,7 +139,7 @@ class Server:
 
 if __name__ == "__main__":
     # create server object
-    server = Server(max_requests=1)
+    server = Server(max_requests=3)
 
     # start server
     server.start()
