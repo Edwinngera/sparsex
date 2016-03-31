@@ -13,7 +13,7 @@ class Client:
     def create_request(self, request_type, input_type=None, data_type=None, data_shape=None, data=None):
         request = Request()
 
-        # action is required
+        # request_type is required
         request.request_type = request_type
 
         # only if there is an input_type, will there be any data in the request

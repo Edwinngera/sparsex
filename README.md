@@ -33,7 +33,6 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 # Development
 
 #### Priority
-* Pipeline, add Protobuf Response message.
 * Pipeline, server actions, get predicitions pipeline.
 * Pipeline, server actions, get features pipeline.
 * Pipeline, server actions, shutdown server.
