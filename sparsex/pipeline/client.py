@@ -1,6 +1,8 @@
 import zmq
 import sys, os, time
 from messages_pb2 import Request, Response
+from PIL import Image
+import numpy as np
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -8,7 +10,6 @@ THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 class Client:
     def __init__(self):
         pass
-
 
     def create_request(self, request_type, input_type=None, data_type=None, data_shape=None, data=None):
         # create empty request
@@ -91,12 +92,28 @@ if __name__ == "__main__":
 
 
 
-    # create server SHUTDOWN request
+    # create server FEATURES request with Image
     request = Request()
     request.request_type = Request.GET_FEATURES
+    request.input_type = Request.IMAGE
+
+    ## adding image byte string as request data
+    image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
+    with open(image_filename, 'r') as image_file:
+        request.data = image_file.read()
 
     # sending a request to the server
     response = client.send_request(request=request)
+
+    # check if response is correct
+    print "response data type :\n", response.data_type
+    print "response data shape :\n", response.data_shape
+    
+    features = np.frombuffer(response.data, dtype='float').reshape(response.data_shape)
+
+    print "response features type :\n", type(features)
+    print "response features data type :\n", features.dtype
+    print "response features shape :\n", features.shape
 
     # sleep for a few seconds before next request
     time.sleep(4.0)

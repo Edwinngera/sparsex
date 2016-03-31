@@ -1,14 +1,21 @@
 import zmq
 import os, sys, time
 from messages_pb2 import Request, Response
+from ..preprocessing.preprocessing import Preprocessing
 from ..feature_extraction.feature_extraction import SparseCoding
 from ..classification.classification import Classifier
+import StringIO
+from PIL import Image
+import numpy as np
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 class ServerActions():
     def __init__(self, feature_extraction_model_file=None, classification_model_file=None):
+        # initialize preprocessing object
+        self.preprocessing = Preprocessing()
+
         # use default feature extraction model if none given
         if feature_extraction_model_file is None:
             feature_extraction_model_file = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/trained_feature_extraction_test_model.pkl"))
@@ -60,10 +67,15 @@ class ServerActions():
         return response, serialized_response
 
 
-    def pipeline_empty(self, request):
+    def pipeline_empty(self, request, additional_information=None):
         # generate empty response type and return
         response = Response()
         response.response_type = Response.EMPTY_RESPONSE
+
+        # add additional information if available
+        if additional_information is not None:
+            response.additional_information = additional_information
+
         return response
 
 
@@ -79,10 +91,15 @@ class ServerActions():
         return response
 
 
-    def pipeline_shutdown(self, request):
+    def pipeline_shutdown(self, request, additional_information=None):
         # generate SHUTDOWN response and return
         response = Response()
         response.response_type = Response.SHUTDOWN
+
+        # add additional information if available
+        if additional_information is not None:
+            response.additional_information = additional_information
+
         return response
 
 
@@ -90,8 +107,27 @@ class ServerActions():
         # if input type is unknown then return ERROR response
         if request.input_type == Request.UNKNOWN_INPUT_TYPE:
             return self.pipeline_error(request, additional_information="unknown input type")
+        elif request.input_type == Request.IMAGE:
+            image_byte_string = request.data
+            image_pil = Image.open(StringIO.StringIO(image_byte_string))
+            image_array = np.array(image_pil)
+            whitened_patches = self.preprocessing.get_whitened_patches_from_image_array(image_array)
+            pooled_features = self.sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches)
+
+            print "get features, received input type IMAGE"
+            print "image_byte_string type :\n", type(image_byte_string)
+            print "image pil type :\n", type(image_pil)
+            print "image array type :\n", type(image_array)
+            print "image array shape :\n", image_array.shape
+
+            response = Response()
+            response.response_type = Response.FEATURES
+            response.data_type = Response.FLOAT64
+            response.data_shape.extend([i for i in pooled_features.shape])
+            response.data = str(bytearray(pooled_features))
+            return response
         else:
-            return self.pipeline_empty(request)
+            return self.pipeline_empty(request, additional_information='un-handled image type')
 
 
 
