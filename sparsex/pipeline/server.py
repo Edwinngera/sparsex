@@ -1,18 +1,33 @@
 import zmq
 import os, sys, time
 from messages_pb2 import Request, Response
+from ..feature_extraction.feature_extraction import SparseCoding
+from ..classification.classification import Classifier
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 class ServerActions():
-    def __init__(self):
-        pass
+    def __init__(self, feature_extraction_model_file=None, classification_model_file=None):
+        # use default feature extraction model if none given
+        if feature_extraction_model_file is None:
+            feature_extraction_model_file = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/trained_feature_extraction_test_model.pkl"))
+
+        # create instance of feature extraction module
+        self.sparse_coding = SparseCoding(model_filename=feature_extraction_model_file)
+
+        # use default classification model if none given
+        if classification_model_file is None:
+            classification_model_file = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/trained_classification_test_model.pkl"))
+
+        # create instance of classification module
+        self.classifier = Classifier(model_filename=classification_model_file)
 
 
     def get_serialized_response(self, response):
         # serialize the response and return
         return response.SerializeToString()
+
 
     def get_deserialized_request(self, serialized_request):
         # de-serialize request object
@@ -29,10 +44,12 @@ class ServerActions():
         print "server received request :\n", request
 
         # handle requests / get response
-        if request.request_type == Request.NONE:
-            response = self.pipeline_none(request)
+        if request.request_type == Request.EMPTY_REQUEST:
+            response = self.pipeline_empty(request)
         elif request.request_type == Request.SHUTDOWN:
             response = self.pipeline_shutdown(request)
+        elif request.request_type == Request.GET_FEATURES:
+            response = self.pipeline_get_features(request)
         else:
             response = self.pipeline_none(request)
 
@@ -43,10 +60,22 @@ class ServerActions():
         return response, serialized_response
 
 
-    def pipeline_none(self, request):
-        # generate NONE response and return
+    def pipeline_empty(self, request):
+        # generate empty response type and return
         response = Response()
-        response.response_type = Response.NONE
+        response.response_type = Response.EMPTY_RESPONSE
+        return response
+
+
+    def pipeline_error(self, request, additional_information=None):
+        # generate error reponse and possibly add addtional information
+        response = Response()
+        response.response_type = Response.ERROR
+
+        # add additional information if available
+        if additional_information is not None:
+            response.additional_information = additional_information
+
         return response
 
 
@@ -57,9 +86,17 @@ class ServerActions():
         return response
 
 
+    def pipeline_get_features(self, request):
+        # if input type is unknown then return ERROR response
+        if request.input_type == Request.UNKNOWN_INPUT_TYPE:
+            return self.pipeline_error(request, "error : unknown input type")
+        else:
+            return self.pipeline_empty(request)
+
+
 
 class Server:
-    def __init__(self, ip="127.0.0.1", port="5556", max_requests=0):
+    def __init__(self, ip="127.0.0.1", port="5556", max_requests=0, feature_extraction_model_file=None, classification_model_file=None):
         self.ip = ip
         self.port = port
         self.max_requests = max_requests

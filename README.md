@@ -40,6 +40,7 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 
 #### Backlog
 * Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
+* Pipeline, add "checksum" functionality in request and response messages for data (image / image_array) verfication.
 * Training, dictionary learning.
 * Training, train classifier after extracting features for one image.
 * Feature extraction, use Spams.

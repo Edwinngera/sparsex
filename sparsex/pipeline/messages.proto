@@ -2,55 +2,61 @@ package sparsex;
 
 message Request {
     enum RequestType {
-        NONE = 0;
+        EMPTY_REQUEST = 0;
         SHUTDOWN = 1;
         GET_FEATURES = 2;
         GET_PREDICTIONS = 3;
     }
 
-    required RequestType request_type = 1;
+    required RequestType request_type = 1 [default = EMPTY_REQUEST];
 
     
     enum InputType {
-        IMAGE = 0;
-        IMAGE_ARRAY = 1;
+        UNKNOWN_INPUT_TYPE = 0;
+        IMAGE = 1;
+        IMAGE_ARRAY = 2;
     }
 
-    optional InputType input_type = 2;
+    optional InputType input_type = 2 [default = UNKNOWN_INPUT_TYPE];
 
 
     enum DataType {
-        UINT8 = 0;
-        INT64 = 1;
-        FLOAT64 = 2;
+        UNKNOWN_DATA_TYPE = 0;
+        UINT8 = 1;
+        INT64 = 2;
+        FLOAT64 = 3;
     }
 
-    optional DataType data_type = 3;
-    repeated int64 shape = 4;
+    optional DataType data_type = 3 [default = UNKNOWN_DATA_TYPE];
+    repeated int64 data_shape = 4;
     optional bytes data = 5;
+    optional string data_checksum = 6;
 }
 
 
 
 message Response {
     enum ResponseType {
-        ERROR = 0;
-        NONE = 1;
+        EMPTY_RESPONSE = 0;
+        ERROR = 1;
         SHUTDOWN = 2;
         FEATURES = 3;
         PREDICTIONS = 4;
     }
 
-    required ResponseType response_type = 1;
+    required ResponseType response_type = 1 [default = EMPTY_RESPONSE];
 
 
     enum DataType {
-        UINT8 = 0;
-        INT64 = 1;
-        FLOAT64 = 2;
+        UNKNOWN_DATA_TYPE = 0;
+        UINT8 = 1;
+        INT64 = 2;
+        FLOAT64 = 3;
     }
 
-    optional DataType data_type = 2;
+    optional DataType data_type = 2 [default = UNKNOWN_DATA_TYPE];
     repeated int64 data_shape = 3;
     optional bytes data = 4;
+    optional string checksum = 5;
+    optional string additional_information = 6;
 }
