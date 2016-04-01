@@ -131,7 +131,7 @@ if __name__ == "__main__":
     # creating client object
     client = Client()
 
-    # request FEATURES from IMAGE
+    # request FEATURES from IMAGE FILE
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     request = client.create_request_from_image_file(Request.GET_FEATURES, image_filename)
 
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     # creating client object
     client = Client()
 
-    # request features from image array
+    # request FEATURES from IMAGE ARRAY
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     image_pil = Image.open(image_filename)
     image_array = np.array(image_pil)
@@ -176,6 +176,62 @@ if __name__ == "__main__":
     print "response features type :\n", type(features)
     print "response features data type :\n", features.dtype
     print "response features shape :\n", features.shape
+
+    # sleep for a few seconds before next request
+    time.sleep(3.0)
+
+
+
+    # creating client object
+    client = Client()
+
+    # request PREDICTIONS from IMAGE FILE
+    image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
+    request = client.create_request_from_image_file(Request.GET_PREDICTIONS, image_filename)
+
+    # sending a request to the server
+    response = client.send_request(request=request)
+
+    # check if response is correct
+    print "response data type :\n", response.data_type
+    print "response data shape :\n", response.data_shape
+    
+    # predcitions = np.frombuffer(response.data, dtype='float').reshape(response.data_shape)
+    predcitions = np.frombuffer(response.data, dtype='float')
+
+    print "response predcitions type :\n", type(predcitions)
+    print "response predcitions data type :\n", predcitions.dtype
+    print "response predcitions shape :\n", predcitions.shape
+
+    # sleep for a few seconds before next request
+    time.sleep(3.0)
+
+
+
+    # creating client object
+    client = Client()
+
+    # request PREDICTIONS from IMAGE ARRAY
+    image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
+    image_pil = Image.open(image_filename)
+    image_array = np.array(image_pil)
+
+    # create request from image array
+    request = client.create_request_from_image_array(request_type=Request.GET_PREDICTIONS, image_array=image_array)
+
+    # sending request to server
+    response = client.send_request(request=request)
+
+    # check if response is correct
+    print "response data type :\n", response.data_type
+    print "response data shape :\n", response.data_shape
+    
+    # predcitions = np.frombuffer(response.data, dtype='float').reshape(response.data_shape)
+    predcitions = np.frombuffer(response.data, dtype='float')
+
+    print "response predcitions type :\n", type(predcitions)
+    print "response predcitions data type :\n", predcitions.dtype
+    print "response predcitions shape :\n", predcitions.shape
 
     # sleep for a few seconds before next request
     time.sleep(3.0)

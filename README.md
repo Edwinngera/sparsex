@@ -34,11 +34,13 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 
 #### Priority
 * Pipeline, server actions, get predicitions pipeline.
+* Pipeline, np.frombuffer of bytearray having issues when the array length is 1 and with int and uint datatype. np.frombuffer eays away the array if uint8, reads wrong value when int64 but performs quite well when float64. Maybe add another message field for single predictions.
 
 
 #### Backlog
 * Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
 * Pipeline, add "checksum" functionality in request and response messages for data (image / image_array) verfication.
+* Pipeline, make sure all/most data types for the data bytes are handled.
 * Training, dictionary learning.
 * Training, train classifier after extracting features for one image.
 * Feature extraction, use Spams.

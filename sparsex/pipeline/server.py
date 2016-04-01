@@ -65,6 +65,28 @@ class ServerActions():
             return image_array
 
 
+    def get_response_from_array(self, response_type, array):
+        # initialize basic response fields
+        response = Response()
+        response.response_type = response_type
+
+        # update data type
+        if array.dtype in [np.uint8]:
+            response.data_type = Response.UINT8
+        elif array.dtype in [int, np.int32, np.int64]:
+            response.data_type = Response.INT64
+        else:
+            response.data_type = Response.FLOAT64
+
+        # update data shape
+        response.data_shape.extend([i for i in array.shape])
+
+        # update data
+        response.data = str(bytearray(array))
+
+        return response
+
+
     def act_on_request(self, serialized_request):
         # make sure incoming request is string before we can de-serialize it
         assert isinstance(serialized_request, str), "client request is of type {0} instead of String".format(type(serialized_request))
@@ -79,6 +101,8 @@ class ServerActions():
             response = self.pipeline_shutdown(request)
         elif request.request_type == Request.GET_FEATURES:
             response = self.pipeline_get_features(request)
+        elif request.request_type == Request.GET_PREDICTIONS:
+            response = self.pipeline_get_predictions(request)
         else:
             response = self.pipeline_none(request)
 
@@ -137,12 +161,49 @@ class ServerActions():
         whitened_patches = self.preprocessing.get_whitened_patches_from_image_array(image_array)
         pooled_features = self.sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches)
 
-        # construct and return reponse
-        response = Response()
-        response.response_type = Response.FEATURES
-        response.data_type = Response.FLOAT64
-        response.data_shape.extend([i for i in pooled_features.shape])
-        response.data = str(bytearray(pooled_features))
+        # construct and return response
+        response = self.get_response_from_array(response_type=Response.FEATURES, array=pooled_features)
+        
+        return response
+
+
+    def pipeline_get_predictions(self, request):
+        # if input type is unknown then return ERROR response
+        if request.input_type == Request.UNKNOWN_INPUT_TYPE:
+            return self.pipeline_error(request, additional_information="unknown input type")
+
+        # parse image array from the data bytes of the request
+        image_array = self.get_image_array_from_byte_data(request)
+
+        # get features
+        whitened_patches = self.preprocessing.get_whitened_patches_from_image_array(image_array)
+        pooled_features = self.sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches)
+        pooled_features = pooled_features.ravel().reshape((1,-1)) # will be removed when pipeline has standardized shapes.
+        predictions = self.classifier.get_predictions(pooled_features)
+
+        predictions = np.vstack((predictions, predictions)) #### HACK
+
+        # predictions = np.arange(1).astype(np.uint8)
+        # print "predictions"
+        # print predictions.dtype
+        # print predictions.shape
+        # print predictions
+        # print np.frombuffer(bytearray(predictions), dtype=np.uint8)
+        # predictions = predictions.astype(np.uint8)
+        # print predictions.dtype
+        # print predictions.shape
+        # print predictions
+        # print np.frombuffer(bytearray(predictions), dtype=np.uint8)
+        # predictions[0] = 256
+        # print predictions.dtype
+        # print predictions.shape
+        # print predictions
+        # print np.frombuffer(bytearray(predictions), dtype=np.int64)
+        # raise
+
+        # construct and return response
+        response = self.get_response_from_array(response_type=Response.PREDICTIONS, array=predictions)
+        
         return response
 
 
@@ -153,6 +214,7 @@ class Server:
         self.port = port
         self.max_requests = max_requests
         self.server_actions = ServerActions()
+
 
     def start(self):
         ## server socket
@@ -224,6 +286,7 @@ class Server:
             print "\nkeyboard interrupt, server shutting down!"
             socket.close()
             sys.exit()
+
 
 
 if __name__ == "__main__":
