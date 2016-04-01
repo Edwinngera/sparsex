@@ -34,8 +34,6 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 
 #### Priority
 * Pipeline, server actions, get predicitions pipeline.
-* Pipeline, server actions, get features pipeline.
-* Pipeline, test on different Requests and Responses.
 
 
 #### Backlog

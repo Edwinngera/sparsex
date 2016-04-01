@@ -29,7 +29,7 @@ class Client:
         return request
 
 
-    def create_request_from_image(self, request_type, image_filename):
+    def create_request_from_image_file(self, request_type, image_filename):
         # initialize basic request fields
         request = Request()
         request.request_type = request_type
@@ -38,6 +38,29 @@ class Client:
         ## adding image byte string as request data
         with open(image_filename, 'r') as image_file:
             request.data = image_file.read()
+
+        return request
+
+
+    def create_request_from_image_array(self, request_type, image_array):
+        # initialize basic request fields
+        request = Request()
+        request.request_type = request_type
+        request.input_type = Request.IMAGE_ARRAY
+
+        # update data type
+        if image_array.dtype in [np.uint8]:
+            request.data_type = Request.UINT8
+        elif image_array.dtype in [int, np.int32, np.int64]:
+            request.data_type = Request.INT64
+        else:
+            request.data_type = Request.FLOAT64
+
+        # update data shape
+        request.data_shape.extend([i for i in image_array.shape])
+
+        # update data
+        request.data = str(bytearray(image_array))
 
         return request
 
@@ -86,29 +109,31 @@ class Client:
         print "client received response :\n", response
 
         return response
-    
-    print "client shutting down"  
+
     
 
 if __name__ == "__main__":
     # creating client object
     client = Client()
 
-    # # create empty request
-    # request = Request()
-    # request.request_type = Request.EMPTY_REQUEST
+    # create empty request
+    request = Request()
+    request.request_type = Request.EMPTY_REQUEST
 
-    # # send None/Default Request
-    # response = client.send_request(request=request)
+    # send None/Default Request
+    response = client.send_request(request=request)
 
-    # # sleep for a few seconds before next request
-    # time.sleep(4.0)
+    # sleep for a few seconds before next request
+    time.sleep(3.0)
 
 
+
+    # creating client object
+    client = Client()
 
     # request FEATURES from IMAGE
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
-    request = client.create_request_from_image(Request.GET_FEATURES, image_filename)
+    request = client.create_request_from_image_file(Request.GET_FEATURES, image_filename)
 
     # sending a request to the server
     response = client.send_request(request=request)
@@ -124,29 +149,47 @@ if __name__ == "__main__":
     print "response features shape :\n", features.shape
 
     # sleep for a few seconds before next request
-    time.sleep(4.0)
+    time.sleep(3.0)
 
 
 
+    # creating client object
+    client = Client()
 
-    # create server FEATURES request with image array
-    request = Request()
-    request.request_type = Request.GET_FEATURES
-    request.input_type = Request.IMAGE_ARRAY
-
-    ## adding image array byte string as request data
+    # request features from image array
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     image_pil = Image.open(image_filename)
     image_array = np.array(image_pil)
 
+    # create request from image array
+    request = client.create_request_from_image_array(request_type=Request.GET_FEATURES, image_array=image_array)
+
+    # sending request to server
+    response = client.send_request(request=request)
+
+    # check if response is correct
+    print "response data type :\n", response.data_type
+    print "response data shape :\n", response.data_shape
+    
+    features = np.frombuffer(response.data, dtype='float').reshape(response.data_shape)
+
+    print "response features type :\n", type(features)
+    print "response features data type :\n", features.dtype
+    print "response features shape :\n", features.shape
+
+    # sleep for a few seconds before next request
+    time.sleep(3.0)
 
 
 
-    # # create server SHUTDOWN request
-    # request = Request()
-    # request.request_type = Request.SHUTDOWN
+    # creating client object
+    client = Client()
 
-    # # sending a request to the server
-    # response = client.send_request(request=request)
+    # create server SHUTDOWN request
+    request = Request()
+    request.request_type = Request.SHUTDOWN
+
+    # sending a request to the server
+    response = client.send_request(request=request)
 
     

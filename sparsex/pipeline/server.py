@@ -43,6 +43,28 @@ class ServerActions():
         return request
 
 
+    def get_image_array_from_byte_data(self, request):
+        if request.input_type == Request.IMAGE:
+            image_byte_string = request.data
+            image_pil = Image.open(StringIO.StringIO(image_byte_string))
+            image_array = np.array(image_pil)
+            return image_array
+
+        # request.input_type == Request.IMAGE_ARRAY:
+        else:
+            # get data type
+            if request.data_type == Request.UINT8:
+                data_type = np.uint8
+            elif request.data_type == Request.INT64:
+                data_type = np.int64
+            else:
+                data_type = np.float64
+
+            data_shape = request.data_shape
+            image_array = np.frombuffer(request.data, dtype=data_type).reshape(data_shape)
+            return image_array
+
+
     def act_on_request(self, serialized_request):
         # make sure incoming request is string before we can de-serialize it
         assert isinstance(serialized_request, str), "client request is of type {0} instead of String".format(type(serialized_request))
@@ -107,27 +129,21 @@ class ServerActions():
         # if input type is unknown then return ERROR response
         if request.input_type == Request.UNKNOWN_INPUT_TYPE:
             return self.pipeline_error(request, additional_information="unknown input type")
-        elif request.input_type == Request.IMAGE:
-            image_byte_string = request.data
-            image_pil = Image.open(StringIO.StringIO(image_byte_string))
-            image_array = np.array(image_pil)
-            whitened_patches = self.preprocessing.get_whitened_patches_from_image_array(image_array)
-            pooled_features = self.sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches)
 
-            print "get features, received input type IMAGE"
-            print "image_byte_string type :\n", type(image_byte_string)
-            print "image pil type :\n", type(image_pil)
-            print "image array type :\n", type(image_array)
-            print "image array shape :\n", image_array.shape
+        # parse image array from the data bytes of the request
+        image_array = self.get_image_array_from_byte_data(request)
 
-            response = Response()
-            response.response_type = Response.FEATURES
-            response.data_type = Response.FLOAT64
-            response.data_shape.extend([i for i in pooled_features.shape])
-            response.data = str(bytearray(pooled_features))
-            return response
-        else:
-            return self.pipeline_empty(request, additional_information='un-handled image type')
+        # get features
+        whitened_patches = self.preprocessing.get_whitened_patches_from_image_array(image_array)
+        pooled_features = self.sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches)
+
+        # construct and return reponse
+        response = Response()
+        response.response_type = Response.FEATURES
+        response.data_type = Response.FLOAT64
+        response.data_shape.extend([i for i in pooled_features.shape])
+        response.data = str(bytearray(pooled_features))
+        return response
 
 
 
@@ -212,7 +228,7 @@ class Server:
 
 if __name__ == "__main__":
     # create server object
-    server = Server(max_requests=3)
+    server = Server(max_requests=0)
 
     # start server
     server.start()
