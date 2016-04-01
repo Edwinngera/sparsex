@@ -33,12 +33,12 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 # Development
 
 #### Priority
-* Pipeline, server actions, get predicitions pipeline.
-* Pipeline, np.frombuffer of bytearray having issues when the array length is 1 and with int and uint datatype. np.frombuffer eays away the array if uint8, reads wrong value when int64 but performs quite well when float64. Maybe add another message field for single predictions.
+* Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
+* Pipeline, come up with standardized shapes for preprocessing, feature_extraction and classification. i.e. whether the incoming image arrays, patches or features are flattened or 2-d or 3-d etc.
 
 
 #### Backlog
-* Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
+* Pipeline, handle different color channels.
 * Pipeline, add "checksum" functionality in request and response messages for data (image / image_array) verfication.
 * Pipeline, make sure all/most data types for the data bytes are handled.
 * Training, dictionary learning.
@@ -50,24 +50,23 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
 * Pipeline, be able to choose which classifier/classifier-library.
 * Pipeline, make sure its an image when received before proceeding to preprocessing after receiving an image on the server.
 * Pipeline, make sure image array is always float once received by server.
-* Pipeline, come up with standardized shapes for preprocessing, feature_extraction and classification. i.e. whether the incoming image arrays, patches or features are flattened or 2-d or 3-d etc.
 * Pipeline, API / function calls for single images or multi-images. This is mostly to avoid confusion in expecting shapes of incoming/input arrays when extracting features or classifying. Should be part of the standardization of shapes.
 * Pipeline, catch TypeError in server-client communication for when wrong data format is being set.
 * Pipeline, catch all known Server related errors so that sockets and client connections can be cleanly terminated.
 * Pipeline, client and server timeout.
 * Pipeline, poll if server is available.
 * Preprocessing, Inplace = True/False option for some of the preprocessing steps. Perhaps for memory conservation.
-* Project, fully setuptools/pip installable
+* Project, fully setuptools/pip installable.
+* Project, logging functionality.
 * Project, documentation
     * Latex Folder with .tex file and .pdf
 * Project, update license
 * Project, saving models with pickle.HIGHEST_PROTOCOL
 * Tests, making feature extraction tests more dynamic. Tests are working great but its just that if we need to be able to test different things then there is no API to do it.
+* Tests, add pipeline tests.
 
 
 #### Wishlist
-* Pipeline, handle different color channels.
-* Logging functionality
 * Continuity functionality
     * If there's an error in the code and the process breaks. You can pickup where you left off after you fix the bug.
 * On-line Training

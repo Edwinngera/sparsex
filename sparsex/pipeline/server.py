@@ -82,7 +82,7 @@ class ServerActions():
         response.data_shape.extend([i for i in array.shape])
 
         # update data
-        response.data = str(bytearray(array))
+        response.data = str(np.getbuffer(array))
 
         return response
 
@@ -180,26 +180,6 @@ class ServerActions():
         pooled_features = self.sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches)
         pooled_features = pooled_features.ravel().reshape((1,-1)) # will be removed when pipeline has standardized shapes.
         predictions = self.classifier.get_predictions(pooled_features)
-
-        predictions = np.vstack((predictions, predictions)) #### HACK
-
-        # predictions = np.arange(1).astype(np.uint8)
-        # print "predictions"
-        # print predictions.dtype
-        # print predictions.shape
-        # print predictions
-        # print np.frombuffer(bytearray(predictions), dtype=np.uint8)
-        # predictions = predictions.astype(np.uint8)
-        # print predictions.dtype
-        # print predictions.shape
-        # print predictions
-        # print np.frombuffer(bytearray(predictions), dtype=np.uint8)
-        # predictions[0] = 256
-        # print predictions.dtype
-        # print predictions.shape
-        # print predictions
-        # print np.frombuffer(bytearray(predictions), dtype=np.int64)
-        # raise
 
         # construct and return response
         response = self.get_response_from_array(response_type=Response.PREDICTIONS, array=predictions)

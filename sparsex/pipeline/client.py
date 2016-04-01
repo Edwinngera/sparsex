@@ -60,7 +60,7 @@ class Client:
         request.data_shape.extend([i for i in image_array.shape])
 
         # update data
-        request.data = str(bytearray(image_array))
+        request.data = str(np.getbuffer(image_array))
 
         return request
 
