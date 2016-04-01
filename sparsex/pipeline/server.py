@@ -235,7 +235,9 @@ class Server:
                 if response.response_type == Response.SHUTDOWN:
                     print "server received shutdown, server shutting down!"
                     socket.send(serialized_response)
+                    socket.setsockopt(zmq.LINGER, 0)
                     socket.close()
+                    context.term()
                     sys.exit()
 
                 # send serialized response to client
@@ -252,7 +254,9 @@ class Server:
                     pass
                 elif request_count >= self.max_requests:
                     print "max_requests reached, server shutting down!"
+                    socket.setsockopt(zmq.LINGER, 0)
                     socket.close()
+                    context.term()
                     sys.exit()
 
                 # required breather, currently handling only 10 requests a second.
@@ -264,8 +268,15 @@ class Server:
                 socket.send('server shutting down!')
 
             print "\nkeyboard interrupt, server shutting down!"
+            socket.setsockopt(zmq.LINGER, 0)
             socket.close()
+            context.term()
             sys.exit()
+
+        # should normally not come here
+        socket.setsockopt(zmq.LINGER, 0)
+        socket.close()
+        context.term()
 
 
 

@@ -80,11 +80,7 @@ class Client:
         return response
 
 
-    def send_request(self, ip="127.0.0.1", port="5556", request=None):
-        # creating zmq client
-        context = zmq.Context()
-        socket = context.socket(zmq.REQ)
-
+    def send_request(self, ip="127.0.0.1", port="5556", request=None, timeout=5000, poll_timeout=1000):
         # if no request is provided, create an empty one
         if request is None:
             request = self.create_request(request_type=Request.EMPTY_REQUEST)
@@ -93,23 +89,52 @@ class Client:
         serialized_request = self.get_serialized_request(request)
 
         print "client connecting to server at tcp://%s:%s" %(ip,port)
-        socket.connect("tcp://%s:%s" %(ip, port))
-
-        print "client connected to server"
         print "client sending request :\n", request
-        socket.send(serialized_request)
 
-        print "client waiting on serialized response from server"
-        sys.stdout.flush()
-        serialized_response = socket.recv()
+        # create context and poller
+        context = zmq.Context()
+        poller = zmq.Poller()
 
-        # deserialize response
-        response = self.get_deserialized_response(serialized_response)
+        socket = context.socket(zmq.REQ)
+        socket.connect("tcp://%s:%s" %(ip, port)) # non-blocking
+        poller.register(socket, zmq.POLLIN)
+        socket.send(serialized_request) # non-blocking
 
-        print "client received response :\n", response
+        retries_left = int(timeout / poll_timeout)
 
-        return response
+        while retries_left:
+            # poll and wait until poll timeout
+            # print "client waiting on server, polling for events every {0} milliseconds".format(poll_timeout)
+            sockets = dict(poller.poll(poll_timeout))
 
+            # check poll for results
+            if sockets.get(socket) == zmq.POLLIN:
+                print "client receiving response"
+                serialized_response = socket.recv()
+                response = self.get_deserialized_response(serialized_response)
+                print "client received response :\n", response
+
+                # release zmq objects
+                socket.setsockopt(zmq.LINGER, 0)
+                socket.close()
+                context.term()
+                return response
+
+            else:
+                # print "no response from server, retrying"
+                retries_left -= 1
+                if retries_left <= 0:
+                    print "server seems to be offline, abandoning request"
+                    socket.setsockopt(zmq.LINGER, 0)
+                    socket.close()
+                    poller.unregister(socket)
+                    context.term()
+                    return
+
+        # should normally never come here            
+        socket.setsockopt(zmq.LINGER, 0)
+        socket.close()
+        context.term()
     
 
 if __name__ == "__main__":
@@ -139,14 +164,15 @@ if __name__ == "__main__":
     response = client.send_request(request=request)
 
     # check if response is correct
-    print "response data type :\n", response.data_type
-    print "response data shape :\n", response.data_shape
-    
-    features = np.frombuffer(response.data, dtype='float').reshape(response.data_shape)
+    if response:
+        print "response data type :\n", response.data_type
+        print "response data shape :\n", response.data_shape
+        
+        features = np.frombuffer(response.data, dtype='float').reshape(response.data_shape)
 
-    print "response features type :\n", type(features)
-    print "response features data type :\n", features.dtype
-    print "response features shape :\n", features.shape
+        print "response features type :\n", type(features)
+        print "response features data type :\n", features.dtype
+        print "response features shape :\n", features.shape
 
     # sleep for a few seconds before next request
     time.sleep(3.0)
@@ -168,14 +194,15 @@ if __name__ == "__main__":
     response = client.send_request(request=request)
 
     # check if response is correct
-    print "response data type :\n", response.data_type
-    print "response data shape :\n", response.data_shape
-    
-    features = np.frombuffer(response.data, dtype='float').reshape(response.data_shape)
+    if response:
+        print "response data type :\n", response.data_type
+        print "response data shape :\n", response.data_shape
+        
+        features = np.frombuffer(response.data, dtype='float').reshape(response.data_shape)
 
-    print "response features type :\n", type(features)
-    print "response features data type :\n", features.dtype
-    print "response features shape :\n", features.shape
+        print "response features type :\n", type(features)
+        print "response features data type :\n", features.dtype
+        print "response features shape :\n", features.shape
 
     # sleep for a few seconds before next request
     time.sleep(3.0)
@@ -193,15 +220,16 @@ if __name__ == "__main__":
     response = client.send_request(request=request)
 
     # check if response is correct
-    print "response data type :\n", response.data_type
-    print "response data shape :\n", response.data_shape
-    
-    # predcitions = np.frombuffer(response.data, dtype='float').reshape(response.data_shape)
-    predcitions = np.frombuffer(response.data, dtype='float')
+    if response:
+        print "response data type :\n", response.data_type
+        print "response data shape :\n", response.data_shape
+        
+        # predcitions = np.frombuffer(response.data, dtype='float').reshape(response.data_shape)
+        predcitions = np.frombuffer(response.data, dtype='float')
 
-    print "response predcitions type :\n", type(predcitions)
-    print "response predcitions data type :\n", predcitions.dtype
-    print "response predcitions shape :\n", predcitions.shape
+        print "response predcitions type :\n", type(predcitions)
+        print "response predcitions data type :\n", predcitions.dtype
+        print "response predcitions shape :\n", predcitions.shape
 
     # sleep for a few seconds before next request
     time.sleep(3.0)
@@ -223,15 +251,16 @@ if __name__ == "__main__":
     response = client.send_request(request=request)
 
     # check if response is correct
-    print "response data type :\n", response.data_type
-    print "response data shape :\n", response.data_shape
-    
-    # predcitions = np.frombuffer(response.data, dtype='float').reshape(response.data_shape)
-    predcitions = np.frombuffer(response.data, dtype='float')
+    if response:
+        print "response data type :\n", response.data_type
+        print "response data shape :\n", response.data_shape
+        
+        # predcitions = np.frombuffer(response.data, dtype='float').reshape(response.data_shape)
+        predcitions = np.frombuffer(response.data, dtype='float')
 
-    print "response predcitions type :\n", type(predcitions)
-    print "response predcitions data type :\n", predcitions.dtype
-    print "response predcitions shape :\n", predcitions.shape
+        print "response predcitions type :\n", type(predcitions)
+        print "response predcitions data type :\n", predcitions.dtype
+        print "response predcitions shape :\n", predcitions.shape
 
     # sleep for a few seconds before next request
     time.sleep(3.0)
