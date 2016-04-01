@@ -62,8 +62,8 @@ Execute the following commands (be sure to enter your USERNAME & TAG):
     * Latex Folder with .tex file and .pdf
 * Project, update license
 * Project, saving models with pickle.HIGHEST_PROTOCOL
+* Project, look through code for method or variable name inconsistencies.
 * Tests, making feature extraction tests more dynamic. Tests are working great but its just that if we need to be able to test different things then there is no API to do it.
-* Tests, add pipeline tests.
 
 
 #### Wishlist
