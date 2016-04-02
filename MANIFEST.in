@@ -1,0 +1,7 @@
+include sparsex/tests/data/yaleB01_P00A-005E-10.pgm
+include sparsex/tests/data/yaleB01_P00A-005E-10_64x64.pgm
+include sparsex/tests/data/yaleB02_P00A-005E-10.pgm
+include sparsex/tests/data/yaleB02_P00A-005E-10_64x64.pgm
+include sparsex/tests/data/trained_feature_extraction_test_model.pkl
+include sparsex/tests/data/trained_classification_test_model.pkl
+include sparsex/pipeline/messages.proto
