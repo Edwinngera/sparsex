@@ -53,7 +53,9 @@ def test_pipeline_shutdown():
 
 
 
-def test_pipeline_get_features_from_image_file(image_filename):
+def test_pipeline_get_features_from_image_file(image_filename=None):
+    if image_filename is None:
+        image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     print "##### Testing Pipeline Get Features From Image File"
     server = Server(max_requests=1)
     server_thread = Thread(target=server.start,args=())
@@ -78,7 +80,11 @@ def test_pipeline_get_features_from_image_file(image_filename):
 
 
 
-def test_pipeline_get_features_from_image_array(image_array):
+def test_pipeline_get_features_from_image_array(image_array=None):
+    if image_array is None:
+        image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
+        image_pil = Image.open(image_filename)
+        image_array = np.array(image_pil)
     print "##### Testing Pipeline Get Features From Image Array"
     server = Server(max_requests=1)
     server_thread = Thread(target=server.start,args=())
@@ -103,7 +109,9 @@ def test_pipeline_get_features_from_image_array(image_array):
 
 
 
-def test_pipeline_get_predictions_from_image_file(image_filename):
+def test_pipeline_get_predictions_from_image_file(image_filename=None):
+    if image_filename is None:
+        image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     print "##### Testing Pipeline Get Predictions From Image File"
     server = Server(max_requests=1)
     server_thread = Thread(target=server.start,args=())
@@ -128,7 +136,11 @@ def test_pipeline_get_predictions_from_image_file(image_filename):
 
 
 
-def test_pipeline_get_predictions_from_image_array(image_array):
+def test_pipeline_get_predictions_from_image_array(image_array=None):
+    if image_array is None:
+        image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
+        image_pil = Image.open(image_filename)
+        image_array = np.array(image_pil)
     print "##### Testing Pipeline Get Features From Image Array"
     server = Server(max_requests=1)
     server_thread = Thread(target=server.start,args=())
@@ -160,18 +172,14 @@ if __name__ == "__main__":
     # test server shutdown request pipeline
     test_pipeline_shutdown()
 
-    image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
-    image_pil = Image.open(image_filename)
-    image_array = np.array(image_pil)
-
     # test get features from image file
-    test_pipeline_get_features_from_image_file(image_filename)
+    test_pipeline_get_features_from_image_file()
     
     # test get features from image array
-    test_pipeline_get_features_from_image_array(image_array)
+    test_pipeline_get_features_from_image_array()
 
     # test get predictions from image file
-    test_pipeline_get_predictions_from_image_file(image_filename)
+    test_pipeline_get_predictions_from_image_file()
 
     # test get predictions from image array
-    test_pipeline_get_predictions_from_image_array(image_array)
+    test_pipeline_get_predictions_from_image_array()
