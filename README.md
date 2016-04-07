@@ -29,12 +29,34 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 
 
 #### Backlog
+* Tests, use PyUnit.
+* Pipeline, expose API for handling many intricasies for fine tuning the server config. Also think of a way of letting the user choose a custom pipeline by choosing any of the following. Sort of like a pipeline buffet where it transfers the output of one to the other. Also the user can provide the data to any given function rather than relying on the pipeline.
+    * Preprocessing:
+        * Set image resize size, get resized image.
+        * Set patch size, get patches. Option flatten.
+        * Get normalized image, get normalized patches, get normalization coefficients. Option flatten.
+        * Get whitened image, get whitened patches, get whitening coefficients. Option flatten.
+        * Or always flatten.
+    * Feature extraction:
+        * Use feature extraction model file.
+        * Train dictionary.
+        * Get dictionary.
+        * Get sparse code.
+        * Get sign split features.
+        * Set pooling window size, get pooled features.
+    * Classification:
+        * Use classification model file.
+        * Train classifier.
+        * Get predictions.
+* Pipeline, split requests into meta-data and data so that the server can make sure meta-data is in perfect order before transfer of data/dataset.
 * Pipeline, handle different color channels.
+* Pipeline, handle h5 files in requests for training datasets.
 * Pipeline, add "checksum" functionality in request and response messages for data (image / image_array) verfication.
 * Pipeline, make sure all/most data types for the data bytes are handled.
 * Training, dictionary learning.
 * Training, train classifier after extracting features for one image.
 * Feature extraction, use Spams.
+* Feature extraction, standardize features option after encoding and pooling.
 * Classification, use Joachim's SVM-Light.
 * Classification, the classifier needs to know how many features it is requires so that we can put a check if number of incoming/input features is the same as number of features required by the classifier.
 * Pipeline, be able to choose the dictionary learning library.
@@ -44,17 +66,18 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Pipeline, API / function calls for single images or multi-images. This is mostly to avoid confusion in expecting shapes of incoming/input arrays when extracting features or classifying. Should be part of the standardization of shapes.
 * Pipeline, catch TypeError in server-client communication for when wrong data format is being set.
 * Pipeline, catch all known Server related errors so that sockets and client connections can be cleanly terminated.
-* Pipeline, client and server timeout.
-* Pipeline, poll if server is available.
 * Preprocessing, Inplace = True/False option for some of the preprocessing steps. Perhaps for memory conservation.
 * Project, pip installable.
 * Project, logging functionality.
 * Project, documentation.
     * Latex Folder with .tex file and .pdf
-* Project, update license
+* Project, update license.
 * Project, saving models with pickle.HIGHEST_PROTOCOL
 * Project, look through code for method or variable name inconsistencies.
+* Project, installing numpy and other hard to install packages.
+* Project, use of subprocess instead of threading.
 * Tests, making feature extraction tests more dynamic. Tests are working great but its just that if we need to be able to test different things then there is no API to do it.
+* Tests, installation test using virtual environments.
 
 
 #### Wishlist
@@ -66,8 +89,7 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 
 
 ### Possible Issues
-* Image acquisition, client does not handle well when the server goes down. Client sends a request to an unavailable server and waits for a response but does not recover when the server comes back online.
-* Make sure most dtypes are float when converting images from grayscale
+* Make sure most dtypes are float when converting images from grayscale.
 * sys.stdout.flush() seems to flush messages from both server and client stuff for some reason. Probably because in this case I am running server and client on my own system and they share stdout. This should be resolved in a more elegant manner. I am unsure why the messages from server would end on client side. Possible bug?
 * Which base datatype should be used before extracting patches. Size constraints? Computation constraints and bottlenecks?
 
