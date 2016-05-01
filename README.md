@@ -24,8 +24,8 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 # Development
 
 #### Priority
-* Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
-* Pipeline, come up with standardized shapes for preprocessing, feature_extraction and classification. i.e. whether the incoming image arrays, patches or features are flattened or 2-d or 3-d etc.
+* Training, install spams.
+* Training, dictionary learning.
 
 
 #### Backlog
@@ -53,7 +53,8 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Pipeline, handle h5 files in requests for training datasets.
 * Pipeline, add "checksum" functionality in request and response messages for data (image / image_array) verfication.
 * Pipeline, make sure all/most data types for the data bytes are handled.
-* Training, dictionary learning.
+* Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
+* Pipeline, come up with standardized shapes for preprocessing, feature_extraction and classification. i.e. whether the incoming image arrays, patches or features are flattened or 2-d or 3-d etc.
 * Training, train classifier after extracting features for one image.
 * Feature extraction, use Spams.
 * Feature extraction, standardize features option after encoding and pooling.
@@ -67,14 +68,15 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Pipeline, catch TypeError in server-client communication for when wrong data format is being set.
 * Pipeline, catch all known Server related errors so that sockets and client connections can be cleanly terminated.
 * Preprocessing, Inplace = True/False option for some of the preprocessing steps. Perhaps for memory conservation.
+* Project, installing numpy and other hard to install packages.
 * Project, pip installable.
+* Project, use subprocess instead of threads.
 * Project, logging functionality.
 * Project, documentation.
     * Latex Folder with .tex file and .pdf
 * Project, update license.
 * Project, saving models with pickle.HIGHEST_PROTOCOL
 * Project, look through code for method or variable name inconsistencies.
-* Project, installing numpy and other hard to install packages.
 * Project, use of subprocess instead of threading.
 * Tests, making feature extraction tests more dynamic. Tests are working great but its just that if we need to be able to test different things then there is no API to do it.
 * Tests, installation test using virtual environments.
@@ -107,3 +109,41 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
     * For Python, the command is:
         * ```protoc -I=$SRC_DIR --python_out=$DST_DIR $SRC_DIR/<FILENAME>.proto```
     * For more language options and support, follow this [link](https://developers.google.com/protocol-buffers/docs/pythontutorial#compiling-your-protocol-buffers).
+
+#### Pip Installation
+* pip install git+file:///path/to/your/git/repo@mybranch
+* pip install --extra-index-url https://testpypi.python.org/pypi sparsex
+
+
+# Useful Links
+1. Installation Notes
+    * Tool Recommendations
+        * [Installation and Packaging Tool Recommendations](https://python-packaging-user-guide.readthedocs.io/en/latest/current/)
+    * Dependency Installation
+        * [Building and Distributing Packages with Setuptools](https://pythonhosted.org/setuptools/setuptools.html#dependencies-that-aren-t-in-pypi)
+        * [Declaring Dependencies](http://pythonhosted.org/setuptools/setuptools.html#declaring-dependencies)
+        * [C & C++ Extensions](https://docs.python.org/2/extending/building.html)
+        * [SO : How can I make setuptools install a package that's not on PyPI?](http://stackoverflow.com/questions/3472430/how-can-i-make-setuptools-install-a-package-thats-not-on-pypi)
+    * Installing Package : Numpy
+        * [SO : Installing numpy as a dependency with setuptools](http://stackoverflow.com/questions/8710918/installing-numpy-as-a-dependency-with-setuptools)
+        * [SO : How to Bootstrap numpy installation in setup.py](http://stackoverflow.com/questions/19919905/how-to-bootstrap-numpy-installation-in-setup-py)
+        * [SO : Why doesn't setup_requires work properly for numpy?](http://stackoverflow.com/questions/21605927/why-doesnt-setup-requires-work-properly-for-numpy)
+    * Installing Package : PyZMQ
+        * [Building and Installing PyZMQ](https://github.com/zeromq/pyzmq/wiki/Building-and-Installing-PyZMQ)
+    * Installing Package : h5py
+        * [SO : Permission issues with /tmp/](http://stackoverflow.com/questions/26097398/installing-python-cryptography-error/27983562#27983562)
+    * Installing Package : scipy
+        * [Issue with importing scipy.misc.imresize](https://github.com/Newmu/stylize/issues/1)
+        * [OS : Installing SciPy with pip](http://stackoverflow.com/questions/2213551/installing-scipy-with-pip)
+        * [OS : PIP Install Numpy throws an error “ascii codec can't decode byte 0xe2](http://stackoverflow.com/questions/26473681/pip-install-numpy-throws-an-error-ascii-codec-cant-decode-byte-0xe2)
+
+1. Packaging and Distributing
+    * [Packaging and Distributing Projects](https://python-packaging-user-guide.readthedocs.io/en/latest/distributing/#packaging-and-distributing-projects)
+    * [Choosing a versioning scheme](https://python-packaging-user-guide.readthedocs.io/en/latest/distributing/#choosing-a-versioning-scheme)
+
+1. Packages
+    * [SPAMS](http://spams-devel.gforge.inria.fr/)
+
+1. Virtual Environments
+    * [Virtual Environment Guide](http://docs.python-guide.org/en/latest/dev/virtualenvs/)
+    * [Conda Virtual Environments](http://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/20/conda/)
