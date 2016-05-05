@@ -24,9 +24,9 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 # Development
 
 #### Priority
-* Training, install spams.
-* Training, dictionary learning.
-
+* Training, test basic spams functionality.
+* Training, make sure input to spams.TrainDL is the expected dimension from preprocessing.
+* Training, make sure dictionary output from spams is of the expected dimension.
 
 #### Backlog
 * Tests, use PyUnit.
@@ -55,11 +55,21 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Pipeline, make sure all/most data types for the data bytes are handled.
 * Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
 * Pipeline, come up with standardized shapes for preprocessing, feature_extraction and classification. i.e. whether the incoming image arrays, patches or features are flattened or 2-d or 3-d etc.
+* Training, toggle between TrainDL and TrainDL_memory.
+* Training, script file. Add as entry_points-console script with default config.
+* Training, script file, maybe use command line arguments and --help.
+* Training, config file, maybe use command line like arguments for configrations. For example -D for user provided dictionary.
+* Training, install Joachim's SVC outside of python.
+* Training, test basic linSVC functionality.
+* Training, either use subprocess to call linSVC or itegrate it into the python environment.
 * Training, train classifier after extracting features for one image.
 * Feature extraction, use Spams.
 * Feature extraction, standardize features option after encoding and pooling.
+* Feature extraction, think about using inheritance or composition.
+* Feature extraction, change learn_dictionary method argument name from whitened_patches to something more generic.
 * Classification, use Joachim's SVM-Light.
 * Classification, the classifier needs to know how many features it is requires so that we can put a check if number of incoming/input features is the same as number of features required by the classifier.
+* Pipeline, server configuration state.
 * Pipeline, be able to choose the dictionary learning library.
 * Pipeline, be able to choose which classifier/classifier-library.
 * Pipeline, make sure its an image when received before proceeding to preprocessing after receiving an image on the server.
@@ -78,6 +88,7 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Project, saving models with pickle.HIGHEST_PROTOCOL
 * Project, look through code for method or variable name inconsistencies.
 * Project, use of subprocess instead of threading.
+* Project, shift into new-style classes.
 * Tests, making feature extraction tests more dynamic. Tests are working great but its just that if we need to be able to test different things then there is no API to do it.
 * Tests, installation test using virtual environments.
 
@@ -110,10 +121,13 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
         * ```protoc -I=$SRC_DIR --python_out=$DST_DIR $SRC_DIR/<FILENAME>.proto```
     * For more language options and support, follow this [link](https://developers.google.com/protocol-buffers/docs/pythontutorial#compiling-your-protocol-buffers).
 
-#### Pip Installation
-* pip install git+file:///path/to/your/git/repo@mybranch
-* pip install --extra-index-url https://testpypi.python.org/pypi sparsex
+#### Pip Installation Quick Codes
+* ```pip install git+file:///path/to/your/git/repo@mybranch```
+* ```pip install --extra-index-url https://testpypi.python.org/pypi sparsex```
 
+
+#### Permission issues with /tmp
+* careful!!! : ```mount -o remount exec /tmp```
 
 # Useful Links
 1. Installation Notes
@@ -128,6 +142,7 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
         * [SO : Installing numpy as a dependency with setuptools](http://stackoverflow.com/questions/8710918/installing-numpy-as-a-dependency-with-setuptools)
         * [SO : How to Bootstrap numpy installation in setup.py](http://stackoverflow.com/questions/19919905/how-to-bootstrap-numpy-installation-in-setup-py)
         * [SO : Why doesn't setup_requires work properly for numpy?](http://stackoverflow.com/questions/21605927/why-doesnt-setup-requires-work-properly-for-numpy)
+        * [Blas vs Atlas vs OpenBlas vs MKL, Benchmarks](http://blog.nguyenvq.com/blog/2014/11/10/optimized-r-and-python-standard-blas-vs-atlas-vs-openblas-vs-mkl/)
     * Installing Package : PyZMQ
         * [Building and Installing PyZMQ](https://github.com/zeromq/pyzmq/wiki/Building-and-Installing-PyZMQ)
     * Installing Package : h5py
@@ -136,6 +151,11 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
         * [Issue with importing scipy.misc.imresize](https://github.com/Newmu/stylize/issues/1)
         * [OS : Installing SciPy with pip](http://stackoverflow.com/questions/2213551/installing-scipy-with-pip)
         * [OS : PIP Install Numpy throws an error “ascii codec can't decode byte 0xe2](http://stackoverflow.com/questions/26473681/pip-install-numpy-throws-an-error-ascii-codec-cant-decode-byte-0xe2)
+    * Installing Package : Atlas
+        * [Important notes and installation guide](https://bazaar.launchpad.net/~ubuntu-branches/ubuntu/trusty/atlas/trusty/view/head:/debian/README.Debian)
+        * [SO : Building ATLAS (and later Octave w/ ATLAS)](http://askubuntu.com/questions/472146/building-atlas-and-later-octave-w-atlas)
+        * [Part of Caffe installation](http://caffe.berkeleyvision.org/install_apt.html)
+        * [libgfortran linking issue](https://github.com/ContinuumIO/anaconda-issues/issues/686)
 
 1. Packaging and Distributing
     * [Packaging and Distributing Projects](https://python-packaging-user-guide.readthedocs.io/en/latest/distributing/#packaging-and-distributing-projects)
@@ -143,7 +163,21 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 
 1. Packages
     * [SPAMS](http://spams-devel.gforge.inria.fr/)
+    * [Intel MKL Buy/Free](https://software.intel.com/en-us/intel-mkl/try-buy)
 
 1. Virtual Environments
     * [Virtual Environment Guide](http://docs.python-guide.org/en/latest/dev/virtualenvs/)
     * [Conda Virtual Environments](http://uoa-eresearch.github.io/eresearch-cookbook/recipe/2014/11/20/conda/)
+
+1. Ubuntu Dependencies
+    * Atlas
+        * ```sudo apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-serial-dev protobuf-compiler```
+        * ```sudo apt-get install --no-install-recommends libboost-all-dev```
+        * ```sudo apt-get install libatlas-base-dev```
+        * Source : [Part of Caffe installation](http://caffe.berkeleyvision.org/install_apt.html)
+
+1. Jypyter Notebooks
+    * [Run Jupyterhub on a Supercomputer](http://zonca.github.io/2015/04/jupyterhub-hpc.html)
+
+1. Python Tips & Tricks
+    * [Inheritance Versus Composition](http://learnpythonthehardway.org/book/ex44.html)
