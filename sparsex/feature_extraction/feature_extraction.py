@@ -11,8 +11,44 @@ from sklearn.utils.validation import NotFittedError
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
-class SparseCoding:
+class SparseCoding(object):
+    
+    SKLEARN_DL = "SklearnDL"
+    
+    def __init__(self, library_name=SKLEARN_DL, model_filename=None, **kwargs):
+        if library_name == SparseCoding.SKLEARN_DL:
+            self.library = SklearnDL(model_filename, **kwargs)
+        else:
+            self.library = SklearnDL(model_filename, **kwargs)
 
+    def save_model(self, filename):
+        return self.library.save_model(filename)
+
+    def load_model(self, filename):
+        return self.library.load_model(filename)
+
+    def learn_dictionary(self, whitened_patches):
+        return self.library.learn_dictionary(whitened_patches)
+
+    def get_dictionary(self):
+        return self.library.get_dictionary()
+
+    def get_sparse_features(self, whitened_patches):
+        return self.library.get_sparse_features(whitened_patches)
+
+    def get_sign_split_features(self, sparse_features):
+        return self.library.get_sign_split_features(sparse_features)
+
+    def get_pooled_features(self, input_feature_map, filter_size=(19,19)):
+        # need to determine if there must be a default value for filter_size
+        return self.library.get_pooled_features(input_feature_map, filter_size)
+
+    def get_pooled_features_from_whitened_patches(self, whitened_patches, filter_size=(19,19)):
+        # need to determine if there must be a default value for filter_size
+        return self.library.get_pooled_features_from_whitened_patches(whitened_patches, filter_size)
+        
+        
+class SklearnDL(object):
     DEFAULT_MODEL_PARAMS = {
         'n_components' : 10,
         'n_features' : 64,
@@ -22,17 +58,17 @@ class SparseCoding:
         'code_init' : None
     }
 
-    def __init__(self, model_filename=None):
+    def __init__(self, model_filename=None, **kwargs):
         if model_filename is not None:
             self.load_model(model_filename)
         else:
             # default model params
-            self.n_components = SparseCoding.DEFAULT_MODEL_PARAMS['n_components']
-            self.n_features = SparseCoding.DEFAULT_MODEL_PARAMS['n_features']
-            self.max_iter = SparseCoding.DEFAULT_MODEL_PARAMS['max_iter']
-            self.random_state = SparseCoding.DEFAULT_MODEL_PARAMS['random_state']
-            self.dict_init = SparseCoding.DEFAULT_MODEL_PARAMS['dict_init']
-            self.code_init = SparseCoding.DEFAULT_MODEL_PARAMS['code_init']
+            self.n_components = SklearnDL.DEFAULT_MODEL_PARAMS['n_components']
+            self.n_features = SklearnDL.DEFAULT_MODEL_PARAMS['n_features']
+            self.max_iter = SklearnDL.DEFAULT_MODEL_PARAMS['max_iter']
+            self.random_state = SklearnDL.DEFAULT_MODEL_PARAMS['random_state']
+            self.dict_init = SklearnDL.DEFAULT_MODEL_PARAMS['dict_init']
+            self.code_init = SklearnDL.DEFAULT_MODEL_PARAMS['code_init']
 
             # initialize Dictionary Learning object with default params and weights
             self.DL_obj = DictionaryLearning(n_components=self.n_components,
@@ -62,11 +98,11 @@ class SparseCoding:
 
         # set certain model params as class attributes. Get values from DL Obj.get_params() or use default values.
         DL_params = self.DL_obj.get_params()
-        for param in SparseCoding.DEFAULT_MODEL_PARAMS:
+        for param in SklearnDL.DEFAULT_MODEL_PARAMS:
             if param in DL_params:
                 setattr(self, param, DL_params[param])
             else:
-                setattr(self, param, SparseCoding.DEFAULT_MODEL_PARAMS[param])
+                setattr(self, param, SklearnDL.DEFAULT_MODEL_PARAMS[param])
 
 
     def learn_dictionary(self, whitened_patches):
@@ -109,7 +145,7 @@ class SparseCoding:
         return sign_split_features
 
 
-    def get_pooled_features(self, input_feature_map, filter_size=(19,19)):
+    def get_pooled_features(self, input_feature_map, filter_size):
         # assuming square filters and images
         filter_side = filter_size[0]
 
@@ -144,10 +180,10 @@ class SparseCoding:
 
 
     # Combined Pipeline
-    def get_pooled_features_from_whitened_patches(self, whitened_patches):
+    def get_pooled_features_from_whitened_patches(self, whitened_patches, filter_size):
         sparse_features = self.get_sparse_features(whitened_patches)
         sign_split_features = self.get_sign_split_features(sparse_features)
-        pooled_features = self.get_pooled_features(sign_split_features)
+        pooled_features = self.get_pooled_features(sign_split_features, filter_size)
         return pooled_features
 
 
