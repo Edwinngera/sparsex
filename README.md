@@ -125,9 +125,12 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * ```pip install git+file:///path/to/your/git/repo@mybranch```
 * ```pip install --extra-index-url https://testpypi.python.org/pypi sparsex```
 
-
 #### Permission issues with /tmp
 * careful!!! : ```mount -o remount exec /tmp```
+
+#### Python Run Package Files (-m Flag)
+* This will prevent errors due to importing modules using ".."
+* python -m sparsex.[package_name].[package_filename_without .py extension]
 
 # Useful Links
 1. Installation Notes
