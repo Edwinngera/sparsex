@@ -8,18 +8,21 @@ class Preprocessing:
 
     ## Pipeline - Step 0
     def get_resized_image(self, image_array, image_size=(64,64)):
+        """Returns (n',m') image from (n,m) image and (n',m') image size."""
         resized_image_array = imresize(image_array, image_size)
         return resized_image_array
 
 
     ## Pipeline - Step 1
     def extract_patches(self, image_array, patch_size=(8,8)):
+        """Returns ((n-p+1)*(m-p+1),p,p) pathces from (n,m) image and (p,p) patch."""
         patches = extract_patches_2d(image_array, patch_size)
         return patches
 
 
     ## Pipeline - Step 2
     def get_contrast_normalized_patches(self, patches):
+        """Returns (n,p,p) normalized_patches from (n,p,p) patches."""
         original_patches_shape = patches.shape
         patches = patches.reshape((patches.shape[0], -1))
         patches = (patches - patches.mean(axis=1)[:, np.newaxis]) / np.sqrt(patches.var(axis=1))[:, np.newaxis]
@@ -29,6 +32,7 @@ class Preprocessing:
 
     ## Pipeline - Step 3
     def get_whitened_patches(self, normalized_patches):
+        """Return (n,p,p) whitened_patches from (n,p,p) (normalized) patches."""
         # original patches shape
         original_patches_shape = normalized_patches.shape
 
@@ -65,6 +69,7 @@ class Preprocessing:
 
     ## Pipeline Combined
     def get_whitened_patches_from_image_array(self, image_array):
+        """Returns ((n'-p+1)*(m'-p+1),p,p) whitened_patches from (n,m) image, (n',m') imsize, (p,p) patch."""
         resized_image_array = self.get_resized_image(image_array)
         patches = self.extract_patches(resized_image_array)
         normalized_patches = self.get_contrast_normalized_patches(patches)
