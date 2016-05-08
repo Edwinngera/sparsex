@@ -23,6 +23,7 @@ sparsex/tests/data/05_whitened_patches_montage.jpg
 
 # Feature extraction tests outputs
 sparsex/tests/data/feature_extraction_model.pkl
+sparsex/tests/data/feature_extraction_model_spams.pkl
 
 # Classification tests outputs
 sparsex/tests/data/classification_model.pkl

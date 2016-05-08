@@ -4,6 +4,7 @@ import numpy as np
 import os
 import json, h5py
 import datetime, time
+import cPickle
 
 # source : http://stackoverflow.com/questions/13990465/3d-numpy-array-to-2d
 def get_giant_patch_image(patches, dtype='uint8', scale=False):
@@ -64,6 +65,14 @@ def read_dictionary_from_h5_file(filename):
         for key in f.keys():
             dictionary[key] = f[key][:]
     return dictionary
+
+## cPickle
+def write_dictionary_to_pickle_file(filename, dictionary):
+    with open(filename, "wb") as f:
+        cPickle.dump(dictionary, f, protocol=cPickle.HIGHEST_PROTOCOL)
+        
+def read_dictionary_from_pickle_file(filename):
+    return np.load(filename)
 
 
 # source : http://stackoverflow.com/questions/13890935/does-pythons-time-time-return-the-local-or-utc-timestamp

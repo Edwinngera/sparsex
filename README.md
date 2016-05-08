@@ -26,9 +26,8 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 #### Priority
 * Feature extraction, use Spams.
 * Feature extraction, spams encoding.
-* Feature extraction, spams save model.
-* Feature extraction, spams load model.
-* Feature extraction, spams load model from filename.
+* Feature extraction, spams feature sign split.
+* Feature extraction, spams max pooling.
 
 #### Backlog
 * Tests, use PyUnit.
@@ -68,6 +67,10 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Feature extraction, standardize/normalize features option after encoding and pooling.
 * Feature extraction, think about using inheritance or composition.
 * Feature extraction, change learn_dictionary method argument name from whitened_patches to something more generic.
+* Feature extraction, spams, figure out which parameters to use.
+* Feature extraction, spams, loading and saving models. Catch and handle exceptions properly.
+* Feature extraction, spams, when updating self.params with kwargs. Try to handle exceptions and wrong keyword arguments.
+* Feature extraction, spams, choose between different decomposition/encoding approaches.
 * Classification, use Joachim's SVM-Light.
 * Classification, the classifier needs to know how many features it is requires so that we can put a check if number of incoming/input features is the same as number of features required by the classifier.
 * Pipeline, server configuration state.

@@ -1,4 +1,5 @@
 from ..tests.preprocessing_test import test_whitening
+from ..customutils.customutils import write_dictionary_to_pickle_file, read_dictionary_from_pickle_file
 import spams
 import numpy as np
 import os
@@ -9,17 +10,20 @@ class Spams(object):
     
     def __init__(self, model_filename=None, **kwargs):
         if model_filename == None:
-            self.params = { 'K' : 100, 'lambda1' : 0.15, 'numThreads' : -1, 'batchsize' : 400, 'iter' : 2,
-                            'verbose' : False}
+            self.params = {'K':100, 'lambda1':0.15, 'numThreads':-1, 'batchsize':400, 'iter':10, 'verbose' : False}
+            self.params.update(kwargs)
         else:
-            raise NotImplementedError
+            self.load_model(model_filename)
+            self.params.update(kwargs)
 
 
     def save_model(self, filename):
-        raise NotImplementedError
+        write_dictionary_to_pickle_file(filename, self.params)
+
 
     def load_model(self, filename):
-        raise NotImplementedError
+        self.params = read_dictionary_from_pickle_file(filename)
+
 
     def learn_dictionary(self, whitened_patches):
         # flattening whitened_patches to 2 dimensions
@@ -74,12 +78,25 @@ if __name__ == "__main__":
     sparse_coding = Spams()
 
     # learn dictionary on whitened patches
+    print "learn dictionary"
     sparse_coding.learn_dictionary(whitened_patches) # making sure the model has a trained dictionary
     sparse_coding.learn_dictionary(whitened_patches) # making sure the model has a trained dictionary
     
+    print "get dictionary"
     D = sparse_coding.get_dictionary() # making sure the model has a trained dictionary
     
-    print "Dict shape\n", D.shape
-    print "Dict F order\n", D.flags['F_CONTIGUOUS']
-    print "Dict C order\n", D.flags['C_CONTIGUOUS']
+    print "dictionary shape\n", D.shape
+    print "dictionary F order\n", D.flags['F_CONTIGUOUS']
+    print "dictionary C order\n", D.flags['C_CONTIGUOUS']
+    
+    print "saving model"
+    model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/feature_extraction_model_spams.pkl"))
+    sparse_coding.save_model(model_filename)
+    
+    print "reloading model"
+    model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/feature_extraction_model_spams.pkl"))
+    sparse_coding = Spams(model_filename=model_filename)
+
+    print "dictionary Shape :"
+    print sparse_coding.get_dictionary().shape
     
