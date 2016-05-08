@@ -54,7 +54,7 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Pipeline, add "checksum" functionality in request and response messages for data (image / image_array) verfication.
 * Pipeline, make sure all/most data types for the data bytes are handled.
 * Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
-* Pipeline, come up with standardized shapes for preprocessing, feature_extraction and classification. i.e. whether the incoming image arrays, patches or features are flattened or 2-d or 3-d etc.
+* Pipeline, come up with standardized shapes for preprocessing, feature_extraction and classification. i.e. whether the incoming image arrays, patches or features are flattened or 2-d or 3-d etc. Take into consideration that some classes/functions are more time consuming than others. 
 * Training, toggle between TrainDL and TrainDL_memory.
 * Training, script file. Add as entry_points-console script with default config.
 * Training, script file, maybe use command line arguments and --help.
@@ -89,6 +89,7 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Project, look through code for method or variable name inconsistencies.
 * Project, use of subprocess instead of threading.
 * Project, shift into new-style classes.
+* Project, arguments sent into methods should not be altered in case those argument values are used eleswhere. Create new variables to store manipulations of the arguments.
 * Tests, making feature extraction tests more dynamic. Tests are working great but its just that if we need to be able to test different things then there is no API to do it.
 * Tests, installation test using virtual environments.
 
@@ -105,6 +106,7 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Make sure most dtypes are float when converting images from grayscale.
 * sys.stdout.flush() seems to flush messages from both server and client stuff for some reason. Probably because in this case I am running server and client on my own system and they share stdout. This should be resolved in a more elegant manner. I am unsure why the messages from server would end on client side. Possible bug?
 * Which base datatype should be used before extracting patches. Size constraints? Computation constraints and bottlenecks?
+* Using .T to transpose a matrix in numpy, seems to be interchanging between 'C' and 'F' orders.
 
 
 # Notes
