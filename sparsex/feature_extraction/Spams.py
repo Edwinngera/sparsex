@@ -8,13 +8,33 @@ THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 class Spams(object):
     
+    TRAIN_DL_PARAMS = ['K','D','lambda1','numThread','batchsize','iter','verbose']
+    ENCODING_PARAMS = ['L','lambda1','lambda2','mode','pos','ols','numThreads','length_path','verbose','cholesky','return_reg_path']
+    
     def __init__(self, model_filename=None, **kwargs):
         if model_filename == None:
-            self.params = {'K':100, 'lambda1':0.15, 'numThreads':-1, 'batchsize':400, 'iter':10, 'verbose' : False}
+            self.params = {'K':100,'lambda1':0.15,'numThreads':-1,'batchsize':400,'iter':10,'verbose':False,
+            'return_reg_path':False,'mode':spams.PENALTY}
             self.params.update(kwargs)
+            self._extract_params()
         else:
             self.load_model(model_filename)
             self.params.update(kwargs)
+            self._extract_params()
+
+
+    def _extract_params(self):
+        # extract train params from global params
+        self.train_params = {}
+        for train_param_name in Spams.TRAIN_DL_PARAMS:
+            if train_param_name in self.params:
+                self.train_params[train_param_name] = self.params[train_param_name]
+                
+        # extract decomposition params from global params
+        self.encoding_params = {}
+        for encoding_param_name in Spams.ENCODING_PARAMS:
+            if encoding_param_name in self.params:
+                self.encoding_params[encoding_param_name] = self.params[encoding_param_name]
 
 
     def save_model(self, filename):
@@ -42,7 +62,10 @@ class Spams(object):
         # updating the params so that the next time trainDL uses the already learnt dictionary from params.
         # D is of shape (p**2, k) which is opposite to the sparse shape convention. We will need to transpose D
         # in the get_dictionary method.
-        self.params['D'] = spams.trainDL(X, **self.params)
+        self.params['D'] = spams.trainDL(X, **self.train_params)
+        
+        # update params
+        self._extract_params()
 
 
     def get_dictionary(self):

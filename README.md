@@ -71,6 +71,7 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Feature extraction, spams, loading and saving models. Catch and handle exceptions properly.
 * Feature extraction, spams, when updating self.params with kwargs. Try to handle exceptions and wrong keyword arguments.
 * Feature extraction, spams, choose between different decomposition/encoding approaches.
+* Feature extraction, spams, identify and extract all parameters from kwargs for train_params and encoding_params.
 * Classification, use Joachim's SVM-Light.
 * Classification, the classifier needs to know how many features it is requires so that we can put a check if number of incoming/input features is the same as number of features required by the classifier.
 * Pipeline, server configuration state.
