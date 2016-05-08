@@ -25,12 +25,10 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 
 #### Priority
 * Feature extraction, use Spams.
-* Feature extraction, spams encoding.
 * Feature extraction, spams feature sign split.
 * Feature extraction, spams max pooling.
 
 #### Backlog
-* Tests, use PyUnit.
 * Pipeline, expose API for handling many intricasies for fine tuning the server config. Also think of a way of letting the user choose a custom pipeline by choosing any of the following. Sort of like a pipeline buffet where it transfers the output of one to the other. Also the user can provide the data to any given function rather than relying on the pipeline.
     * Preprocessing:
         * Set image resize size, get resized image.
@@ -72,6 +70,8 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Feature extraction, spams, when updating self.params with kwargs. Try to handle exceptions and wrong keyword arguments.
 * Feature extraction, spams, choose between different decomposition/encoding approaches.
 * Feature extraction, spams, identify and extract all parameters from kwargs for train_params and encoding_params.
+* Feature extraction, spams, think about how to handle sparse matrices. Will expanding it cause memory issues?
+* Feature extraction, spams, look into the FutureWarning about that keeps coming up.``` /usr/local/lib/python2.7/dist-packages/spams.py:1783: FutureWarning: comparison to `None` will result in an elementwise object comparison in the future. if D == None:```
 * Classification, use Joachim's SVM-Light.
 * Classification, the classifier needs to know how many features it is requires so that we can put a check if number of incoming/input features is the same as number of features required by the classifier.
 * Pipeline, server configuration state.
@@ -97,6 +97,8 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Project, arguments sent into methods should not be altered in case those argument values are used eleswhere. Create new variables to store manipulations of the arguments.
 * Tests, making feature extraction tests more dynamic. Tests are working great but its just that if we need to be able to test different things then there is no API to do it.
 * Tests, installation test using virtual environments.
+* Tests, use PyUnit.
+* Tests, add feature_extraction tests for spams.
 
 
 #### Wishlist
