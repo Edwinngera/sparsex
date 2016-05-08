@@ -24,9 +24,11 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 # Development
 
 #### Priority
-* Training, test basic spams functionality.
-* Training, make sure input to spams.TrainDL is the expected dimension from preprocessing.
-* Training, make sure dictionary output from spams is of the expected dimension.
+* Feature extraction, use Spams.
+* Feature extraction, spams encoding.
+* Feature extraction, spams save model.
+* Feature extraction, spams load model.
+* Feature extraction, spams load model from filename.
 
 #### Backlog
 * Tests, use PyUnit.
@@ -63,8 +65,7 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Training, test basic linSVC functionality.
 * Training, either use subprocess to call linSVC or itegrate it into the python environment.
 * Training, train classifier after extracting features for one image.
-* Feature extraction, use Spams.
-* Feature extraction, standardize features option after encoding and pooling.
+* Feature extraction, standardize/normalize features option after encoding and pooling.
 * Feature extraction, think about using inheritance or composition.
 * Feature extraction, change learn_dictionary method argument name from whitened_patches to something more generic.
 * Classification, use Joachim's SVM-Light.
