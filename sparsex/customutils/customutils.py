@@ -26,8 +26,13 @@ def save_image(image_array, destination_filename, dtype='uint8'):
     image_pil.save(destination_filename)
 
 
-def get_image_from_file(image_filename, dtype='float'):
-    image_pil = Image.open(image_filename)
+def get_image_from_file(image_filename, dtype='float', is_grayscale=True):
+    if is_grayscale:
+        image_pil = Image.open(image_filename)
+        image_pil = image_pil.convert('L')
+        image_pil = np.asarray(image_pil)
+    else:    
+        image_pil = Image.open(image_filename)
     image = np.array(image_pil).astype(dtype)
     return image
 
