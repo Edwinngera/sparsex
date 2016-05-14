@@ -37,9 +37,9 @@ def test_resizing_image(image_filename, show_image=True, save_image=True):
     print resized_image_array.shape
 
     show_and_save_montage_of_patches(image_array, show_image, save_image,
-                                     "./data/01_original_image.jpg")
+                                     os.path.join(THIS_FILE_PATH, "./data/01_original_image.jpg"))
     show_and_save_montage_of_patches(resized_image_array, show_image, save_image,
-                                     "./data/02_resized_image.jpg")
+                                     os.path.join(THIS_FILE_PATH, "./data/02_resized_image.jpg"))
 
     return resized_image_array
 
@@ -56,7 +56,7 @@ def test_patch_extraction(image_filename, show_montage=True, save_montage=True):
     print patches.shape
 
     show_and_save_montage_of_patches(patches, show_montage, save_montage,
-                                     "./data/03_patch_extraction_montage.jpg")
+                                     os.path.join(THIS_FILE_PATH, "./data/03_patch_extraction_montage.jpg"))
 
     return patches
 
@@ -78,7 +78,7 @@ def test_contrast_normalization(image_filename, show_montage=True, save_montage=
     print normalized_patches.reshape((normalized_patches.shape[0], -1)).var(axis=1)[:10]
 
     show_and_save_montage_of_patches(normalized_patches, show_montage, save_montage,
-                                     "./data/04_normalized_patches_montage.jpg")
+                                     os.path.join(THIS_FILE_PATH, "./data/04_normalized_patches_montage.jpg"))
 
     return normalized_patches
 
@@ -96,7 +96,7 @@ def test_whitening(image_filename, show_montage=True, save_montage=True):
     print whitened_patches.shape
 
     show_and_save_montage_of_patches(whitened_patches, show_montage, save_montage,
-                                     "./data/05_whitened_patches_montage.jpg")
+                                     os.path.join(THIS_FILE_PATH, "./data/05_whitened_patches_montage.jpg"))
 
     return whitened_patches
     
@@ -118,27 +118,27 @@ def test_preprocessing_combined_pipeline(image_filename, show_montage=True, save
     print "whitened patches shape :\n", whitened_patches.shape
 
     show_and_save_montage_of_patches(image_array, show_montage, save_montage,
-                                     "./data/01_original_image.jpg")
+                                     os.path.join(THIS_FILE_PATH, "./data/01_original_image.jpg"))
     show_and_save_montage_of_patches(whitened_patches, show_montage, save_montage,
-                                     "./data/05_whitened_patches_montage.jpg")
+                                     os.path.join(THIS_FILE_PATH, "./data/05_whitened_patches_montage.jpg"))
 
     return whitened_patches
 
 
 if __name__ == "__main__":
-    image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/yaleB01_P00A-005E-10_64x64.pgm"))
+    image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/yaleB01_P00A-005E-10.pgm"))
     
-    # test resizing image
-    #test_resizing_image(image_filename, show_image=True, save_image=True)
+    # # test resizing image
+    # test_resizing_image(image_filename, show_image=True, save_image=True)
 
-    # test patch extraction
+    # # test patch extraction
     # test_patch_extraction(image_filename, show_montage=True, save_montage=True)
 
-    # test contrast normalization
+    # # test contrast normalization
     # test_contrast_normalization(image_filename, show_montage=True, save_montage=True)
 
     # test whitening
-    # test_whitening(image_filename, show_montage=True, save_montage=True)
+    test_whitening(image_filename, show_montage=True, save_montage=True)
 
-    # test combined pipeline
-    test_preprocessing_combined_pipeline(image_filename, show_montage=True, save_montage=True)
+    # # test combined pipeline
+    # test_preprocessing_combined_pipeline(image_filename, show_montage=True, save_montage=True)
