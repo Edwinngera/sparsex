@@ -57,16 +57,23 @@ class SparseCoding(object):
 
 if __name__ == "__main__":
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
-    library_name = SparseCoding.SPAMS
-    model_filename = Spams.DEFAULT_MODEL_FILENAME
-    
-    for message, library_name, model_filename in zip(["\n\n### Spams feature extraction",
-                                                      "\n\n### SklearnDL feature extraction"],
+
+    # loop through all libraries
+    for message, library_name, model_filename in zip(["\n### Spams feature extraction",
+                                                      "\n### Spams trained feature extraction",
+                                                      "\n### SklearnDL feature extraction",
+                                                      "\n### SklearnDL trained feature extraction"],
                                                      [SparseCoding.SPAMS,
+                                                      SparseCoding.SPAMS,
+                                                      SparseCoding.SKLEARN_DL,
                                                       SparseCoding.SKLEARN_DL],
                                                      [Spams.DEFAULT_MODEL_FILENAME,
-                                                      SklearnDL.DEFAULT_MODEL_FILENAME]):
+                                                      Spams.DEFAULT_TRAINED_MODEL_FILENAME,
+                                                      SklearnDL.DEFAULT_MODEL_FILENAME,
+                                                      SklearnDL.DEFAULT_TRAINED_MODEL_FILENAME]):
         print message
+        print library_name
+        print model_filename
         
         # get whitened patches
         whitened_patches = test_whitening(image_filename, False, False)
