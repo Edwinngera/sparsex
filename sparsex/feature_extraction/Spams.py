@@ -1,5 +1,6 @@
 from ..tests.preprocessing_test import test_whitening
 from ..customutils.customutils import write_dictionary_to_pickle_file, read_dictionary_from_pickle_file
+from skimage.util.shape import view_as_windows
 import spams
 import numpy as np
 import os
@@ -112,15 +113,54 @@ class Spams(object):
                 + "Sparsex Note : It is possible the feature extraction dictionary has not yet been learnt for this model. " \
                 + "Train the feature extraction model at least once to prevent this error.")
 
- 
+
     def get_sign_split_features(self, sparse_features):
-        raise NotImplementedError
+        n_samples, n_components = sparse_features.shape
+        sign_split_features = np.empty((n_samples, 2 * n_components))
+        sign_split_features[:, :n_components] = np.maximum(sparse_features, 0)
+        sign_split_features[:, n_components:] = -np.minimum(sparse_features, 0)
+        return sign_split_features
+
 
     def get_pooled_features(self, input_feature_map, filter_size):
-        raise NotImplementedError
+        # assuming square filters and images
+        filter_side = filter_size[0]
 
+        # reshaping incoming features from 2d to 3d i.e. (3249,20) to (57,57,20)
+        input_feature_map_shape = input_feature_map.shape
+        if input_feature_map.ndim == 2:
+            input_feature_map_side = int(np.sqrt(input_feature_map.shape[0]))
+            input_feature_map = input_feature_map.reshape((input_feature_map_side, input_feature_map_side, input_feature_map_shape[-1]))
+        assert input_feature_map.ndim == 3, "Input features dimension is %d instead of 3" %input_feature_map.ndim
+
+        # get windows (57,57,20) to (3,3,1,19,19,20)
+        input_feature_map_windows = view_as_windows(input_feature_map,
+                                                    window_shape=(filter_size[0], filter_size[1], input_feature_map.shape[-1]),
+                                                    step=filter_size[0])
+
+        # reshape windows (3,3,1,19,19,20) to (3**2, 19**2, 20) == (9, 361, 20)
+        input_feature_map_windows = input_feature_map_windows.reshape((input_feature_map_windows.shape[0]**2,
+                                                                       filter_size[0]**2,
+                                                                       input_feature_map.shape[-1]))
+
+        # calculate norms (9, 361, 20) to (9,361)
+        input_feature_map_window_norms = np.linalg.norm(input_feature_map_windows, ord=2, axis=-1)
+
+        # calculate indexes of max norms per window (9,361) to (9,1). One max index per window.
+        max_norm_indexes = np.argmax(input_feature_map_window_norms, axis=-1)
+
+        # max pooled features are the features that have max norm indexes (9, 361, 20) to (9,20). One max index per window.
+        pooled_features = input_feature_map_windows[np.arange(input_feature_map_windows.shape[0]), max_norm_indexes]
+
+        # return pooled feature map
+        return pooled_features
+        
+        
     def get_pooled_features_from_whitened_patches(self, whitened_patches, filter_size):
-        raise NotImplementedError
+        sparse_features = self.get_sparse_features(whitened_patches)
+        sign_split_features = self.get_sign_split_features(sparse_features)
+        pooled_features = self.get_pooled_features(sign_split_features, filter_size)
+        return pooled_features
 
 
 
@@ -133,31 +173,38 @@ if __name__ == "__main__":
     # create sparse coding object
     sparse_coding = Spams()
 
-    # # get encoding without learning dictionary (comment out when not needed)
-    # print "get encoding"
-    # encoding = sparse_coding.get_sparse_features(whitened_patches)
-    # print "encoding shape\n", encoding.shape
-    # print "encoding F order\n", encoding.flags['F_CONTIGUOUS']
-    # print "encoding C order\n", encoding.flags['C_CONTIGUOUS']
+    # # get sparse code without learning dictionary (It will throw an error. Comment out when not needed.)
+    # print "sparse features (before dictionary learning)"
+    # sparse_features = sparse_coding.get_sparse_features(whitened_patches)
+    # print "sparse_features shape\n", sparse_features.shape
+    # print "sparse_features F order\n", sparse_features.flags['F_CONTIGUOUS']
+    # print "sparse_features C order\n", sparse_features.flags['C_CONTIGUOUS']
     
     # learn dictionary on whitened patches
     print "learn dictionary"
     sparse_coding.learn_dictionary(whitened_patches) # making sure the model has a trained dictionary
     sparse_coding.learn_dictionary(whitened_patches) # making sure the model has a trained dictionary
     
-    print "get dictionary"
-    D = sparse_coding.get_dictionary() # making sure the model has a trained dictionary
-    
-    print "dictionary shape\n", D.shape
-    print "dictionary F order\n", D.flags['F_CONTIGUOUS']
-    print "dictionary C order\n", D.flags['C_CONTIGUOUS']
-    
-    # get encoding
-    print "get encoding"
-    encoding = sparse_coding.get_sparse_features(whitened_patches)
-    print "encoding shape\n", encoding.shape
-    print "encoding F order\n", encoding.flags['F_CONTIGUOUS']
-    print "encoding C order\n", encoding.flags['C_CONTIGUOUS']
+    # get sparse code
+    sparse_features = sparse_coding.get_sparse_features(whitened_patches)
+
+    # get feature sign split
+    sign_split_features = sparse_coding.get_sign_split_features(sparse_features)
+
+    # get pooled features
+    pooled_features = sparse_coding.get_pooled_features(input_feature_map=sign_split_features, filter_size=(19,19))
+
+    print "dictionary Shape :"
+    print sparse_coding.get_dictionary().shape
+
+    print "sparse features shape :"
+    print sparse_features.shape
+
+    print "sign split features shape :"
+    print sign_split_features.shape
+
+    print "pooled features shape :"
+    print pooled_features.shape
     
     print "saving model"
     model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/feature_extraction_model_spams.pkl"))
@@ -169,8 +216,10 @@ if __name__ == "__main__":
 
     print "dictionary Shape :"
     print sparse_coding.get_dictionary().shape
-    
-    # get encoding
-    print "encoding shape"
+
+    print "sparse features shape"
     print sparse_coding.get_sparse_features(whitened_patches).shape
+    
+    print "pooled features"
+    print sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches, filter_size=(19,19)).shape
     

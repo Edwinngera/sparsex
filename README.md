@@ -25,8 +25,6 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 
 #### Priority
 * Feature extraction, use Spams.
-* Feature extraction, spams feature sign split.
-* Feature extraction, spams max pooling.
 
 #### Backlog
 * Pipeline, expose API for handling many intricasies for fine tuning the server config. Also think of a way of letting the user choose a custom pipeline by choosing any of the following. Sort of like a pipeline buffet where it transfers the output of one to the other. Also the user can provide the data to any given function rather than relying on the pipeline.
