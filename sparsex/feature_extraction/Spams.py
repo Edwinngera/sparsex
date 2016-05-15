@@ -9,13 +9,16 @@ THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 class Spams(object):
     
-    DEFAULT_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/feature_extraction_model_spams.pkl"))
+    DEFAULT_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
+                             "../tests/data/feature_extraction_model_spams.pkl"))
+    DEFAULT_TRAINED_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
+                                     "../tests/data/trained_feature_extraction_test_model_spams.pkl"))
     
     TRAIN_DL_PARAMS = ['K', 'D', 'lambda1', 'numThread', 'batchsize', 'iter', 'verbose']
     ENCODING_PARAMS = ['L', 'lambda1', 'lambda2', 'mode', 'pos', 'ols',' numThreads',
                        'length_path', 'verbose', 'cholesky', 'return_reg_path']
     
-    DEFAULT_MODEL_PARAMS = {'K':100, 'lambda1':0.15, 'numThreads':-1, 'batchsize':400,
+    DEFAULT_MODEL_PARAMS = {'K':10, 'lambda1':0.15, 'numThreads':-1, 'batchsize':400,
                             'iter':10, 'verbose':False, 'return_reg_path':False, 'mode':spams.PENALTY}
     
     def __init__(self, model_filename=None, **kwargs):

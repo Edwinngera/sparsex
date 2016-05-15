@@ -102,7 +102,7 @@ def test_whitening(image_filename, show_montage=True, save_montage=True):
     
 
 def test_preprocessing_combined_pipeline(image_filename, show_montage=True, save_montage=True):
-    print "\n\nPreprocessing Combined Pipeline Test"
+    print "### Preprocessing Combined Pipeline Test"
 
     # get image array
     image_array = get_image_from_file(image_filename)
