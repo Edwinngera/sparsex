@@ -1,6 +1,6 @@
 from sklearn.svm import LinearSVC
 from sklearn.externals import joblib
-from ..feature_extraction.feature_extraction import SparseCoding
+from ..feature_extraction.feature_extraction import SparseCoding, Spams, SklearnDL
 import os
 import numpy as np
 from ..tests.preprocessing_test import test_whitening
@@ -51,54 +51,68 @@ class Classifier():
 if __name__ == "__main__":
     image_filename_1 = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     image_filename_2 = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB02_P00A-005E-10_64x64.pgm"))
-    trained_feature_extraction_model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/trained_feature_extraction_test_model.pkl"))
     classification_model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/classification_model.pkl"))
+    for message, feature_extraction_library_name, trained_feature_extraction_model_filename, classification_model_filename in zip(
+        ["\n### classification using spams feature extraction",
+         "\n### classification using spams feature extraction"],
+        [SparseCoding.SPAMS,
+         SparseCoding.SKLEARN_DL],
+        [Spams.DEFAULT_TRAINED_MODEL_FILENAME,
+         SklearnDL.DEFAULT_TRAINED_MODEL_FILENAME],
+        [classification_model_filename,
+         classification_model_filename]):
+        
+        print message
+        print feature_extraction_library_name
+        print trained_feature_extraction_model_filename
+        print classification_model_filename
 
-    # get whitened patches
-    whitened_patches_1 = test_whitening(image_filename_1, False, False)
-    whitened_patches_2 = test_whitening(image_filename_2, False, False)
+        # get whitened patches
+        whitened_patches_1 = test_whitening(image_filename_1, False, False)
+        whitened_patches_2 = test_whitening(image_filename_2, False, False)
 
-    # create sparse coding object
-    print "loading trained feature extraction model from file :\n", trained_feature_extraction_model_filename
-    sparse_coding = SparseCoding(model_filename=trained_feature_extraction_model_filename)
+        # create sparse coding object
+        print "loading trained feature extraction model from file :\n", trained_feature_extraction_model_filename
+        sparse_coding = SparseCoding(feature_extraction_library_name,
+                                     trained_feature_extraction_model_filename)
 
-    # get pooled features directly from whitened patches using feature extraction pipeline
-    pooled_features_1 = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches_1)
-    pooled_features_2 = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches_2)
+        # get pooled features directly from whitened patches using feature extraction pipeline
+        pooled_features_1 = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches_1)
+        pooled_features_2 = sparse_coding.get_pooled_features_from_whitened_patches(whitened_patches_2)
 
-    # input X, flattened features, ndim = 2, [n_samples, n_features]. Here there is only one image, so n_samples = 1
-    X_input_1 = pooled_features_1.ravel().reshape((1,-1)) # will be removed when pipeline has standardized shapes.
-    X_input_2 = pooled_features_2.ravel().reshape((1,-1)) # will be removed when pipeline has standardized shapes.
-    X_input = np.vstack((X_input_1,X_input_2))
+        # input X, flattened features, ndim = 2, [n_samples, n_features]. Here there is only one image, so n_samples = 1
+        X_input_1 = pooled_features_1.ravel().reshape((1,-1)) # will be removed when pipeline has standardized shapes.
+        X_input_2 = pooled_features_2.ravel().reshape((1,-1)) # will be removed when pipeline has standardized shapes.
+        X_input = np.vstack((X_input_1,X_input_2))
 
-    # generate an fake class Y for X, ndim = 1, [n_samples]
-    Y_input = np.arange(X_input.shape[0])
+        # generate an fake class Y for X, ndim = 1, [n_samples]
+        Y_input = np.arange(X_input.shape[0])
 
-    # create classifier object
-    classifier = Classifier()
+        # create classifier object
+        classifier = Classifier()
 
-    # training the classifier on X and Y. This is just to train once for the classifier to be able to classify.
-    classifier.train(X_input, Y_input)
+        # training the classifier on X and Y. This is just to train once for the classifier to be able to classify.
+        classifier.train(X_input, Y_input)
 
-    # save the model
-    print "saving classification model to file :\n", classification_model_filename
-    classifier.save_model(classification_model_filename)
+        # save the model
+        print "saving classification model to file :\n", classification_model_filename
+        classifier.save_model(classification_model_filename)
 
-    # re-load the classification model
-    print "re-loading classification model from file :\n", classification_model_filename
-    classifier = Classifier(model_filename=classification_model_filename)
+        # re-load the classification model
+        print "re-loading classification model from file :\n", classification_model_filename
+        classifier = Classifier(model_filename=classification_model_filename)
 
-    # predict the class of X
-    Y_predict = classifier.get_predictions(X_input)
+        # predict the class of X
+        Y_predict = classifier.get_predictions(X_input)
 
-    print "pooled features 1 shape :\n", pooled_features_1.shape
-    print "pooled features 2 shape :\n", pooled_features_2.shape
+        print "pooled features 1 shape :\n", pooled_features_1.shape
+        print "pooled features 2 shape :\n", pooled_features_2.shape
 
-    print "X_input shape :\n", X_input.shape
+        print "X_input shape :\n", X_input.shape
 
-    print "Y_input shape :\n", Y_input.shape
-    print "Y_input :\n", Y_input
+        print "Y_input shape :\n", Y_input.shape
+        print "Y_input :\n", Y_input
 
-    print "Y_predict shape :\n", Y_predict.shape
-    print "Y_predict :\n", Y_predict
+        print "Y_predict shape :\n", Y_predict.shape
+        print "Y_predict :\n", Y_predict
 
