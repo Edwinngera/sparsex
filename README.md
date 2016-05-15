@@ -24,7 +24,8 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 # Development
 
 #### Priority
-* Feature extraction, use Spams.
+* Classification, use Joachim's SVM-Light.
+* Classification, call SVM-light using subprocess.
 
 #### Backlog
 * Pipeline, expose API for handling many intricasies for fine tuning the server config. Also think of a way of letting the user choose a custom pipeline by choosing any of the following. Sort of like a pipeline buffet where it transfers the output of one to the other. Also the user can provide the data to any given function rather than relying on the pipeline.
@@ -70,7 +71,6 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Feature extraction, spams, identify and extract all parameters from kwargs for train_params and encoding_params.
 * Feature extraction, spams, think about how to handle sparse matrices. Will expanding it cause memory issues?
 * Feature extraction, spams, look into the FutureWarning about that keeps coming up.``` /usr/local/lib/python2.7/dist-packages/spams.py:1783: FutureWarning: comparison to `None` will result in an elementwise object comparison in the future. if D == None:```
-* Classification, use Joachim's SVM-Light.
 * Classification, the classifier needs to know how many features it is requires so that we can put a check if number of incoming/input features is the same as number of features required by the classifier.
 * Pipeline, server configuration state.
 * Pipeline, be able to choose the dictionary learning library.
