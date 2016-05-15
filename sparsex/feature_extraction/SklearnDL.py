@@ -9,6 +9,8 @@ THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 class SklearnDL(object):
     
+    DEFAULT_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/feature_extraction_model_sklearndl.pkl"))
+    
     DEFAULT_MODEL_PARAMS = {
         'n_components' : 10,
         'n_features' : 64,
