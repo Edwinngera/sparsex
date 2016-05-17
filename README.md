@@ -104,7 +104,9 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 
 
 ### Doubts
-* Classification, SVMLight, is it possible to give string.io or other forms of file streams as arguments to shell commands using subprocess instead of file names. 
+* SVMLight, is it possible to give string.io or other forms of file streams as arguments to shell commands using subprocess instead of file names.
+* SVMLight, will uploading only executable to git work on other systems?
+* SVMLight, use pre-made python interfaces by other developers?
 
 
 ### Possible Issues
@@ -174,6 +176,7 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 1. Packages
     * [SPAMS](http://spams-devel.gforge.inria.fr/)
     * [Intel MKL Buy/Free](https://software.intel.com/en-us/intel-mkl/try-buy)
+    * [Joachim's SVMLight](http://svmlight.joachims.org/)
 
 1. Virtual Environments
     * [Virtual Environment Guide](http://docs.python-guide.org/en/latest/dev/virtualenvs/)

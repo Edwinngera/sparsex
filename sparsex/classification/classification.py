@@ -41,16 +41,21 @@ class Classifier(object):
 if __name__ == "__main__":
     image_filename_1 = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     image_filename_2 = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB02_P00A-005E-10_64x64.pgm"))
-    classification_model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/classification_model.pkl"))
     for message, feature_extraction_library_name, trained_feature_extraction_model_filename, classification_model_filename in zip(
         ["\n### classification using spams feature extraction",
          "\n### classification using spams feature extraction"],
-        [SparseCoding.SPAMS,
-         SparseCoding.SKLEARN_DL],
-        [Spams.DEFAULT_TRAINED_MODEL_FILENAME,
-         SklearnDL.DEFAULT_TRAINED_MODEL_FILENAME],
-        [classification_model_filename,
-         classification_model_filename]):
+        [SparseCoding.SKLEARN_DL,
+         SparseCoding.SKLEARN_DL,
+         SparseCoding.SPAMS,
+         SparseCoding.SPAMS],
+        [SklearnDL.DEFAULT_TRAINED_MODEL_FILENAME,
+         SklearnDL.DEFAULT_TRAINED_MODEL_FILENAME,
+         Spams.DEFAULT_TRAINED_MODEL_FILENAME,
+         Spams.DEFAULT_TRAINED_MODEL_FILENAME],
+        [SklearnSVC.DEFAULT_MODEL_FILENAME,
+         SklearnSVC.DEFAULT_TRAINED_MODEL_FILENAME,
+         SklearnSVC.DEFAULT_MODEL_FILENAME,
+         SklearnSVC.DEFAULT_TRAINED_MODEL_FILENAME]):
         
         print message
         print feature_extraction_library_name
