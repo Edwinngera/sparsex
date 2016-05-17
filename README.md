@@ -5,6 +5,12 @@ This is an RnD project part of the curriculum for the Master of Autonomous Syste
 Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 
 
+# License
+Sparsex is licensed under the MIT License which can be found in the file called LICENSE.md
+
+Sparsex also uses third-party software libraries and their respective license terms can be found in the file called THIRD-PARTY-LICENCES.md
+
+
 # Installation
 **(Tested on Ubuntu 14.04, Python 2.7.11)**
 
