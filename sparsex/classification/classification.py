@@ -41,16 +41,27 @@ class Classifier(object):
 if __name__ == "__main__":
     image_filename_1 = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     image_filename_2 = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB02_P00A-005E-10_64x64.pgm"))
-    classification_model_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/classification_model.pkl"))
-    for message, feature_extraction_library_name, trained_feature_extraction_model_filename, classification_model_filename in zip(
-        ["\n### classification using spams feature extraction",
-         "\n### classification using spams feature extraction"],
-        [SparseCoding.SPAMS,
-         SparseCoding.SKLEARN_DL],
-        [Spams.DEFAULT_TRAINED_MODEL_FILENAME,
-         SklearnDL.DEFAULT_TRAINED_MODEL_FILENAME],
-        [classification_model_filename,
-         classification_model_filename]):
+    for message, feature_extraction_library_name, trained_feature_extraction_model_filename, classification_library_name, classification_model_filename in zip(
+        ["\n### sklearnsvc classification using sklearndl feature extraction",
+         "\n### sklearnsvc classification using sklearndl feature extraction",
+         "\n### sklearnsvc classification using spams feature extraction",
+         "\n### sklearnsvc classification using spams feature extraction"],
+        [SparseCoding.SKLEARN_DL,
+         SparseCoding.SKLEARN_DL,
+         SparseCoding.SPAMS,
+         SparseCoding.SPAMS],
+        [SklearnDL.DEFAULT_TRAINED_MODEL_FILENAME,
+         SklearnDL.DEFAULT_TRAINED_MODEL_FILENAME,
+         Spams.DEFAULT_TRAINED_MODEL_FILENAME,
+         Spams.DEFAULT_TRAINED_MODEL_FILENAME],
+        [Classifier.SKLEARN_SVC,
+         Classifier.SKLEARN_SVC,
+         Classifier.SKLEARN_SVC,
+         Classifier.SKLEARN_SVC],
+        [SklearnSVC.DEFAULT_MODEL_FILENAME,
+         SklearnSVC.DEFAULT_TRAINED_MODEL_FILENAME,
+         SklearnSVC.DEFAULT_MODEL_FILENAME,
+         SklearnSVC.DEFAULT_TRAINED_MODEL_FILENAME]):
         
         print message
         print feature_extraction_library_name
@@ -79,7 +90,7 @@ if __name__ == "__main__":
         Y_input = np.arange(X_input.shape[0])
 
         # create classifier object
-        classifier = Classifier()
+        classifier = Classifier(classification_library_name)
 
         # training the classifier on X and Y. This is just to train once for the classifier to be able to classify.
         classifier.train(X_input, Y_input)
@@ -90,7 +101,7 @@ if __name__ == "__main__":
 
         # re-load the classification model
         print "re-loading classification model from file :\n", classification_model_filename
-        classifier = Classifier(model_filename=classification_model_filename)
+        classifier = Classifier(classification_library_name, classification_model_filename)
 
         # predict the class of X
         Y_predict = classifier.get_predictions(X_input)
