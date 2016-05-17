@@ -24,8 +24,11 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 # Development
 
 #### Priority
+* Classification, make class files for SVMLight and SklearnSVC.
 * Classification, use Joachim's SVM-Light.
+* Classification, implement methods for SVMLight.
 * Classification, call SVM-light using subprocess.
+* Classification, currently use input, model and output files in /tmp/ folder and read them.
 
 #### Backlog
 * Pipeline, expose API for handling many intricasies for fine tuning the server config. Also think of a way of letting the user choose a custom pipeline by choosing any of the following. Sort of like a pipeline buffet where it transfers the output of one to the other. Also the user can provide the data to any given function rather than relying on the pipeline.
@@ -93,18 +96,15 @@ Project is currently maintained by Nitish Reddy Koripalli (21st February 2016).
 * Project, use of subprocess instead of threading.
 * Project, shift into new-style classes.
 * Project, arguments sent into methods should not be altered in case those argument values are used eleswhere. Create new variables to store manipulations of the arguments.
+* Project, continuity functionality such that model file is saved after every batch or iteration.
 * Tests, making feature extraction tests more dynamic. Tests are working great but its just that if we need to be able to test different things then there is no API to do it.
 * Tests, installation test using virtual environments.
 * Tests, use PyUnit.
 * Tests, add feature_extraction tests for spams.
 
 
-#### Wishlist
-* Continuity functionality
-    * If there's an error in the code and the process breaks. You can pickup where you left off after you fix the bug.
-* On-line Training
-    * Train on the go, one image at a time.
-    * This might not be the best idea since having bulk training samples instead lets you use the GPU more efficiently.
+### Doubts
+* Classification, SVMLight, is it possible to give string.io or other forms of file streams as arguments to shell commands using subprocess instead of file names. 
 
 
 ### Possible Issues

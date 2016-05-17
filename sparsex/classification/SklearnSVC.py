@@ -1,4 +1,5 @@
-from SklearnSVC import SklearnSVC
+from sklearn.svm import LinearSVC
+from sklearn.externals import joblib
 from ..feature_extraction.feature_extraction import SparseCoding, Spams, SklearnDL
 import os
 import numpy as np
@@ -9,32 +10,41 @@ from sklearn.utils.validation import NotFittedError
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
-class Classifier(object):
-    
-    SKLEARN_SVC = "SklearnSVC"
-    
-    def __init__(self, library_name=SKLEARN_SVC, model_filename=None):
-        if library_name == Classifier.SKLEARN_SVC:
-            self.library = SklearnSVC(model_filename)
+class SklearnSVC(object):
+    def __init__(self, model_filename=None):
+        if model_filename is not None:
+            self.load_model(model_filename)
         else:
-            raise AttributeError("Invalid library_name : \"{0}\" for Classifier class in" \
-            + "feature_extraction".format(library_name))
+            self.linSVC_obj = LinearSVC()
 
 
     def save_model(self, filename):
-        return self.library.save_model(filename)
+        # save linSVC object to file, compress is also to prevent multiple model files.
+        joblib.dump(self.linSVC_obj, filename, compress=3)
 
 
     def load_model(self, filename):
-        return self.library.load_model(filename)
+        # load linSVC Object from file
+        self.linSVC_obj = joblib.load(filename)
 
 
     def train(self, X, Y):
-        return self.library.train(X, Y)
+        assert X.ndim == 2, "Classifier training data X.ndim is %d instead of 2" %X.ndim
+        assert Y.ndim == 1, "Classifier training data Y.ndim is %d instead of 1" %Y.ndim
+
+        # train the model
+        self.linSVC_obj.fit(X,Y)
 
 
     def get_predictions(self, X):
-        return self.library.get_predictions(X)
+        assert X.ndim == 2, "Classifier prediction data X.ndim is %d instead of 2" %X.ndim
+
+        # get classes
+        try:
+            return self.linSVC_obj.predict(X)
+        except NotFittedError:
+            raise NotFittedError("Classification model cannot preidct without being trained first. " \
+                                 + "Train the classification model at least once to prevent this error.")
 
 
 
@@ -78,22 +88,22 @@ if __name__ == "__main__":
         # generate an fake class Y for X, ndim = 1, [n_samples]
         Y_input = np.arange(X_input.shape[0])
 
-        # create classifier object
-        classifier = Classifier()
+        # create SklearnSVC object
+        sklearn_svc = SklearnSVC()
 
-        # training the classifier on X and Y. This is just to train once for the classifier to be able to classify.
-        classifier.train(X_input, Y_input)
+        # training the SklearnSVC on X and Y. This is just to train once for the SklearnSVC to be able to classify.
+        sklearn_svc.train(X_input, Y_input)
 
         # save the model
         print "saving classification model to file :\n", classification_model_filename
-        classifier.save_model(classification_model_filename)
+        sklearn_svc.save_model(classification_model_filename)
 
         # re-load the classification model
         print "re-loading classification model from file :\n", classification_model_filename
-        classifier = Classifier(model_filename=classification_model_filename)
+        sklearn_svc = SklearnSVC(model_filename=classification_model_filename)
 
         # predict the class of X
-        Y_predict = classifier.get_predictions(X_input)
+        Y_predict = sklearn_svc.get_predictions(X_input)
 
         print "pooled features 1 shape :\n", pooled_features_1.shape
         print "pooled features 2 shape :\n", pooled_features_2.shape
