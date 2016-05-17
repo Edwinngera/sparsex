@@ -29,3 +29,12 @@ sparsex/tests/data/feature_extraction_model_sklearndl.pkl
 # Classification tests outputs
 sparsex/tests/data/classification_model.pkl
 
+# SVM_Light
+sparsex/classification/svm_light/svm_classify
+sparsex/classification/svm_light/svm_classify.o
+sparsex/classification/svm_light/svm_common.o
+sparsex/classification/svm_light/svm_hideo.o
+sparsex/classification/svm_light/svm_learn
+sparsex/classification/svm_light/svm_learn.o
+sparsex/classification/svm_light/svm_learn_main.o
+
