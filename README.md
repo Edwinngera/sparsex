@@ -30,7 +30,6 @@ Sparsex also uses third-party software libraries and their respective license te
 # Development
 
 #### Priority
-* Classification, make class files for SVMLight and SklearnSVC.
 * Classification, use Joachim's SVM-Light.
 * Classification, implement methods for SVMLight.
 * Classification, call SVM-light using subprocess.
