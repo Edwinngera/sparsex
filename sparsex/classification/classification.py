@@ -1,3 +1,4 @@
+from JoachimsSVM import JoachimsSVM
 from SklearnSVC import SklearnSVC
 from ..feature_extraction.feature_extraction import SparseCoding, Spams, SklearnDL
 import os
@@ -12,6 +13,7 @@ THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 class Classifier(object):
     
     SKLEARN_SVC = "SklearnSVC"
+    JOACHIMS_SVM = "JoachimsSVM"
     
     def __init__(self, library_name=SKLEARN_SVC, model_filename=None):
         if library_name == Classifier.SKLEARN_SVC:

@@ -32,7 +32,6 @@ Sparsex also uses third-party software libraries and their respective license te
 #### Priority
 * Classification, use Joachim's SVM-Light.
 * Classification, implement methods for SVMLight.
-* Classification, call SVM-light using subprocess.
 * Classification, currently use input, model and output files in /tmp/ folder and read them.
 
 #### Backlog
@@ -80,6 +79,7 @@ Sparsex also uses third-party software libraries and their respective license te
 * Feature extraction, spams, think about how to handle sparse matrices. Will expanding it cause memory issues?
 * Feature extraction, spams, look into the FutureWarning about that keeps coming up.``` /usr/local/lib/python2.7/dist-packages/spams.py:1783: FutureWarning: comparison to `None` will result in an elementwise object comparison in the future. if D == None:```
 * Classification, the classifier needs to know how many features it is requires so that we can put a check if number of incoming/input features is the same as number of features required by the classifier.
+* Classification, try obtaining sparse pooled features in order to construct sparse joachimsSVM format input data.
 * Pipeline, server configuration state.
 * Pipeline, be able to choose the dictionary learning library.
 * Pipeline, be able to choose which classifier/classifier-library.
@@ -145,6 +145,13 @@ Sparsex also uses third-party software libraries and their respective license te
 #### Python Run Package Files (-m Flag)
 * This will prevent errors due to importing modules using ".."
 * python -m sparsex.[package_name].[package_filename_without .py extension]
+
+#### Joachims (SVM Light, SVM Struct, SVM Multiclass)
+* ```svm_learn [options] example_file model_file```
+    * -z c, for classification
+    * -c 0.1, param C 
+    * -t 0, linear kernel
+* ```svm_classify [options] example_file model_file output_file```
 
 # Useful Links
 1. Installation Notes

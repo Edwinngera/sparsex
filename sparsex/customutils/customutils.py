@@ -79,6 +79,15 @@ def write_dictionary_to_pickle_file(filename, dictionary):
 def read_dictionary_from_pickle_file(filename):
     return np.load(filename)
 
+## file to and from string
+def read_string_from_file(filename):
+    with open(filename, "r") as f:
+        file_string = f.read()
+    return file_string
+    
+def write_string_to_file(filename, file_string):
+    with open(filename, "w") as f:
+        f.write(file_string)
 
 # source : http://stackoverflow.com/questions/13890935/does-pythons-time-time-return-the-local-or-utc-timestamp
 def get_current_string_timestamp(datetime_format="%Y-%m-%d_%H:%M:%S.%f"):
