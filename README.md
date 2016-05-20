@@ -30,9 +30,7 @@ Sparsex also uses third-party software libraries and their respective license te
 # Development
 
 #### Priority
-* Classification, use Joachim's SVM-Light.
-* Classification, implement methods for SVMLight.
-* Classification, currently use input, model and output files in /tmp/ folder and read them.
+* Classification, use Joachim's SVM-Light/SVM Multiclass.
 
 #### Backlog
 * Pipeline, expose API for handling many intricasies for fine tuning the server config. Also think of a way of letting the user choose a custom pipeline by choosing any of the following. Sort of like a pipeline buffet where it transfers the output of one to the other. Also the user can provide the data to any given function rather than relying on the pipeline.
@@ -77,7 +75,8 @@ Sparsex also uses third-party software libraries and their respective license te
 * Feature extraction, spams, choose between different decomposition/encoding approaches.
 * Feature extraction, spams, identify and extract all parameters from kwargs for train_params and encoding_params.
 * Feature extraction, spams, think about how to handle sparse matrices. Will expanding it cause memory issues?
-* Feature extraction, spams, look into the FutureWarning about that keeps coming up.``` /usr/local/lib/python2.7/dist-packages/spams.py:1783: FutureWarning: comparison to `None` will result in an elementwise object comparison in the future. if D == None:```
+* Feature extraction, spams, look into the FutureWarning about that keeps coming up.  
+``` /usr/local/lib/python2.7/dist-packages/spams.py:1783: FutureWarning: comparison to `None` will result in an elementwise object comparison in the future. if D == None:```
 * Classification, the classifier needs to know how many features it is requires so that we can put a check if number of incoming/input features is the same as number of features required by the classifier.
 * Classification, try obtaining sparse pooled features in order to construct sparse joachimsSVM format input data.
 * Pipeline, server configuration state.
@@ -102,6 +101,7 @@ Sparsex also uses third-party software libraries and their respective license te
 * Project, shift into new-style classes.
 * Project, arguments sent into methods should not be altered in case those argument values are used eleswhere. Create new variables to store manipulations of the arguments.
 * Project, continuity functionality such that model file is saved after every batch or iteration.
+* Project, create a .sparsex home folder for temp files and avoiding permission issues.
 * Tests, making feature extraction tests more dynamic. Tests are working great but its just that if we need to be able to test different things then there is no API to do it.
 * Tests, installation test using virtual environments.
 * Tests, use PyUnit.
@@ -153,6 +153,10 @@ Sparsex also uses third-party software libraries and their respective license te
     * -t 0, linear kernel
 * ```svm_classify [options] example_file model_file output_file```
 
+#### Logging
+* [SO : Python Logging (function name, file name, line number) using a single file](http://stackoverflow.com/a/20112491/2598661)
+* [SO : logger configuration to log to file and print to stdout](http://stackoverflow.com/questions/13733552/logger-configuration-to-log-to-file-and-print-to-stdout)
+
 # Useful Links
 1. Installation Notes
     * Tool Recommendations
@@ -174,7 +178,7 @@ Sparsex also uses third-party software libraries and their respective license te
     * Installing Package : scipy
         * [Issue with importing scipy.misc.imresize](https://github.com/Newmu/stylize/issues/1)
         * [OS : Installing SciPy with pip](http://stackoverflow.com/questions/2213551/installing-scipy-with-pip)
-        * [OS : PIP Install Numpy throws an error “ascii codec can't decode byte 0xe2](http://stackoverflow.com/questions/26473681/pip-install-numpy-throws-an-error-ascii-codec-cant-decode-byte-0xe2)
+        * [OS : PIP Install Numpy throws an error "ascii codec can't decode byte 0xe2"](http://stackoverflow.com/questions/26473681/pip-install-numpy-throws-an-error-ascii-codec-cant-decode-byte-0xe2)
     * Installing Package : Atlas
         * [Important notes and installation guide](https://bazaar.launchpad.net/~ubuntu-branches/ubuntu/trusty/atlas/trusty/view/head:/debian/README.Debian)
         * [SO : Building ATLAS (and later Octave w/ ATLAS)](http://askubuntu.com/questions/472146/building-atlas-and-later-octave-w-atlas)

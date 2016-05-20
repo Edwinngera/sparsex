@@ -1,7 +1,7 @@
 from ..feature_extraction.feature_extraction import SparseCoding, Spams, SklearnDL
 from ..customutils.customutils import read_dictionary_from_pickle_file, write_dictionary_to_pickle_file
 from ..customutils.customutils import read_string_from_file, write_string_to_file
-import os, subprocess
+import os, sys, subprocess, logging, re
 import numpy as np
 from ..tests.preprocessing_test import test_whitening
 
@@ -18,9 +18,9 @@ class JoachimsSVM(object):
                              "./joachims/svm_multiclass/svm_multiclass_classify"))
     
     DEFAULT_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
-                             "../tests/data/classification_model_svmlight.pkl"))
+                             "../tests/data/classification_model_joachimssvm.pkl"))
     DEFAULT_TRAINED_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
-                             "../tests/data/trained_classification_model_svmlight.pkl"))
+                             "../tests/data/trained_classification_model_joachimssvm.pkl"))
 
     TEMP_TRAIN_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
                                                         "./joachims/temp/sparsex_temp_joachimssvm_train_file"))
@@ -66,7 +66,7 @@ class JoachimsSVM(object):
                              "-d", str(self.params["d"]),
                              JoachimsSVM.TEMP_TRAIN_FILENAME,
                              JoachimsSVM.TEMP_MODEL_FILENAME]
-            print args
+            logging.debug("train args : \n{0}".format(args))
             subprocess.call(args)
             
         except subprocess.CalledProcessError:
@@ -112,9 +112,10 @@ class JoachimsSVM(object):
     # convert input X,Y into joachims train format of <target> <feature1>:<value1> <feature2>:<value2> ...
     def _convert_train_data_to_joachims_train_data(self, X, Y):
         assert Y.dtype == int, "JoachimsSVM train targets Y.dtype is {0} instead of int/int64".format(Y.dtype)
-        print X.shape, X.dtype
-        print Y.shape, Y.dtype
-        
+        logging.debug("X.shape : {0}".format(X.shape))
+        logging.debug("X.dtype : {0}".format(X.dtype))
+        logging.debug("Y.shape : {0}".format(Y.shape))
+        logging.debug("Y.dtype : {0}".format(Y.dtype))
         
         # target_template = <target>, <integer>
         target_template = "{0}"
@@ -127,7 +128,7 @@ class JoachimsSVM(object):
         
         # for every sample
         for sample_index in range(X.shape[0]):
-            # add target, e.g. 2
+            # add target, e.g. 2, adding +1 to make it 1-indexed instead of 0-indexed
             joachims_train_data += target_template.format(Y[sample_index] + 1)
             
             # add feature:value, e.g. 1:1.33
@@ -141,16 +142,67 @@ class JoachimsSVM(object):
 
     
     # convert input X into joachims test format of <target/placeholder> <feature1>:<value1> <feature2>:<value2> ...
-    def _convert_test_data_to_joachims_test_data(self, X):
-        raise NotImplementedError
+    def _convert_test_data_to_joachims_test_data(self, X, target_placeholder=1):
+        logging.debug("X.shape : {0}".format(X.shape))
+        logging.debug("X.dtype : {0}".format(X.dtype))
+        
+        # target_template = <target>, <integer>
+        target_template = "{0}".format(target_placeholder)
+        
+        # feature_value_template = <feature>:<value>, <integer>:<float>, feature index starts from 1
+        feature_value_template = " {0}:{1}"
+        
+        # each sample will be populated into this string variable
+        joachims_test_data = ""
+        
+        # for every sample
+        for sample_index in range(X.shape[0]):
+            # add target template which is just the target placeholder
+            joachims_test_data += target_template
+            
+            # add feature:value, e.g. 1:1.33
+            for feature_index in range(X.shape[1]):
+                joachims_test_data += feature_value_template.format(feature_index + 1, X[sample_index, feature_index])
+            
+            # finally add newline for each sample
+            joachims_test_data += "\n"
+        
+        return joachims_test_data
+        
         
     ## convert from svm_light format
     def _convert_joachims_output_to_predictions(self, joachims_output):
-        raise NotImplementedError
+        logging.debug("joachims_output : \n{0}".format(joachims_output))
+        
+        # find out number of samples and create np.array(int)
+        # subtracting last element, it appears split('\n') seems to yield an additional line
+        joachims_output_lines = joachims_output.split('\n')[:-1]
+        number_samples = len(joachims_output_lines)
+        output_array = np.empty(number_samples, dtype=np.int)
+        
+        # create pattern for string matching
+        pattern = re.compile("^(\d+)")
+        
+        for line_number in range(number_samples):
+            line = joachims_output_lines[line_number]
+            match = pattern.match(line)
+            if match != None:
+                # subtracting 1 because labels are 1-indexed
+                output_array[line_number] = int(match.group(1)) - 1
+            else:
+                logging.debug("finding classification output, match not found")
+        
+        logging.debug("output_array.shape : {0}".format(output_array.shape))
+        logging.debug("output_array.dtype : {0}".format(output_array.dtype))
+        return output_array
         
         
         
 if __name__ == "__main__":
+    logging.basicConfig(format="[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s",
+                        level=logging.INFO,
+                        stream=sys.stdout)
+    
     image_filename_1 = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB01_P00A-005E-10_64x64.pgm"))
     image_filename_2 = os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/yaleB02_P00A-005E-10_64x64.pgm"))
     for message, feature_extraction_library_name, trained_feature_extraction_model_filename, classification_model_filename in zip(
@@ -171,17 +223,18 @@ if __name__ == "__main__":
          JoachimsSVM.DEFAULT_MODEL_FILENAME,
          JoachimsSVM.DEFAULT_TRAINED_MODEL_FILENAME]):
         
-        print message
-        print feature_extraction_library_name
-        print trained_feature_extraction_model_filename
-        print classification_model_filename
+        logging.info(message)
+        logging.info(feature_extraction_library_name)
+        logging.info(trained_feature_extraction_model_filename)
+        logging.info(classification_model_filename)
 
         # get whitened patches
         whitened_patches_1 = test_whitening(image_filename_1, False, False)
         whitened_patches_2 = test_whitening(image_filename_2, False, False)
 
         # create sparse coding object
-        print "loading trained feature extraction model from file :\n", trained_feature_extraction_model_filename
+        logging.info("loading trained feature extraction model from file :\n{0}".format(
+                     trained_feature_extraction_model_filename))
         sparse_coding = SparseCoding(feature_extraction_library_name,
                                      trained_feature_extraction_model_filename)
 
@@ -204,24 +257,23 @@ if __name__ == "__main__":
         joachims_svm.train(X_input, Y_input)
 
         # save the model
-        print "saving classification model to file :\n", classification_model_filename
+        logging.info("saving classification model to file :\n{0}".format(classification_model_filename))
         joachims_svm.save_model(classification_model_filename)
 
         # re-load the classification model
-        print "re-loading classification model from file :\n", classification_model_filename
+        logging.info("re-loading classification model from file :\n{0}".format(classification_model_filename))
         joachims_svm = JoachimsSVM(model_filename=classification_model_filename)
 
         # predict the class of X
         Y_predict = joachims_svm.get_predictions(X_input)
 
-        print "pooled features 1 shape :\n", pooled_features_1.shape
-        print "pooled features 2 shape :\n", pooled_features_2.shape
+        logging.debug("pooled features 1 shape : {0}".format(pooled_features_1.shape))
+        logging.debug("pooled features 2 shape : {0}".format(pooled_features_2.shape))
 
-        print "X_input shape :\n", X_input.shape
+        logging.debug("X_input shape : {0}".format(X_input.shape))
 
-        print "Y_input shape :\n", Y_input.shape
-        print "Y_input :\n", Y_input
+        logging.debug("Y_input shape : {0}".format(Y_input.shape))
+        logging.debug("Y_input : {0}".format(Y_input))
 
-        print "Y_predict shape :\n", Y_predict.shape
-        print "Y_predict :\n", Y_predict
-
+        logging.debug("Y_predict shape : {0}".format(Y_predict.shape))
+        logging.debug("Y_predict : {0}".format(Y_predict))
