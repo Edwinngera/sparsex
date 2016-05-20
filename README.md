@@ -30,7 +30,8 @@ Sparsex also uses third-party software libraries and their respective license te
 # Development
 
 #### Priority
-* Classification, use Joachim's SVM-Light/SVM Multiclass.
+* Training, script file. Add as entry_points-console script with default config.
+* Training, script file, maybe use command line arguments and --help.
 
 #### Backlog
 * Pipeline, expose API for handling many intricasies for fine tuning the server config. Also think of a way of letting the user choose a custom pipeline by choosing any of the following. Sort of like a pipeline buffet where it transfers the output of one to the other. Also the user can provide the data to any given function rather than relying on the pipeline.
@@ -59,12 +60,7 @@ Sparsex also uses third-party software libraries and their respective license te
 * Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
 * Pipeline, come up with standardized shapes for preprocessing, feature_extraction and classification. i.e. whether the incoming image arrays, patches or features are flattened or 2-d or 3-d etc. Take into consideration that some classes/functions are more time consuming than others. 
 * Training, toggle between TrainDL and TrainDL_memory.
-* Training, script file. Add as entry_points-console script with default config.
-* Training, script file, maybe use command line arguments and --help.
 * Training, config file, maybe use command line like arguments for configrations. For example -D for user provided dictionary.
-* Training, install Joachim's SVC outside of python.
-* Training, test basic linSVC functionality.
-* Training, either use subprocess to call linSVC or itegrate it into the python environment.
 * Training, train classifier after extracting features for one image.
 * Feature extraction, standardize/normalize features option after encoding and pooling.
 * Feature extraction, think about using inheritance or composition.
@@ -94,16 +90,14 @@ Sparsex also uses third-party software libraries and their respective license te
 * Project, logging functionality.
 * Project, documentation.
     * Latex Folder with .tex file and .pdf
-* Project, update license.
 * Project, saving models with pickle.HIGHEST_PROTOCOL
 * Project, look through code for method or variable name inconsistencies.
-* Project, use of subprocess instead of threading.
 * Project, shift into new-style classes.
 * Project, arguments sent into methods should not be altered in case those argument values are used eleswhere. Create new variables to store manipulations of the arguments.
 * Project, continuity functionality such that model file is saved after every batch or iteration.
 * Project, create a .sparsex home folder for temp files and avoiding permission issues.
 * Tests, making feature extraction tests more dynamic. Tests are working great but its just that if we need to be able to test different things then there is no API to do it.
-* Tests, installation test using virtual environments.
+* Tests, installation test using virtual environments or docker.
 * Tests, use PyUnit.
 * Tests, add feature_extraction tests for spams.
 

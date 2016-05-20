@@ -15,9 +15,11 @@ class Classifier(object):
     SKLEARN_SVC = "SklearnSVC"
     JOACHIMS_SVM = "JoachimsSVM"
     
-    def __init__(self, library_name=SKLEARN_SVC, model_filename=None):
+    def __init__(self, library_name=JOACHIMS_SVM, model_filename=None):
         if library_name == Classifier.SKLEARN_SVC:
             self.library = SklearnSVC(model_filename)
+        elif library_name == Classifier.JOACHIMS_SVM:
+            self.library = JoachimsSVM(model_filename)
         else:
             raise AttributeError("Invalid library_name : \"{0}\" for Classifier class in" \
             + "feature_extraction".format(library_name))
@@ -47,23 +49,43 @@ if __name__ == "__main__":
         ["\n### sklearnsvc classification using sklearndl feature extraction",
          "\n### sklearnsvc classification using sklearndl feature extraction",
          "\n### sklearnsvc classification using spams feature extraction",
-         "\n### sklearnsvc classification using spams feature extraction"],
+         "\n### sklearnsvc classification using spams feature extraction",
+         "\n### joachimssvm classification using sklearndl feature extraction",
+          "\n### joachimssvm classification using sklearndl feature extraction",
+          "\n### joachimssvm classification using spams feature extraction",
+          "\n### joachimssvm classification using spams feature extraction"],
         [SparseCoding.SKLEARN_DL,
+         SparseCoding.SKLEARN_DL,
+         SparseCoding.SPAMS,
+         SparseCoding.SPAMS,
+         SparseCoding.SKLEARN_DL,
          SparseCoding.SKLEARN_DL,
          SparseCoding.SPAMS,
          SparseCoding.SPAMS],
         [SklearnDL.DEFAULT_TRAINED_MODEL_FILENAME,
          SklearnDL.DEFAULT_TRAINED_MODEL_FILENAME,
          Spams.DEFAULT_TRAINED_MODEL_FILENAME,
+         Spams.DEFAULT_TRAINED_MODEL_FILENAME,
+         SklearnDL.DEFAULT_TRAINED_MODEL_FILENAME,
+         SklearnDL.DEFAULT_TRAINED_MODEL_FILENAME,
+         Spams.DEFAULT_TRAINED_MODEL_FILENAME,
          Spams.DEFAULT_TRAINED_MODEL_FILENAME],
         [Classifier.SKLEARN_SVC,
          Classifier.SKLEARN_SVC,
          Classifier.SKLEARN_SVC,
-         Classifier.SKLEARN_SVC],
+         Classifier.SKLEARN_SVC,
+         Classifier.JOACHIMS_SVM,
+         Classifier.JOACHIMS_SVM,
+         Classifier.JOACHIMS_SVM,
+         Classifier.JOACHIMS_SVM],
         [SklearnSVC.DEFAULT_MODEL_FILENAME,
          SklearnSVC.DEFAULT_TRAINED_MODEL_FILENAME,
          SklearnSVC.DEFAULT_MODEL_FILENAME,
-         SklearnSVC.DEFAULT_TRAINED_MODEL_FILENAME]):
+         SklearnSVC.DEFAULT_TRAINED_MODEL_FILENAME,
+         JoachimsSVM.DEFAULT_MODEL_FILENAME,
+         JoachimsSVM.DEFAULT_TRAINED_MODEL_FILENAME,
+         JoachimsSVM.DEFAULT_MODEL_FILENAME,
+         JoachimsSVM.DEFAULT_TRAINED_MODEL_FILENAME]):
         
         print message
         print feature_extraction_library_name
