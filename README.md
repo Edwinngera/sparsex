@@ -31,6 +31,13 @@ Sparsex also uses third-party software libraries and their respective license te
 
 #### Priority
 * Training, script file. Add as entry_points-console script with default config.
+* Training, script file, preprocess data
+* Training, script file, split into train and test set
+* Training, script file, learn dictionary with data
+* Training, script file, get sparse codes
+* Training, script file, get pooled features
+* Training, script file, train classifier
+* Training, script file, get results on test set
 * Training, script file, maybe use command line arguments and --help.
 
 #### Backlog
@@ -61,6 +68,8 @@ Sparsex also uses third-party software libraries and their respective license te
 * Pipeline, come up with standardized shapes for preprocessing, feature_extraction and classification. i.e. whether the incoming image arrays, patches or features are flattened or 2-d or 3-d etc. Take into consideration that some classes/functions are more time consuming than others. 
 * Training, toggle between TrainDL and TrainDL_memory.
 * Training, config file, maybe use command line like arguments for configrations. For example -D for user provided dictionary.
+* Training, config file validation of arguments. Cross check with default parameters.
+* Training, validate if the images in the directory are images.
 * Training, train classifier after extracting features for one image.
 * Feature extraction, standardize/normalize features option after encoding and pooling.
 * Feature extraction, think about using inheritance or composition.
@@ -106,6 +115,7 @@ Sparsex also uses third-party software libraries and their respective license te
 * SVMLight, is it possible to give string.io or other forms of file streams as arguments to shell commands using subprocess instead of file names.
 * SVMLight, will uploading only executable to git work on other systems?
 * SVMLight, use pre-made python interfaces by other developers?
+* Continguous vs Fortran arrays.
 
 
 ### Possible Issues
@@ -147,9 +157,6 @@ Sparsex also uses third-party software libraries and their respective license te
     * -t 0, linear kernel
 * ```svm_classify [options] example_file model_file output_file```
 
-#### Logging
-* [SO : Python Logging (function name, file name, line number) using a single file](http://stackoverflow.com/a/20112491/2598661)
-* [SO : logger configuration to log to file and print to stdout](http://stackoverflow.com/questions/13733552/logger-configuration-to-log-to-file-and-print-to-stdout)
 
 # Useful Links
 1. Installation Notes
@@ -204,3 +211,13 @@ Sparsex also uses third-party software libraries and their respective license te
 
 1. Python Tips & Tricks
     * [Inheritance Versus Composition](http://learnpythonthehardway.org/book/ex44.html)
+
+1. Logging  
+    * [SO : Python Logging (function name, file name, line number) using a single file](http://stackoverflow.com/a/20112491/2598661)
+    * [SO : logger configuration to log to file and print to stdout](http://stackoverflow.com/questions/13733552/logger-configuration-to-log-to-file-and-print-to-stdout)
+    
+1. Settings / Config
+    * [Argsparse](https://docs.python.org/2/library/argparse.html)
+    * [Argsparse Tutorial](https://docs.python.org/2/howto/argparse.html)
+    * [Config](https://docs.python.org/2/library/configparser.html)
+    * [SO : What's the best practice using a settings file in Python?](http://stackoverflow.com/questions/5055042/whats-the-best-practice-using-a-settings-file-in-python)
