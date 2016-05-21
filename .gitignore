@@ -42,3 +42,6 @@ sparsex/classification/joachims/svm_light/*
 # Joachims temp
 sparsex/classification/joachims/temp/*
 
+# Training
+sparsex/training/trained_feature_extraction_model_spams.pkl
+

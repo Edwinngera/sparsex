@@ -30,15 +30,11 @@ Sparsex also uses third-party software libraries and their respective license te
 # Development
 
 #### Priority
-* Training, script file. Add as entry_points-console script with default config.
-* Training, script file, preprocess data
 * Training, script file, split into train and test set
-* Training, script file, learn dictionary with data
-* Training, script file, get sparse codes
-* Training, script file, get pooled features
 * Training, script file, train classifier
 * Training, script file, get results on test set
 * Training, script file, maybe use command line arguments and --help.
+* Classification, add temp folder to sparsex/classification/joachims/
 
 #### Backlog
 * Pipeline, expose API for handling many intricasies for fine tuning the server config. Also think of a way of letting the user choose a custom pipeline by choosing any of the following. Sort of like a pipeline buffet where it transfers the output of one to the other. Also the user can provide the data to any given function rather than relying on the pipeline.
@@ -67,10 +63,12 @@ Sparsex also uses third-party software libraries and their respective license te
 * Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
 * Pipeline, come up with standardized shapes for preprocessing, feature_extraction and classification. i.e. whether the incoming image arrays, patches or features are flattened or 2-d or 3-d etc. Take into consideration that some classes/functions are more time consuming than others. 
 * Training, toggle between TrainDL and TrainDL_memory.
+* Training, script file. Add as entry_points-console script with default config.
 * Training, config file, maybe use command line like arguments for configrations. For example -D for user provided dictionary.
 * Training, config file validation of arguments. Cross check with default parameters.
 * Training, validate if the images in the directory are images.
 * Training, train classifier after extracting features for one image.
+* Training, replace training logging with logging within core sparsex classes.
 * Feature extraction, standardize/normalize features option after encoding and pooling.
 * Feature extraction, think about using inheritance or composition.
 * Feature extraction, change learn_dictionary method argument name from whitened_patches to something more generic.
@@ -93,6 +91,7 @@ Sparsex also uses third-party software libraries and their respective license te
 * Pipeline, catch TypeError in server-client communication for when wrong data format is being set.
 * Pipeline, catch all known Server related errors so that sockets and client connections can be cleanly terminated.
 * Preprocessing, Inplace = True/False option for some of the preprocessing steps. Perhaps for memory conservation.
+* Preprocessing, since normalization is a part of whitening, we need to make sure that normalization is not done twice and also make sure that if normalization=False and whitening=True, then we must normalize as well.
 * Project, installing numpy and other hard to install packages.
 * Project, pip installable.
 * Project, use subprocess instead of threads.
@@ -157,6 +156,9 @@ Sparsex also uses third-party software libraries and their respective license te
     * -t 0, linear kernel
 * ```svm_classify [options] example_file model_file output_file```
 
+#### Issue : ```ImportError: libgfortran.so.1: cannot open shared object file```
+* [NumPy < 1.9 on Python 2.7 missing gfortran library dependency](https://github.com/ContinuumIO/anaconda-issues/issues/445)
+* ```conda install libgfortran``` followed by ```conda install --all``` fixed it for me.
 
 # Useful Links
 1. Installation Notes
@@ -211,6 +213,9 @@ Sparsex also uses third-party software libraries and their respective license te
 
 1. Python Tips & Tricks
     * [Inheritance Versus Composition](http://learnpythonthehardway.org/book/ex44.html)
+
+1. Numpy Tips & Tricks
+    * [Converting 3d to 2d arrays while maintaining window shapes](http://stackoverflow.com/questions/13990465/3d-numpy-array-to-2d)
 
 1. Logging  
     * [SO : Python Logging (function name, file name, line number) using a single file](http://stackoverflow.com/a/20112491/2598661)
