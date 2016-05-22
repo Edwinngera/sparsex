@@ -17,7 +17,7 @@ class SklearnSVC(object):
     DEFAULT_TRAINED_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
                              "../tests/data/trained_classification_model_sklearnsvc.pkl"))
     
-    def __init__(self, model_filename=None):
+    def __init__(self, model_filename=None, **kwargs):
         if model_filename is not None:
             self.load_model(model_filename)
         else:

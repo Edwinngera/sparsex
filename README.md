@@ -31,10 +31,8 @@ Sparsex also uses third-party software libraries and their respective license te
 
 #### Priority
 * Training, script file, split into train and test set
-* Training, script file, train classifier
 * Training, script file, get results on test set
 * Training, script file, maybe use command line arguments and --help.
-* Classification, add temp folder to sparsex/classification/joachims/
 
 #### Backlog
 * Pipeline, expose API for handling many intricasies for fine tuning the server config. Also think of a way of letting the user choose a custom pipeline by choosing any of the following. Sort of like a pipeline buffet where it transfers the output of one to the other. Also the user can provide the data to any given function rather than relying on the pipeline.
@@ -66,8 +64,6 @@ Sparsex also uses third-party software libraries and their respective license te
 * Training, script file. Add as entry_points-console script with default config.
 * Training, config file, maybe use command line like arguments for configrations. For example -D for user provided dictionary.
 * Training, config file validation of arguments. Cross check with default parameters.
-* Training, validate if the images in the directory are images.
-* Training, train classifier after extracting features for one image.
 * Training, replace training logging with logging within core sparsex classes.
 * Feature extraction, standardize/normalize features option after encoding and pooling.
 * Feature extraction, think about using inheritance or composition.
@@ -92,6 +88,7 @@ Sparsex also uses third-party software libraries and their respective license te
 * Pipeline, catch all known Server related errors so that sockets and client connections can be cleanly terminated.
 * Preprocessing, Inplace = True/False option for some of the preprocessing steps. Perhaps for memory conservation.
 * Preprocessing, since normalization is a part of whitening, we need to make sure that normalization is not done twice and also make sure that if normalization=False and whitening=True, then we must normalize as well.
+* Preprocessing, choose appropriate value for adding in the denominator to prevent divide by zero in contrast normalization. Currently it is 0.01.
 * Project, installing numpy and other hard to install packages.
 * Project, pip installable.
 * Project, use subprocess instead of threads.
@@ -216,6 +213,7 @@ Sparsex also uses third-party software libraries and their respective license te
 
 1. Numpy Tips & Tricks
     * [Converting 3d to 2d arrays while maintaining window shapes](http://stackoverflow.com/questions/13990465/3d-numpy-array-to-2d)
+    * [Cross-validation : sklearn.cross_validation.StratifiedKFold](http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedKFold.html#sklearn.cross_validation.StratifiedKFold)
 
 1. Logging  
     * [SO : Python Logging (function name, file name, line number) using a single file](http://stackoverflow.com/a/20112491/2598661)

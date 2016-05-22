@@ -15,11 +15,11 @@ class Classifier(object):
     SKLEARN_SVC = "SklearnSVC"
     JOACHIMS_SVM = "JoachimsSVM"
     
-    def __init__(self, library_name=JOACHIMS_SVM, model_filename=None):
+    def __init__(self, library_name=JOACHIMS_SVM, model_filename=None, **kwargs):
         if library_name == Classifier.SKLEARN_SVC:
-            self.library = SklearnSVC(model_filename)
+            self.library = SklearnSVC(model_filename, **kwargs)
         elif library_name == Classifier.JOACHIMS_SVM:
-            self.library = JoachimsSVM(model_filename)
+            self.library = JoachimsSVM(model_filename, **kwargs)
         else:
             raise AttributeError("Invalid library_name : \"{0}\" for Classifier class in" \
             + "feature_extraction".format(library_name))

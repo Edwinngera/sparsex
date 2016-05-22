@@ -25,7 +25,7 @@ class Preprocessing:
         """Returns (n,p,p) normalized_patches from (n,p,p) patches."""
         original_patches_shape = patches.shape
         patches = patches.reshape((patches.shape[0], -1))
-        patches = (patches - patches.mean(axis=1)[:, np.newaxis]) / np.sqrt(patches.var(axis=1))[:, np.newaxis]
+        patches = (patches - patches.mean(axis=1)[:, np.newaxis]) / (np.sqrt(patches.var(axis=1))[:, np.newaxis] + 0.01)
         patches = patches.reshape(original_patches_shape)
         return patches
 

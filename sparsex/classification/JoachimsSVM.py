@@ -33,11 +33,13 @@ class JoachimsSVM(object):
     
     DEFAULT_MODEL_PARAMS = {"model":"", "c":0.1, "t":1, "d":2}
     
-    def __init__(self, model_filename=None):
+    def __init__(self, model_filename=None, **kwargs):
         if model_filename is not None:
             self.load_model(model_filename)
+            self.params.update(kwargs)
         else:
             self.params = JoachimsSVM.DEFAULT_MODEL_PARAMS
+            self.params.update(kwargs)
 
 
     def save_model(self, filename):

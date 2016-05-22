@@ -44,4 +44,5 @@ sparsex/classification/joachims/temp/*
 
 # Training
 sparsex/training/trained_feature_extraction_model_spams.pkl
+sparsex/training/trained_classification_model_joachimssvm.pkl
 
