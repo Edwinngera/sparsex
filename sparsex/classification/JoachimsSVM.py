@@ -31,7 +31,7 @@ class JoachimsSVM(object):
     TEMP_OUTPUT_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
                                                         "./joachims/temp/sparsex_temp_joachimssvm_output_file"))
     
-    DEFAULT_MODEL_PARAMS = {"model":"", "c":0.1, "t":1, "d":2}
+    DEFAULT_MODEL_PARAMS = {"model":"", "c":0.1, "t":1, "d":2, "g":0.1}
     
     def __init__(self, model_filename=None, **kwargs):
         if model_filename is not None:
@@ -66,6 +66,7 @@ class JoachimsSVM(object):
                              "-c", str(self.params["c"]),
                              "-t", str(self.params["t"]),
                              "-d", str(self.params["d"]),
+                             "-g", str(self.params["g"]),
                              JoachimsSVM.TEMP_TRAIN_FILENAME,
                              JoachimsSVM.TEMP_MODEL_FILENAME]
             logging.debug("train args : \n{0}".format(args))

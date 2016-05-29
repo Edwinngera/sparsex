@@ -108,10 +108,12 @@ Sparsex also uses third-party software libraries and their respective license te
 
 
 ### Doubts
-* SVMLight, is it possible to give string.io or other forms of file streams as arguments to shell commands using subprocess instead of file names.
+* SVMLight, is it possible to give string.io or other forms of file streams as arguments to shell commands using subprocess instead of file names. This may cause doubling of the memory when loading to and from the file.
 * SVMLight, will uploading only executable to git work on other systems?
 * SVMLight, use pre-made python interfaces by other developers?
 * Continguous vs Fortran arrays.
+* Spams, encoding using only one processor?
+* Massive amounts of features when pooling size is (3,3)
 
 
 ### Possible Issues
@@ -207,6 +209,9 @@ Sparsex also uses third-party software libraries and their respective license te
 
 1. Jypyter Notebooks
     * [Run Jupyterhub on a Supercomputer](http://zonca.github.io/2015/04/jupyterhub-hpc.html)
+
+1. Ubuntu Tips & Tricks
+    * [stdout to file and to console](http://www.linuxquestions.org/questions/linux-software-2/bash-how-to-redirect-output-to-file-and-still-have-it-on-screen-412611/)
 
 1. Python Tips & Tricks
     * [Inheritance Versus Composition](http://learnpythonthehardway.org/book/ex44.html)
