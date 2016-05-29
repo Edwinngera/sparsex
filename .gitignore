@@ -48,4 +48,5 @@ sparsex/training/trained_classification_model_joachimssvm.pkl
 
 # Atom Remote
 .ftpconfig
+*.log
 

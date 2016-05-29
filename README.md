@@ -30,11 +30,6 @@ Sparsex also uses third-party software libraries and their respective license te
 # Development
 
 #### Priority
-* Training, script file, split into train and test set
-* Training, script file, get results on test set
-* Training, script file, maybe use command line arguments and --help.
-
-#### Backlog
 * Pipeline, expose API for handling many intricasies for fine tuning the server config. Also think of a way of letting the user choose a custom pipeline by choosing any of the following. Sort of like a pipeline buffet where it transfers the output of one to the other. Also the user can provide the data to any given function rather than relying on the pipeline.
     * Preprocessing:
         * Set image resize size, get resized image.
@@ -54,6 +49,8 @@ Sparsex also uses third-party software libraries and their respective license te
         * Train classifier.
         * Get predictions.
 * Pipeline, split requests into meta-data and data so that the server can make sure meta-data is in perfect order before transfer of data/dataset.
+
+#### Backlog
 * Pipeline, handle different color channels.
 * Pipeline, handle h5 files in requests for training datasets.
 * Pipeline, add "checksum" functionality in request and response messages for data (image / image_array) verfication.
@@ -65,6 +62,9 @@ Sparsex also uses third-party software libraries and their respective license te
 * Training, config file, maybe use command line like arguments for configrations. For example -D for user provided dictionary.
 * Training, config file validation of arguments. Cross check with default parameters.
 * Training, replace training logging with logging within core sparsex classes.
+* Training, script file, split into train and test set
+* Training, script file, get results on test set
+* Training, script file, maybe use command line arguments and --help.
 * Feature extraction, standardize/normalize features option after encoding and pooling.
 * Feature extraction, think about using inheritance or composition.
 * Feature extraction, change learn_dictionary method argument name from whitened_patches to something more generic.

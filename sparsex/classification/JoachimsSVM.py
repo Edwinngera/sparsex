@@ -21,6 +21,8 @@ class JoachimsSVM(object):
                              "../tests/data/classification_model_joachimssvm.pkl"))
     DEFAULT_TRAINED_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
                              "../tests/data/trained_classification_model_joachimssvm.pkl"))
+    STANDARD_TRAINED_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
+                             "../training/trained_classification_model_joachimssvm.pkl"))
 
     TEMP_TRAIN_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
                                                         "./joachims/temp/sparsex_temp_joachimssvm_train_file"))

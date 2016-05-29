@@ -13,6 +13,8 @@ class Spams(object):
                              "../tests/data/feature_extraction_model_spams.pkl"))
     DEFAULT_TRAINED_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
                                      "../tests/data/trained_feature_extraction_test_model_spams.pkl"))
+    STANDARD_TRAINED_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
+                                     "../training/trained_feature_extraction_model_spams.pkl"))
     
     TRAIN_DL_PARAMS = ['K', 'D', 'lambda1', 'numThread', 'batchsize', 'iter', 'verbose']
     ENCODING_PARAMS = ['L', 'lambda1', 'lambda2', 'mode', 'pos', 'ols',' numThreads',
