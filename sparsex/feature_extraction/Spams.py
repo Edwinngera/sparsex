@@ -16,22 +16,27 @@ class Spams(object):
     STANDARD_TRAINED_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
                                      "../training/trained_feature_extraction_model_spams.pkl"))
     
+    # train dl params
     TRAIN_DL_PARAMS = ['K', 'D', 'lambda1', 'numThread', 'batchsize', 'iter', 'verbose']
-    ENCODING_PARAMS = ['L', 'lambda1', 'lambda2', 'mode', 'pos', 'ols',' numThreads',
-                       'length_path', 'verbose', 'cholesky', 'return_reg_path']
     
-    DEFAULT_MODEL_PARAMS = {'K':10, 'lambda1':0.15, 'numThreads':-1, 'batchsize':400,
-                            'iter':10, 'verbose':False, 'return_reg_path':False, 'mode':spams.PENALTY}
+    # encoding params
+    LASSO_ENCODING_PARAMS = ['L', 'lambda1', 'lambda2', 'mode', 'pos', 'ols',' numThreads',
+                       'length_path', 'verbose', 'cholesky', 'return_reg_path']
+    OMP_ENCODING_PARAMS = ['L', 'eps', 'lambda1', 'return_reg_path', 'numThreads']
+    
+    # default params
+    DEFAULT_MODEL_PARAMS = {'K':10, 'lambda1':0.15, 'numThreads':-1, 'batchsize':400, 'iter':10,
+                            'verbose':False, 'return_reg_path':False, 'mode':spams.PENALTY,
+                            'encoding_algorithm':'omp'}
     
     def __init__(self, model_filename=None, **kwargs):
         if model_filename == None:
             self.params = Spams.DEFAULT_MODEL_PARAMS
-            self.params.update(kwargs)
-            self._extract_params()
         else:
             self.load_model(model_filename)
-            self.params.update(kwargs)
-            self._extract_params()
+            
+        self.params.update(kwargs)
+        self._extract_params()
 
 
     def _extract_params(self):
@@ -41,9 +46,18 @@ class Spams(object):
             if train_param_name in self.params:
                 self.train_params[train_param_name] = self.params[train_param_name]
                 
-        # extract decomposition params from global params
+        # choose the encoding params
+        # NOTE : choose encoding_function based on the algorithm chosen
+        if self.params['encoding_algorithm'] == 'lasso':
+            _encoding_params = Spams.LASSO_ENCODING_PARAMS
+            self.encoding_function = spams.lasso
+        else:
+            _encoding_params = Spams.OMP_ENCODING_PARAMS
+            self.encoding_function = spams.omp
+        
+        # extract the encoding params from the global params
         self.encoding_params = {}
-        for encoding_param_name in Spams.ENCODING_PARAMS:
+        for encoding_param_name in _encoding_params:
             if encoding_param_name in self.params:
                 self.encoding_params[encoding_param_name] = self.params[encoding_param_name]
 
@@ -104,8 +118,7 @@ class Spams(object):
         
         try:
             # get encoding, which is a sparse matrix
-            #encoding = spams.lasso(X, self.params['D'], **self.encoding_params)
-            encoding = spams.omp(X, self.params['D'], **self.encoding_params)
+            encoding = self.encoding_function(X, self.params['D'], **self.encoding_params)
             
             # convert the sparse matrix to a full matrix
             encoding = encoding.toarray()
