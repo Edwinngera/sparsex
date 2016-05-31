@@ -104,7 +104,8 @@ class Spams(object):
         
         try:
             # get encoding, which is a sparse matrix
-            encoding = spams.lasso(X, self.params['D'], **self.encoding_params)
+            #encoding = spams.lasso(X, self.params['D'], **self.encoding_params)
+            encoding = spams.omp(X, self.params['D'], **self.encoding_params)
             
             # convert the sparse matrix to a full matrix
             encoding = encoding.toarray()
