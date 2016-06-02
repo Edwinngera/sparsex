@@ -2,8 +2,6 @@ from ..customutils.customutils import is_perfect_square, isqrt
 from sklearn.feature_extraction.image import extract_patches_2d
 from scipy.misc import imresize
 import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib import cm
 
 class Preprocessing:
     def __init__(self):
@@ -138,9 +136,6 @@ class Preprocessing:
             # sigma = (1/(n-1)) * np.dot(A,A.T), where A = image_patches.T
             sigma = (1.0 / (number_patches - 1)) * np.dot(A, A.T)
 
-            # plt.imshow(sigma, cmap=cm.Greys)
-            # plt.show()
-
             # decompose and reconstruct
             u, s, v = np.linalg.svd(sigma, full_matrices=True)
 
@@ -157,6 +152,10 @@ class Preprocessing:
             # reshape whitened image_patches
             whitened_image_patches = whitened_image_patches.reshape(image_patches_shape)
 
+            # from matplotlib import pyplot as plt
+            # from matplotlib import cm
+            # plt.imshow(sigma, cmap=cm.Greys)
+            # plt.show()
             # subset = whitened_image_patches[np.random.rand(whitened_image_patches.shape[0]) > 0.97]
             # print "...........", subset.shape
             # plt.imshow(np.dot(whitened_image_patches.reshape(3249,-1).T, whitened_image_patches.reshape(3249,-1)), cmap=cm.Greys)
