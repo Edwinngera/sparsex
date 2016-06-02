@@ -31,7 +31,7 @@ def get_image_from_file(image_filename, dtype='float', is_grayscale=True):
         image_pil = Image.open(image_filename)
         image_pil = image_pil.convert('L')
         image_pil = np.asarray(image_pil)
-    else:    
+    else:
         image_pil = Image.open(image_filename)
     image = np.array(image_pil).astype(dtype)
     return image
@@ -39,7 +39,7 @@ def get_image_from_file(image_filename, dtype='float', is_grayscale=True):
 
 def resize_image_to_64x64(image_filename):
     image_pil_64x64 = Image.open(image_filename).resize((64,64))
-    new_image_filename = image_filename.split(".")[0] + "_64x64." + image_filename.split(".")[1] 
+    new_image_filename = image_filename.split(".")[0] + "_64x64." + image_filename.split(".")[1]
     image_pil_64x64.save(new_image_filename)
 
 ## json
@@ -75,7 +75,7 @@ def read_dictionary_from_h5_file(filename):
 def write_dictionary_to_pickle_file(filename, dictionary):
     with open(filename, "wb") as f:
         cPickle.dump(dictionary, f, protocol=cPickle.HIGHEST_PROTOCOL)
-        
+
 def read_dictionary_from_pickle_file(filename):
     return np.load(filename)
 
@@ -84,7 +84,7 @@ def read_string_from_file(filename):
     with open(filename, "r") as f:
         file_string = f.read()
     return file_string
-    
+
 def write_string_to_file(filename, file_string):
     with open(filename, "w") as f:
         f.write(file_string)
@@ -93,3 +93,19 @@ def write_string_to_file(filename, file_string):
 def get_current_string_timestamp(datetime_format="%Y-%m-%d_%H:%M:%S.%f"):
     string_timestamp = datetime.datetime.fromtimestamp(time.time()).strftime(datetime_format)
     return string_timestamp
+
+# math
+def isqrt(n):
+    x = n
+    y = (x + 1) // 2
+    while y < x:
+        x = y
+        y = (x + n // x) // 2
+    return x
+
+def is_perfect_square(number):
+    assert isinstance(number, int), "number must be integer to determine if_perfect_square, instread {0} is of type {1}".format(number, type(number))
+    if isqrt(number)**2 == number:
+        return True
+    else:
+        return False
