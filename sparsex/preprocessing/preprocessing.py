@@ -39,7 +39,7 @@ class Preprocessing:
 
 
     def extract_patches(self, image_array, patch_size=(8,8), multiple_images=False):
-        """Returns ((n-p+1)*(m-p+1),p,p) pathces from (n,m) image and (p,p) patch for single image."""
+        """Returns ((n-p+1)*(m-p+1),p**2) patches from (n,m) image and (p,p) patch for single image."""
 
         # validate patch_size
         assert patch_size[0] == patch_size[1], "patch_size is {0} instead of being square".format(patch_size)
@@ -60,75 +60,74 @@ class Preprocessing:
             # for every image in the array, resize it and populate the empty resized array
             for image_index in range(number_images):
                 patches[image_index] = extract_patches_2d(image_array[image_index], patch_size)
+                
+            # flatten the patches to standardized shape (number_images, number_patches, patch_side**2)
+            patches = patches.reshape(number_images, number_patches, -1)
 
         else:
             # expecting shape (x, y)
             assert image_array.ndim == 2, "image_array.ndim is {0} instead of 2".format(image_array.ndim)
 
+            number_patches = (image_array.shape[1] - patch_size[0] + 1)**2
+
             # extract patches for single image
             patches = extract_patches_2d(image_array, patch_size)
+            
+            # flatten the patches to (number_patches, patch_side ** 2)
+            patches = patches.reshape(number_patches, -1)
 
-        # returning shape (number_images, number_patches, patch_side, patch_side) for multiple_images
-        # returning shape (number_patches, patch_side, patch_side) for single image
+        # returning shape (number_images, number_patches, patch_side ** 2) for multiple_images
+        # returning shape (number_patches, patch_side ** 2) for single image
         return patches
 
 
     def get_contrast_normalized_patches(self, patches, multiple_images=False):
-        """Returns (n,p,p) normalized_patches from (n,p,p) patches for single image."""
+        """Returns (n,p**2) normalized_patches from (n,p**2) patches for single image."""
 
         # From [Zim15], While implementing contrast normalization, we subtract the pixel mean of each patch after extraction
         # and divide by the standard deviation of all it's pixels. Before the division, we add a small value alpha to the pixel variance
         # in order to prevent potential errors due to division by zero.
 
         if multiple_images:
-            # expecting (number_images, number_patches, patch_side, patch_side)
-            assert patches.ndim == 4, "patches.ndim is {0} instead of 4".format(patches.ndim)
+            # expecting (number_images, number_patches, patch_side**2)
+            assert patches.ndim == 3, "patches.ndim is {0} instead of 3".format(patches.ndim)
 
             # store shapes
-            original_patches_shape = patches.shape
             number_images = patches.shape[0]
             number_patches = patches.shape[1]
 
             # reshape based on [Zim15] i.e. (number_images * number_patches, p**2)
             patches = patches.reshape(number_images * number_patches, -1)
+            
+            # normalize and overwrite patches onto the original patches
+            patches = (patches - patches.mean(axis=1)[:, np.newaxis]) / (np.sqrt(patches.var(axis=1))[:, np.newaxis] + 0.01)
+            
+            # reshape into original shape i.e. (number_images, number_patches, p**2)
+            patches = patches.reshape(number_images, number_patches, -1)
 
         else:
-            # expecting (number_patches, patch_side, patch_side)
-            assert patches.ndim == 3, "patches.ndim is {0} instead of 3".format(patches.ndim)
+            # expecting (number_patches, patch_side**2)
+            assert patches.ndim == 2, "patches.ndim is {0} instead of 2".format(patches.ndim)
 
-            # store shapes
-            original_patches_shape = patches.shape
-            number_patches = patches.shape[0]
+            # normalize and overwrite patches onto the original patches
+            # shape is already consistent
+            patches = (patches - patches.mean(axis=1)[:, np.newaxis]) / (np.sqrt(patches.var(axis=1))[:, np.newaxis] + 0.01)
 
-            # reshape based on [Zim15] i.e. (number_images * number_patches, p**2)
-            patches = patches.reshape((number_patches, -1))
-
-        # overwrite normalized patches onto the original patches
-        patches = (patches - patches.mean(axis=1)[:, np.newaxis]) / (np.sqrt(patches.var(axis=1))[:, np.newaxis] + 0.01)
-
-        # reshape into original shape
-        patches = patches.reshape(original_patches_shape)
-
-        # returning shape (number_images, number_patches, patch_side, patch_side) for multiple_images
-        # returning shape (number_patches, patch_side, patch_side) for single image
+        # returning shape (number_images, number_patches, patch_side**2) for multiple_images
+        # returning shape (number_patches, patch_side**2) for single image
         return patches
 
 
-    ## Pipeline - Step 3
     def get_whitened_patches(self, patches, multiple_images=False):
-        """Return (n,p,p) whitened_patches from (n,p,p) (normalized) patches for single image."""
+        """Return (n,p**2) whitened_patches from (n,p**2) patches for single image."""
 
         def whiten_image_patches(image_patches):
-            # expecting (number_patches, patch_side, patch_side)
-            assert image_patches.ndim == 3, "image_patches.ndim is {0} instead of 3".format(image_patches.ndim)
+            # expecting (number_patches, patch_side**2)
+            assert image_patches.ndim == 2, "image_patches.ndim is {0} instead of 2".format(image_patches.ndim)
 
             # validating number_patches > 1
-            image_patches_shape = image_patches.shape
-            number_patches = image_patches.shape[1]
+            number_patches = image_patches.shape[0]
             assert number_patches > 1, "number_patches is {0} instead of being greater than 1, otherwise whitening is not possible".format(number_patches)
-
-            # flatten individual image_patches such that rows = no. of image_patches, columns = pixel values
-            image_patches = image_patches.reshape((image_patches.shape[0], -1))
 
             # Transpose to get matrix A
             A = image_patches.T
@@ -149,23 +148,22 @@ class Preprocessing:
             # Transpose to get back normalized image_patches
             whitened_image_patches = whitened_A.T
 
-            # reshape whitened image_patches
-            whitened_image_patches = whitened_image_patches.reshape(image_patches_shape)
-
             # from matplotlib import pyplot as plt
             # from matplotlib import cm
             # plt.imshow(sigma, cmap=cm.Greys)
             # plt.show()
-            # subset = whitened_image_patches[np.random.rand(whitened_image_patches.shape[0]) > 0.97]
+            # subset = whitened_image_patches[np.random.rand(number_patches) > 0.97]
             # print "...........", subset.shape
             # plt.imshow(np.dot(whitened_image_patches.reshape(3249,-1).T, whitened_image_patches.reshape(3249,-1)), cmap=cm.Greys)
             # plt.show()
 
+            # returning shape (number_patches, patch_side**2) for single image
             return whitened_image_patches
 
         # Whitenening is done per image i.e. decorrelating all the patches for one image
         if multiple_images:
-            assert patches.ndim == 4, "patches.ndim is {0} instead of 4".format(patches.ndim)
+            # expecting (number_images, number_patches, patch_side**2)
+            assert patches.ndim == 3, "patches.ndim is {0} instead of 3".format(patches.ndim)
 
             # store shapes
             number_images = patches.shape[0]
@@ -175,22 +173,21 @@ class Preprocessing:
                 patches[image_index] = whiten_image_patches(patches[image_index])
 
         else:
-            # expecting (number_patches, patch_side, patch_side)
-            assert patches.ndim == 3, "patches.ndim is {0} instead of 3".format(patches.ndim)
+            # expecting (number_patches, patch_side**2)
+            assert patches.ndim == 2, "patches.ndim is {0} instead of 2".format(patches.ndim)
 
             # whiten the patches
             patches = whiten_image_patches(patches)
 
-        # returning shape (number_images, number_patches, patch_side, patch_side) for multiple_images
-        # returning shape (number_patches, patch_side, patch_side) for single image
+        # returning shape (number_images, number_patches, patch_side**2) for multiple_images
+        # returning shape (number_patches, patch_side**2) for single image
         return patches
 
 
-    ## Pipeline Combined
-    def get_whitened_patches_from_image_array(self, image_array):
+    def get_whitened_patches_from_image_array(self, image_array, image_size=(64,64), patch_size=(8,8), multiple_images=False):
         """Returns ((n'-p+1)*(m'-p+1),p,p) whitened_patches from (n,m) image, (n',m') imsize, (p,p) patch."""
-        resized_image_array = self.get_resized_image(image_array)
-        patches = self.extract_patches(resized_image_array)
-        normalized_patches = self.get_contrast_normalized_patches(patches)
-        whitened_patches = self.get_whitened_patches(normalized_patches)
+        resized_image_array = self.get_resized_image(image_array, image_size, multiple_images)
+        patches = self.extract_patches(resized_image_array, patch_size, multiple_images)
+        normalized_patches = self.get_contrast_normalized_patches(patches, multiple_images)
+        whitened_patches = self.get_whitened_patches(normalized_patches, multiple_images)
         return whitened_patches

@@ -21,8 +21,8 @@ def test_extract_patches(image_array):
     resized_image_array = preprocessing.get_resized_image(image_array, image_size=(64,64), multiple_images=True)
     patches = preprocessing.extract_patches(resized_image_array, patch_size=(8,8), multiple_images=True)
 
-    # (number_images, number_patches, patch_side, patch_side)
-    assert patches.ndim == 4, "test_extract_patches: Failed.\patches.ndim is {0} instead of 4".format(patches.ndim)
+    # (number_images, number_patches, patch_side**2)
+    assert patches.ndim == 3, "test_extract_patches: Failed.\patches.ndim is {0} instead of 3".format(patches.ndim)
     logging.debug("patches.shape: {0}".format(patches.shape))
     logging.info("test_extract_patches: Success")
 
@@ -33,8 +33,8 @@ def test_contrast_normalization(image_array):
     patches = preprocessing.extract_patches(resized_image_array, patch_size=(8,8), multiple_images=True)
     normalized_patches = preprocessing.get_contrast_normalized_patches(patches, multiple_images=True)
 
-    # (number_images, number_patches, patch_side, patch_side)
-    assert normalized_patches.ndim == 4, "test_contrast_normalization: Failed.\normalized_patches.ndim is {0} instead of 4".format(normalized_patches.ndim)
+    # (number_images, number_patches, patch_side**2)
+    assert normalized_patches.ndim == 3, "test_contrast_normalization: Failed.\normalized_patches.ndim is {0} instead of 3".format(normalized_patches.ndim)
     logging.debug("normalized_patches.shape: {0}".format(normalized_patches.shape))
     logging.debug("normalized_patch.mean(): {0}".format(normalized_patches[0][0].mean()))
     logging.debug("normalized_patch.var(): {0}".format(normalized_patches[0][0].var()))
@@ -48,10 +48,23 @@ def test_whitening(image_array):
     normalized_patches = preprocessing.get_contrast_normalized_patches(patches, multiple_images=True)
     whitened_patches = preprocessing.get_whitened_patches(normalized_patches, multiple_images=True)
 
-    # (number_images, number_patches, patch_side, patch_side)
-    assert whitened_patches.ndim == 4, "test_whitening: Failed.\whitened_patches.ndim is {0} instead of 4".format(whitened_patches.ndim)
+    # (number_images, number_patches, patch_side**2)
+    assert whitened_patches.ndim == 3, "test_whitening: Failed.\whitened_patches.ndim is {0} instead of 3".format(whitened_patches.ndim)
     logging.debug("whitened_patches.shape: {0}".format(whitened_patches.shape))
     logging.info("test_whitening: Success")
+
+
+def test_get_whitened_patches_from_image_array(image_array):
+    preprocessing = Preprocessing()
+    whitened_patches = preprocessing.get_whitened_patches_from_image_array(image_array=image_array,
+                                                                           image_size=(64,64),
+                                                                           patch_size=(8,8),
+                                                                           multiple_images=True)
+    
+    # (number_images, number_patches, patch_side**2)
+    assert whitened_patches.ndim == 3, "test_get_whitened_patches_from_image_array: Failed.\whitened_patches.ndim is {0} instead of 3".format(whitened_patches.ndim)
+    logging.debug("whitened_patches.shape: {0}".format(whitened_patches.shape))
+    logging.info("test_get_whitened_patches_from_image_array: Success")
 
 
 if __name__ == "__main__":
@@ -79,3 +92,6 @@ if __name__ == "__main__":
 
     # test whitening
     test_whitening(image_array)
+    
+    # test whitened patches from image_array
+    test_get_whitened_patches_from_image_array(image_array)
