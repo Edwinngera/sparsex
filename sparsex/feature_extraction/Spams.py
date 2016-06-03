@@ -1,5 +1,5 @@
 from ..tests.preprocessing_test import test_whitening
-from ..customutils.customutils import write_dictionary_to_pickle_file, read_dictionary_from_pickle_file
+from ..customutils.customutils import write_dictionary_to_pickle_file, read_dictionary_from_pickle_file, is_perfect_square, isqrt
 from skimage.util.shape import view_as_windows
 import spams
 import numpy as np
@@ -21,7 +21,7 @@ class Spams(object):
     
     # encoding params
     LASSO_ENCODING_PARAMS = ['L', 'lambda1', 'lambda2', 'mode', 'pos', 'ols',' numThreads',
-                       'length_path', 'verbose', 'cholesky', 'return_reg_path']
+                             'length_path', 'verbose', 'cholesky', 'return_reg_path']
     OMP_ENCODING_PARAMS = ['L', 'eps', 'lambda1', 'return_reg_path', 'numThreads']
     
     # default params
@@ -70,15 +70,31 @@ class Spams(object):
         self.params = read_dictionary_from_pickle_file(filename)
 
 
-    def learn_dictionary(self, whitened_patches):
-        # flattening whitened_patches to 2 dimensions
-        if whitened_patches.ndim == 3:
-            whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
-        assert whitened_patches.ndim == 2, "Whitened patches ndim is %d instead of 2" %whitened_patches.ndim
+    def learn_dictionary(self, patches, multiple_images=False):
+        """Returns None from (n,p**2) patches for a single image."""
+        
+        # store original shape
+        original_patches_shape = patches.shape
+        
+        if multiple_images:
+            # expecting (number_images, number_patches, patch_side**2)
+            assert patches.ndim == 3, "patches.ndim is {0} instead of 3".format(patches.ndim)
             
-        # spams.trainDL excepts X to be (p**2,n) with n patches and p**2 features,
+            # store shapes
+            number_images = original_patches_shape[0]
+            number_patches = original_patches_shape[1]
+            
+            # reshape patches, dictionary is learnt on each patch so it does not matter which image it comes from
+            # therefore, flatten the array to (number_images * number_patches, patch_side**2)
+            patches = patches.reshape(number_images * number_patches, -1)
+            
+        else:
+            # expecting (number_patches, patch_side**2)
+            assert patches.ndim == 2, "patches.ndim is {0} instead of 2".format(patches.ndim)
+            
+        # spams.trainDL expects X to be (p**2,n) with n patches and p**2 features,
         # which is opposite to the convention used in sparsex. Therefore we transpose it.
-        X = whitened_patches.T
+        X = patches.T
 
         # spams.trainDL expects arrays to be in fortran order. Rememeber to reconvert it to 'C' order when
         # in the get_dictionary mehtod.
@@ -91,9 +107,22 @@ class Spams(object):
         
         # update params
         self._extract_params()
+        
+        if multiple_images:
+            # precautionary reshape back to original shape, since its possible the patches referenced here may be used
+            # elsewhere, therefore they will be reshaped due to the manipulations made above in multple images.
+            # Although X has its flags changed, patches retains its original flags.
+            patches = patches.reshape(original_patches_shape)
+        else:
+            # no reshaping required
+            pass
+        
+        # return None
+        return
 
 
     def get_dictionary(self):
+        """Returns (k, p**2) dictionary with k dictionary elements and p**2 features each."""
         # transpose D from (p**2, k) to (k, p**2) to adhere to sparsex shape convention.
         # CAUTION!!! array.T seems to be changing order from C to F and vice versa.
         D = self.params['D'].T
@@ -102,15 +131,30 @@ class Spams(object):
         return np.ascontiguousarray(D)
         
 
-    def get_sparse_features(self, whitened_patches):
-        # flattening whitened_patches to 2 dimensions
-        if whitened_patches.ndim == 3:
-            whitened_patches = whitened_patches.reshape((whitened_patches.shape[0], -1))
-        assert whitened_patches.ndim == 2, "Whitened patches ndim is %d instead of 2" %whitened_patches.ndim
+    def get_sparse_features(self, patches, multiple_images=False):
+        """Returns (n,k) encoding from (n,p**2) patches and (k,p**2) internal dictionary for single image."""
+        
+        # store original shape
+        original_patches_shape = patches.shape
+        
+        if multiple_images:
+            # expecting (number_images, number_patches, patch_side**2)
+            assert patches.ndim == 3, "patches.ndim is {0} instead of 3".format(patches.ndim)
+        
+            # store shapes
+            number_images = original_patches_shape[0]
+            number_patches = original_patches_shape[1]
             
-        # spams.trainDL excepts X to be (p**2,n) with n patches and p**2 features,
+            # reshape patches, sparse encoding is done on each patch and does not depend on image.
+            patches = patches.reshape(number_images * number_patches, -1)
+        
+        else:
+            # expecting (number_patches, patch_side**2)
+            assert patches.ndim == 2, "patches.ndim is {0} instead of 2".format(patches.ndim)
+
+        # spams excepts X to be (p**2,n) with n patches and p**2 features,
         # which is opposite to the convention used in sparsex. Therefore we transpose it.
-        X = whitened_patches.T
+        X = patches.T
 
         # spams.trainDL expects arrays to be in fortran order. Rememeber to reconvert it to 'C' order when
         # in the get_dictionary mehtod.
@@ -126,9 +170,6 @@ class Spams(object):
             # tranpose encoding (k,n) to (n,k) to adhere to sparsex shape convention.
             encoding = encoding.T
             
-            # convert encoding to contiguous array from fortran array
-            return np.ascontiguousarray(encoding)
-            
         except KeyError:
             raise KeyError("It is possible feature extraction dictionary has not yet been learnt for this model. " \
                          + "Train the feature extraction model at least once to prevent this error.")
@@ -136,54 +177,161 @@ class Spams(object):
             raise ValueError(e.message + "\n" \
                 + "Sparsex Note : It is possible the feature extraction dictionary has not yet been learnt for this model. " \
                 + "Train the feature extraction model at least once to prevent this error.")
+            
+        finally:
+            if multiple_images:
+                # precautionary reshape back to original shape, since its possible the patches referenced here may be used
+                # elsewhere, therefore they will be reshaped due to the manipulations made above in multple images.
+                # Although X has its flags changed, patches retains its original flags.
+                patches = patches.reshape(original_patches_shape)
+                
+                # reshape encoding to (number_images, number_patches, k)
+                encoding = encoding.reshape(number_images, number_patches, -1)
+                
+            else:
+                # no reshaping required
+                pass
+            
+            # convert encoding to contiguous array from fortran array
+            # returning shape (number_images, number_patches, k) for multiple images
+            # returning shape (number_patches, k) for single image
+            return np.ascontiguousarray(encoding)
 
 
-    def get_sign_split_features(self, sparse_features):
-        n_samples, n_components = sparse_features.shape
-        sign_split_features = np.empty((n_samples, 2 * n_components))
-        sign_split_features[:, :n_components] = np.maximum(sparse_features, 0)
-        sign_split_features[:, n_components:] = -np.minimum(sparse_features, 0)
+    def get_sign_split_features(self, encoding, multiple_images=False):
+        """Returns (n,2k) features from (n,k) encoding for single image."""
+        
+        original_encoding_shape = encoding.shape
+        
+        if multiple_images:
+            # expecting (number_images, number_patches, k)
+            assert encoding.ndim == 3, "encoding.ndim is {0} instead of 3".format(encoding.ndim)
+        
+            # store shapes
+            number_images = original_encoding_shape[0]
+            number_patches = original_encoding_shape[1]
+            number_samples = number_images * number_patches
+            number_features = original_encoding_shape[2]
+            
+            # reshape encoding, sign split is done on each patch and does not depend on image.
+            encoding = encoding.reshape(number_images * number_patches, -1)
+        
+        else:
+            # expecting (number_patches, k)
+            assert encoding.ndim == 2, "encoding.ndim is {0} instead of 2".format(encoding.ndim)
+            
+            # store shapes
+            number_samples = original_encoding_shape[0]
+            number_features = original_encoding_shape[1]
+            
+        sign_split_features = np.empty((number_samples, 2 * number_features))
+        sign_split_features[:, :number_features] = np.maximum(encoding, 0)
+        sign_split_features[:, number_features:] = -np.minimum(encoding, 0)
+        
+        if multiple_images:
+            # precautionary reshape of encoding to original shape in case it may be used elsewhere
+            encoding = encoding.reshape(original_encoding_shape)
+            
+            # reshape sign_split_features to (number_images, number_patches, 2k)
+            sign_split_features = sign_split_features.reshape(number_images, number_patches, -1)
+        
+        else:
+            # no reshaping required
+            pass
+            
+        # returning shape (number_images, number_patches, 2*k) for multiple images.
+        # returning shape (number_patches, 2*k) for single image.
         return sign_split_features
 
 
-    def get_pooled_features(self, input_feature_map, filter_size):
-        # assuming square filters and images
-        filter_side = filter_size[0]
+    def get_pooled_features(self, encoding, filter_size, multiple_images=False):
+        """Returns (n/s**2,f) pooled features from (n,f) features and (s,s) filter size for single image."""
+        
+        def pool_features(input_feature_map):
+            # expecting shape (sqrt_number_patches, sqrt_number_patches, number_features)
+            assert input_feature_map.ndim == 3, "input_feature_map.ndim is {0} instead of 3".format(input_feature_map.ndim)
+        
+            # get windows (57,57,20) to (3,3,1,19,19,20)
+            input_feature_map_windows = view_as_windows(input_feature_map,
+                                                        window_shape=(filter_size[0], filter_size[1], input_feature_map.shape[-1]),
+                                                        step=filter_size[0])
 
-        # reshaping incoming features from 2d to 3d i.e. (3249,20) to (57,57,20)
-        input_feature_map_shape = input_feature_map.shape
-        if input_feature_map.ndim == 2:
-            input_feature_map_side = int(np.sqrt(input_feature_map.shape[0]))
-            input_feature_map = input_feature_map.reshape((input_feature_map_side, input_feature_map_side, input_feature_map_shape[-1]))
-        assert input_feature_map.ndim == 3, "Input features dimension is %d instead of 3" %input_feature_map.ndim
+            # reshape windows (3,3,1,19,19,20) to (3**2, 19**2, 20) == (9, 361, 20)
+            input_feature_map_windows = input_feature_map_windows.reshape((input_feature_map_windows.shape[0]**2,
+                                                                           filter_size[0]**2,
+                                                                           input_feature_map.shape[-1]))
 
-        # get windows (57,57,20) to (3,3,1,19,19,20)
-        input_feature_map_windows = view_as_windows(input_feature_map,
-                                                    window_shape=(filter_size[0], filter_size[1], input_feature_map.shape[-1]),
-                                                    step=filter_size[0])
+            # calculate norms (9, 361, 20) to (9,361)
+            input_feature_map_window_norms = np.linalg.norm(input_feature_map_windows, ord=2, axis=-1)
 
-        # reshape windows (3,3,1,19,19,20) to (3**2, 19**2, 20) == (9, 361, 20)
-        input_feature_map_windows = input_feature_map_windows.reshape((input_feature_map_windows.shape[0]**2,
-                                                                       filter_size[0]**2,
-                                                                       input_feature_map.shape[-1]))
+            # calculate indexes of max norms per window (9,361) to (9,1). One max index per window.
+            max_norm_indexes = np.argmax(input_feature_map_window_norms, axis=-1)
 
-        # calculate norms (9, 361, 20) to (9,361)
-        input_feature_map_window_norms = np.linalg.norm(input_feature_map_windows, ord=2, axis=-1)
+            # max pooled features are the features that have max norm indexes (9, 361, 20) to (9,20). One max index per window.
+            pooled_feature_map = input_feature_map_windows[np.arange(input_feature_map_windows.shape[0]), max_norm_indexes]
 
-        # calculate indexes of max norms per window (9,361) to (9,1). One max index per window.
-        max_norm_indexes = np.argmax(input_feature_map_window_norms, axis=-1)
-
-        # max pooled features are the features that have max norm indexes (9, 361, 20) to (9,20). One max index per window.
-        pooled_features = input_feature_map_windows[np.arange(input_feature_map_windows.shape[0]), max_norm_indexes]
-
-        # return pooled feature map
-        return pooled_features
+            # return pooled feature map
+            return pooled_feature_map
         
         
-    def get_pooled_features_from_whitened_patches(self, whitened_patches, filter_size):
-        sparse_features = self.get_sparse_features(whitened_patches)
-        sign_split_features = self.get_sign_split_features(sparse_features)
-        pooled_features = self.get_pooled_features(sign_split_features, filter_size)
+        # validate filter_size
+        assert filter_size[0] == filter_size[1], "filter_size is {0} instead of being square".format(filter_size)
+        
+        # store shape
+        original_encoding_shape = encoding.shape
+        
+        if multiple_images:
+            # expecting (number_images, number_patches, number_features)
+            assert encoding.ndim == 3, "encoding.ndim is {0} instead of 3".format(encoding.ndim)
+        
+            # store shapes
+            number_images, number_patches, number_features = original_encoding_shape
+            
+            # validate number_patches to be perfect square so that it can be reshaped into a square map/window
+            assert is_perfect_square(number_patches), "number_patches is {0} and is not a perfect_square".format(number_patches)
+
+            # calculate sqrt of number_patches
+            sqrt_number_patches = isqrt(number_patches)
+            
+            # reshape encoding to (number_images, sqrt_number_patches, sqrt_number_patches, number_features)
+            encoding_map = encoding.reshape(number_images, sqrt_number_patches, sqrt_number_patches, number_features)
+            
+            # create empty pooled features to populate all the feature maps for each image
+            # shape (number_images, number_patches/filter_side**2, number_features)
+            pooled_features = np.empty((number_images, number_patches / filter_size[0]**2, number_features), dtype=float)
+
+            # for each image, get pooled features from the encoding/feature_map
+            for image_index in range(number_images):
+                pooled_features[image_index] = pool_features(encoding_map[image_index])
+            
+        else:
+            # expecting (number_patches, number_features)
+            assert encoding.ndim == 2, "encoding.ndim is {0} instead of 2".format(encoding.ndim)
+            
+            number_patches, number_features = original_encoding_shape
+            
+            # validate number_patches to be perfect square so that it can be reshaped into a square map/window
+            assert is_perfect_square(number_patches), "number_patches is {0} and is not a perfect_square".format(number_patches)
+
+            # calculate sqrt of number_patches
+            sqrt_number_patches = isqrt(number_patches)
+            
+            # reshape encoding to (sqrt_number_patches, sqrt_number_patches, number_features)
+            encoding_map = encoding.reshape(sqrt_number_patches, sqrt_number_patches, number_features)
+            
+            # get pooled features
+            pooled_features = pool_features(encoding_map)
+        
+        # returning shape (number_images, number_patches/filter_side**2, number_features) for multiple images
+        # returning shape (number_patches/filter_side**2, number_features) for single image
+        return pooled_features        
+        
+        
+    def get_pooled_features_from_whitened_patches(self, patches, filter_size, multiple_images=False):
+        """Returns (n/s**2,f) pooled features from (n,p**2) patches and (s,s) filter size and (k,p**2) dictionary for a single image."""
+        sparse_features = self.get_sparse_features(patches, multiple_images)
+        sign_split_features = self.get_sign_split_features(sparse_features, multiple_images)
+        pooled_features = self.get_pooled_features(sign_split_features, filter_size, multiple_images)
         return pooled_features
 
 
@@ -216,7 +364,7 @@ if __name__ == "__main__":
     sign_split_features = sparse_coding.get_sign_split_features(sparse_features)
 
     # get pooled features
-    pooled_features = sparse_coding.get_pooled_features(input_feature_map=sign_split_features, filter_size=(19,19))
+    pooled_features = sparse_coding.get_pooled_features(sign_split_features, filter_size=(19,19))
 
     print "dictionary Shape :"
     print sparse_coding.get_dictionary().shape

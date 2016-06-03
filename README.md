@@ -56,7 +56,6 @@ Sparsex also uses third-party software libraries and their respective license te
 * Pipeline, add "checksum" functionality in request and response messages for data (image / image_array) verfication.
 * Pipeline, make sure all/most data types for the data bytes are handled.
 * Pipeline, Add a constant "image_size" as an attribute for the pipeline as a whole so that there is one constant image size for the entirety of the pipeline from training to classification.
-* Pipeline, come up with standardized shapes for preprocessing, feature_extraction and classification. i.e. whether the incoming image arrays, patches or features are flattened or 2-d or 3-d etc. Take into consideration that some classes/functions are more time consuming than others. 
 * Training, toggle between TrainDL and TrainDL_memory.
 * Training, script file. Add as entry_points-console script with default config.
 * Training, config file, maybe use command line like arguments for configrations. For example -D for user provided dictionary.
