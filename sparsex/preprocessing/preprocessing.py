@@ -1,4 +1,3 @@
-from ..customutils.customutils import is_perfect_square, isqrt
 from sklearn.feature_extraction.image import extract_patches_2d
 from scipy.misc import imresize
 import numpy as np

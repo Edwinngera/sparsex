@@ -1,4 +1,4 @@
-from ..customutils.customutils import save_image, get_image_from_file, get_giant_patch_image, resize_image_to_64x64
+from ..customutils.customutils import get_image_from_file
 from ..preprocessing.preprocessing import Preprocessing
 from PIL import Image
 import numpy as np
