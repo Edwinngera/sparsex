@@ -9,9 +9,9 @@ THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 def test_learn_dictionary(image_array, library_name=None, model_filename=None):
     preprocessing = Preprocessing()
-    whitened_patches = preprocessing.get_whitened_patches_from_image_array(image_array,multiple_images=True)
+    patches = preprocessing.pipeline(image_array, image_size=(64,64), patch_size=(8,8), normalize=True, whiten=True, multiple_images=True)
     spams = Spams()
-    spams.learn_dictionary(whitened_patches, multiple_images=True)
+    spams.learn_dictionary(patches, multiple_images=True)
     spams_dictionary = spams.get_dictionary()
     
     # (k, p**2)
@@ -22,10 +22,10 @@ def test_learn_dictionary(image_array, library_name=None, model_filename=None):
 
 def test_get_sparse_encoding(image_array, library_name=None, model_filename=None):
     preprocessing = Preprocessing()
-    whitened_patches = preprocessing.get_whitened_patches_from_image_array(image_array,multiple_images=True)
+    patches = preprocessing.pipeline(image_array, image_size=(64,64), patch_size=(8,8), normalize=True, whiten=True, multiple_images=True)
     spams = Spams()
-    spams.learn_dictionary(whitened_patches, multiple_images=True)
-    sparse_encoding = spams.get_sparse_features(whitened_patches, multiple_images=True)
+    spams.learn_dictionary(patches, multiple_images=True)
+    sparse_encoding = spams.get_sparse_features(patches, multiple_images=True)
     
     # (number_images, number_patches, k)
     assert sparse_encoding.ndim == 3, "test_get_sparse_encoding: Failed.\nsparse_encoding.ndim is {0} instead of 3".format(sparse_encoding.ndim)
@@ -35,10 +35,10 @@ def test_get_sparse_encoding(image_array, library_name=None, model_filename=None
     
 def test_get_sign_split_features(image_array, library_name=None, model_filename=None):
     preprocessing = Preprocessing()
-    whitened_patches = preprocessing.get_whitened_patches_from_image_array(image_array,multiple_images=True)
+    patches = preprocessing.pipeline(image_array, image_size=(64,64), patch_size=(8,8), normalize=True, whiten=True, multiple_images=True)
     spams = Spams()
-    spams.learn_dictionary(whitened_patches, multiple_images=True)
-    sparse_encoding = spams.get_sparse_features(whitened_patches, multiple_images=True)
+    spams.learn_dictionary(patches, multiple_images=True)
+    sparse_encoding = spams.get_sparse_features(patches, multiple_images=True)
     sparse_sign_split_encoding = spams.get_sign_split_features(sparse_encoding, multiple_images=True)
     
     # (number_images, number_patches, 2k)
@@ -49,10 +49,10 @@ def test_get_sign_split_features(image_array, library_name=None, model_filename=
 
 def test_get_pooled_features(library_name=None, model_filename=None):
     preprocessing = Preprocessing()
-    whitened_patches = preprocessing.get_whitened_patches_from_image_array(image_array,multiple_images=True)
+    patches = preprocessing.pipeline(image_array, image_size=(64,64), patch_size=(8,8), normalize=True, whiten=True, multiple_images=True)
     spams = Spams()
-    spams.learn_dictionary(whitened_patches, multiple_images=True)
-    sparse_encoding = spams.get_sparse_features(whitened_patches, multiple_images=True)
+    spams.learn_dictionary(patches, multiple_images=True)
+    sparse_encoding = spams.get_sparse_features(patches, multiple_images=True)
     sparse_sign_split_encoding = spams.get_sign_split_features(sparse_encoding, multiple_images=True)
     pooled_features = spams.get_pooled_features(sparse_sign_split_encoding, filter_size=(19,19), multiple_images=True)
     
@@ -62,17 +62,17 @@ def test_get_pooled_features(library_name=None, model_filename=None):
     logging.info("test_get_pooled_features: Success")
 
 
-def test_get_pooled_features_from_whitened_patches(library_name=None, model_filename=None):
+def test_pipeline(library_name=None, model_filename=None):
     preprocessing = Preprocessing()
-    whitened_patches = preprocessing.get_whitened_patches_from_image_array(image_array,multiple_images=True)
+    patches = preprocessing.pipeline(image_array, image_size=(64,64), patch_size=(8,8), normalize=True, whiten=True, multiple_images=True)
     spams = Spams()
-    spams.learn_dictionary(whitened_patches, multiple_images=True)
-    pooled_features = spams.get_pooled_features_from_whitened_patches(whitened_patches, filter_size=(19,19), multiple_images=True)
+    spams.learn_dictionary(patches, multiple_images=True)
+    features = spams.pipeline(patches, sign_split=False, pooling=True, pooling_size=(19,19), multiple_images=True)
 
     # (number_images, number_patches/filter_side**2, 2k)
-    assert pooled_features.ndim == 3, "test_get_pooled_features: Failed.\npooled_features.ndim is {0} instead of 3".format(pooled_features.ndim)
-    logging.debug("pooled_features.shape: {0}".format(pooled_features.shape))
-    logging.info("test_get_pooled_features: Success")
+    assert features.ndim == 3, "test_pipeline: Failed.\nfeatures.ndim is {0} instead of 3".format(features.ndim)
+    logging.debug("features.shape: {0}".format(features.shape))
+    logging.info("test_pipeline: Success")
 
 
 
@@ -102,7 +102,7 @@ if __name__ == "__main__":
     # test get pooled features
     test_get_pooled_features(image_array)
     
-    # test get pooled features from whitened patches
-    test_get_pooled_features_from_whitened_patches(image_array)
+    # test pipeline
+    test_pipeline(image_array)
     
     

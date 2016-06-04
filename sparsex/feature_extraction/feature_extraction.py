@@ -27,31 +27,26 @@ class SparseCoding(object):
     def load_model(self, filename):
         return self.library.load_model(filename)
 
-    def learn_dictionary(self, whitened_patches):
-        """Returns None from (n,p,p) or (n,p**2) whitened_patches."""
-        return self.library.learn_dictionary(whitened_patches)
+    def learn_dictionary(self, patches, multiple_images=False):
+        """Returns None from (n,p**2) patches for single image."""
+        return self.library.learn_dictionary(patches, multiple_images)
 
     def get_dictionary(self):
         """Returns (k,p**2) dictionary"""
         return self.library.get_dictionary()
 
-    def get_sparse_features(self, whitened_patches):
-        """Returns (n,k) encoding from (n,p,p) or (n,p**2) whitened_patches and (k,p**2) internal dictionary."""
-        return self.library.get_sparse_features(whitened_patches)
+    def get_sparse_features(self, patches, multiple_images=False):
+        """Returns (n,k) encoding from (n,p**2) patches and (k,p**2) internal dictionary for single image."""
+        return self.library.get_sparse_features(patches, multiple_images)
 
-    def get_sign_split_features(self, sparse_features):
+    def get_sign_split_features(self, sparse_features, multiple_images=False):
         """Returns (n,2*k) feature_vector from (n,k) feature_vector."""
-        return self.library.get_sign_split_features(sparse_features)
+        return self.library.get_sign_split_features(sparse_features, multiple_images)
 
-    def get_pooled_features(self, input_feature_map, filter_size=(19,19)):
-        """Returns ((m**2/s**2),k) feature_map from (m**2, k) feature_map and (s,s) filter_size."""
-        # need to determine if there must be a default value for filter_size
-        return self.library.get_pooled_features(input_feature_map, filter_size)
-
-    def get_pooled_features_from_whitened_patches(self, whitened_patches, filter_size=(19,19)):
-        """Returns ((m**2/s**2),k) feature_map from (m**2,p**2) or (m**2,p,p) patches, (s,s) filter_size, (k,p**2) internal dictionary."""
-        # need to determine if there must be a default value for filter_size
-        return self.library.get_pooled_features_from_whitened_patches(whitened_patches, filter_size)
+    def pipeline(self, patches, sign_split=True, pooling=True, pooling_size=(3,3), multiple_images=False):
+        """Returns (n/s**2,2k) feature map from (n,p**2), sign_split, pooling, (s,s) pooling_size, (k,p**2) internal dictionary for single image."""
+        # need to determine if there must be a default value for pooling_size
+        return self.library.pipeline(patches, sign_split, pooling, pooling_size, multiple_images)
         
 
 

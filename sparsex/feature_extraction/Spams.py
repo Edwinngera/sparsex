@@ -327,12 +327,14 @@ class Spams(object):
         return pooled_features        
         
         
-    def get_pooled_features_from_whitened_patches(self, patches, filter_size, multiple_images=False):
-        """Returns (n/s**2,f) pooled features from (n,p**2) patches and (s,s) filter size and (k,p**2) dictionary for a single image."""
-        sparse_features = self.get_sparse_features(patches, multiple_images)
-        sign_split_features = self.get_sign_split_features(sparse_features, multiple_images)
-        pooled_features = self.get_pooled_features(sign_split_features, filter_size, multiple_images)
-        return pooled_features
+    def pipeline(self, patches, sign_split=True, pooling=True, pooling_size=(3,3), multiple_images=False):
+        """Returns (n/s**2,2k) feature map from (n,p**2), sign_split, pooling, (s,s) pooling_size, (k,p**2) internal dictionary for single image."""
+        features = self.get_sparse_features(patches, multiple_images)
+        if sign_split:
+            features = self.get_sign_split_features(features, multiple_images)
+        if pooling:
+            features = self.get_pooled_features(features, pooling_size, multiple_images)
+        return features
 
 
 
