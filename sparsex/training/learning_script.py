@@ -165,6 +165,39 @@ def train_classifier(X, Y, config_params):
     return classifier
 
 
+def validate(X_train, Y_train, X_test, Y_test, config_params): 
+    ## training
+    # preprocess 
+    patches = preprocess(X_train, config_params)
+
+    # extract features
+    sparse_X_train = extract_features(patches, config_params)
+
+    # repeat the training data
+    sparse_X_train = np.tile(sparse_X_train, (config_params["classification_training_repeats"],1))
+    Y_train = np.tile(Y_train, config_params["classification_training_repeats"])
+
+    # train classifier
+    classifier = train_classifier(sparse_X_train, Y_train, config_params)
+
+    ## testing
+    # preprocess 
+    patches = preprocess(X_test, config_params)
+
+    # extract features
+    sparse_X_test = extract_features(patches, config_params)
+
+    # get predictions
+    Y_predict = classifier.get_predictions(sparse_X_test)
+
+    # scores
+    correct_predictions = np.sum(Y_test == Y_predict)
+    total_predicitions = Y_test.shape[0]
+    percentage_correct = (correct_predictions * 100.0) / total_predicitions
+
+    logging.info("PREDICTION_RATE: {0}% ... {1} / {2}".format(percentage_correct, correct_predictions, total_predicitions))
+
+
 def main():
     config_params = get_config_params()
     
@@ -176,45 +209,42 @@ def main():
     # get data
     X_raw, Y_raw = get_dataset_from_dataset_dict(dataset_dict, config_params["preprocess_resize"])
     
-    # cross validation
-    random_seed = 2902 # 29th Feb
-    random_state = np.random.RandomState(2902)
-    skf = StratifiedKFold(Y_raw, n_folds=3, shuffle=True, random_state=random_state)
-    for train_index, test_index in skf:
-        ## training
+    if config_params["validation"] and not config_params["cross_validation"] :
+        # single validation
+        random_state = np.random.RandomState(config_params["random_seed"])
+        train_index = random_state.rand(Y_raw.shape[0]) > config_params["validation_split"]
+        test_index = ~train_index
         X_train, Y_train = X_raw[train_index], Y_raw[train_index]
+        X_test, Y_test = X_raw[test_index], Y_raw[test_index]
+        validate(X_train, Y_train, X_test, Y_test, config_params)
         
-        # preprocess 
-        patches = preprocess(X_train, config_params)
+    elif config_params["validation"] and config_params["cross_validation"]:
+        # cross validation
+        random_state = np.random.RandomState(config_params["random_seed"])
+        skf = StratifiedKFold(Y_raw, n_folds=config_params["cross_validation_folds"], shuffle=True, random_state=random_state)
+        for train_index, test_index in skf:
+            ## training
+            X_train, Y_train = X_raw[train_index], Y_raw[train_index]
+            X_test, Y_test = X_raw[test_index], Y_raw[test_index]
+            
+            validate(X_train, Y_train, X_test, Y_test, config_params)
+    
+    else:
+        # no validation, only training
+        X_train, Y_train = X_raw, Y_raw
         
+        # preprocess
+        patches = preprocess(X_raw, config_params)
+
         # extract features
         sparse_X_train = extract_features(patches, config_params)
-        
+
         # repeat the training data
         sparse_X_train = np.tile(sparse_X_train, (config_params["classification_training_repeats"],1))
         Y_train = np.tile(Y_train, config_params["classification_training_repeats"])
-        
+
         # train classifier
         classifier = train_classifier(sparse_X_train, Y_train, config_params)
-        
-        ## testing
-        X_test, Y_test = X_raw[test_index], Y_raw[test_index]
-        
-        # preprocess 
-        patches = preprocess(X_test, config_params)
-        
-        # extract features
-        sparse_X_test = extract_features(patches, config_params)
-        
-        # get predictions
-        Y_predict = classifier.get_predictions(sparse_X_test)
-        
-        # scores
-        correct_predictions = np.sum(Y_test == Y_predict)
-        total_predicitions = Y_test.shape[0]
-        percentage_correct = (correct_predictions * 100.0) / total_predicitions
-        
-        logging.info("PREDICTION_RATE: {0}% ... {1} / {2}".format(percentage_correct, correct_predictions, total_predicitions))
 
 
 

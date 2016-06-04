@@ -3,7 +3,7 @@ from ..feature_extraction.feature_extraction import SparseCoding
 from ..classification.classification import Classifier
 
 config_params = {
-    "dataset_path" : "/home/nitish/mas_course_ss2015/assignments/sparsex/datasets/yale_face_b_ext_cropped/CroppedYale_64x64",
+    "dataset_path" : "/home/nitish/mas_course_ss2015/assignments/sparsex/datasets/yale_face_b_ext_cropped/CroppedYale",
     "preprocess_resize" : (67,67),
     "preprocess_patch_size" : (8,8),
     "preprocess_normalization" : True,
@@ -31,5 +31,10 @@ config_params = {
     },
     "classification_training_repeats":1,
     "classification_output_model_filename" : "/home/nitish/mas_course_ss2015/assignments/sparsex/sparsex/training/trained_classification_model_joachimssvm.pkl",
+    "random_seed":2902,
+    "validation":True,
+    "validation_split":0.1,
+    "cross_validation":False,
+    "cross_validation_folds":3
 }
 
