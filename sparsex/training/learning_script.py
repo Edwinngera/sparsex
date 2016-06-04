@@ -12,6 +12,9 @@ THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 def get_config_params():
+    config_params = sparsex_train_config.config_params
+    config_params_print = "\n".join(["config-param: {0} : {1}".format(param,value) for param, value in config_params.iteritems()])
+    logging.debug("config_params: \n{0}".format(config_params_print))
     return sparsex_train_config.config_params
 
 
@@ -134,7 +137,8 @@ def extract_features(patches, config_params):
     logging.debug("dictionary_shape: {0}".format(sparse_coding.get_dictionary().shape))
 
     # extract sparse_features
-    sparse_features = sparse_coding.pipeline(patches, sign_split=True, pooling=True, pooling_size=(3,3), multiple_images=True)
+    sparse_features = sparse_coding.pipeline(patches, sign_split=True, pooling=True,
+                                             pooling_size=config_params["feature_extraction_pooling_filter_size"], multiple_images=True)
     logging.debug("sparse_features.shape: {0}".format(sparse_features.shape))
 
     # save model

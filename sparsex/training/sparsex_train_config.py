@@ -22,7 +22,7 @@ config_params = {
     "feature_extraction_output_model_filename" : "/home/nitish/mas_course_ss2015/assignments/sparsex/sparsex/training/trained_feature_extraction_model_spams.pkl",
     "feature_extraction_sign_split" :True,
     "feature_extraction_pooling" : True,
-    "feature_extraction_pooling_filter_size" : (6,6),
+    "feature_extraction_pooling_filter_size" : (10,10),
     "classification_library" : Classifier.JOACHIMS_SVM,
     "classification_params" : {
         "c":0.1,
@@ -33,7 +33,7 @@ config_params = {
     "classification_output_model_filename" : "/home/nitish/mas_course_ss2015/assignments/sparsex/sparsex/training/trained_classification_model_joachimssvm.pkl",
     "random_seed":2902,
     "validation":True,
-    "validation_split":0.1,
+    "validation_split":0.25,
     "cross_validation":False,
     "cross_validation_folds":3
 }
