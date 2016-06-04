@@ -1,9 +1,8 @@
 from ..tests.preprocessing_test import test_whitening
 from ..customutils.customutils import write_dictionary_to_pickle_file, read_dictionary_from_pickle_file, is_perfect_square, isqrt
 from skimage.util.shape import view_as_windows
-import spams
+import spams, os, sys, logging
 import numpy as np
-import os
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -152,24 +151,10 @@ class Spams(object):
             # expecting (number_patches, patch_side**2)
             assert patches.ndim == 2, "patches.ndim is {0} instead of 2".format(patches.ndim)
 
-        # spams excepts X to be (p**2,n) with n patches and p**2 features,
-        # which is opposite to the convention used in sparsex. Therefore we transpose it.
-        X = patches.T
-
-        # spams.trainDL expects arrays to be in fortran order. Rememeber to reconvert it to 'C' order when
-        # in the get_dictionary mehtod.
-        X = np.asfortranarray(X)
-        
+        # get dictionary_size
         try:
-            # get encoding, which is a sparse matrix
-            encoding = self.encoding_function(X, self.params['D'], **self.encoding_params)
-            
-            # convert the sparse matrix to a full matrix
-            encoding = encoding.toarray()
-            
-            # tranpose encoding (k,n) to (n,k) to adhere to sparsex shape convention.
-            encoding = encoding.T
-            
+            # spams dictionary is shaped (number_features, dictionary_size)
+            dictionary_size = self.params['D'].shape[1]
         except KeyError:
             raise KeyError("It is possible feature extraction dictionary has not yet been learnt for this model. " \
                          + "Train the feature extraction model at least once to prevent this error.")
@@ -177,25 +162,90 @@ class Spams(object):
             raise ValueError(e.message + "\n" \
                 + "Sparsex Note : It is possible the feature extraction dictionary has not yet been learnt for this model. " \
                 + "Train the feature extraction model at least once to prevent this error.")
+        
+        # create empty encoding array
+        # shape is transposed (number_images * number_patches, dictionary_size)    
+        encoding = np.empty((patches.shape[0], dictionary_size), dtype=float)
+        
+        logging.debug("get sparse encoding")
+        logging.debug("number_images * number_patches (total_patches): {0}".format(patches.shape[0]))
+        sys.stdout.flush()
+        
+        for patch_index in range(patches.shape[0]):
+            # encoding_function returns (dictionary_size, 1) for one sample of (number_features, 1) but is scipy.sparse
+            # convert sparse matrix to full matrix using toarray()
+            single_encoding = self.encoding_function(np.asfortranarray(patches[patch_index][:,np.newaxis]), self.params['D'], **self.encoding_params).toarray()
             
-        finally:
-            if multiple_images:
-                # precautionary reshape back to original shape, since its possible the patches referenced here may be used
-                # elsewhere, therefore they will be reshaped due to the manipulations made above in multple images.
-                # Although X has its flags changed, patches retains its original flags.
-                patches = patches.reshape(original_patches_shape)
-                
-                # reshape encoding to (number_images, number_patches, k)
-                encoding = encoding.reshape(number_images, number_patches, -1)
-                
-            else:
-                # no reshaping required
-                pass
+            # column matrix is populated into encoding as row matrix by flattnening it (ravel).
+            encoding[patch_index, :] = single_encoding.ravel()
             
-            # convert encoding to contiguous array from fortran array
-            # returning shape (number_images, number_patches, k) for multiple images
-            # returning shape (number_patches, k) for single image
-            return np.ascontiguousarray(encoding)
+            if (patch_index * 10) % patches.shape[0] == 0:
+                logging.debug("encoding progress : {0}0%".format((patch_index * 10) // patches.shape[0]))
+                sys.stdout.flush()
+        
+        if multiple_images:
+            # precautionary reshape back to original shape, since its possible the patches referenced here may be used
+            # elsewhere, therefore they will be reshaped due to the manipulations made above in multple images.
+            # Although X has its flags changed, patches retains its original flags.
+            patches = patches.reshape(original_patches_shape)
+            
+            # reshape encoding to (number_images, number_patches, k)
+            encoding = encoding.reshape(number_images, number_patches, -1)
+            
+        else:
+            # no reshaping required
+            pass
+            
+        # convert encoding to contiguous array from fortran array
+        # returning shape (number_images, number_patches, k) for multiple images
+        # returning shape (number_patches, k) for single image
+        return np.ascontiguousarray(encoding)
+        
+        
+        # # spams excepts X to be (p**2,n) with n patches and p**2 features,
+        # # which is opposite to the convention used in sparsex. Therefore we transpose it.
+        # X = patches.T
+        # 
+        # # spams.trainDL expects arrays to be in fortran order. Rememeber to reconvert it to 'C' order when
+        # # in the get_dictionary mehtod.
+        # X = np.asfortranarray(X)
+        # 
+        # try:
+        #     # get encoding, which is a sparse matrix
+        #     encoding = self.encoding_function(X, self.params['D'], **self.encoding_params)
+        #     
+        #     # convert the sparse matrix to a full matrix
+        #     encoding = encoding.toarray()
+        #     
+        #     # tranpose encoding (k,n) to (n,k) to adhere to sparsex shape convention.
+        #     encoding = encoding.T
+        #     
+        # except KeyError:
+        #     raise KeyError("It is possible feature extraction dictionary has not yet been learnt for this model. " \
+        #                  + "Train the feature extraction model at least once to prevent this error.")
+        # except ValueError as e:
+        #     raise ValueError(e.message + "\n" \
+        #         + "Sparsex Note : It is possible the feature extraction dictionary has not yet been learnt for this model. " \
+        #         + "Train the feature extraction model at least once to prevent this error.")
+        #     
+        # finally:
+        #     if multiple_images:
+        #         # precautionary reshape back to original shape, since its possible the patches referenced here may be used
+        #         # elsewhere, therefore they will be reshaped due to the manipulations made above in multple images.
+        #         # Although X has its flags changed, patches retains its original flags.
+        #         patches = patches.reshape(original_patches_shape)
+        #         
+        #         # reshape encoding to (number_images, number_patches, k)
+        #         encoding = encoding.reshape(number_images, number_patches, -1)
+        #         
+        #     else:
+        #         # no reshaping required
+        #         pass
+        #     
+        #     # convert encoding to contiguous array from fortran array
+        #     # returning shape (number_images, number_patches, k) for multiple images
+        #     # returning shape (number_patches, k) for single image
+        #     return np.ascontiguousarray(encoding)
 
 
     def get_sign_split_features(self, encoding, multiple_images=False):
