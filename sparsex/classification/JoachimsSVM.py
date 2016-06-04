@@ -122,26 +122,26 @@ class JoachimsSVM(object):
         logging.debug("Y.shape : {0}".format(Y.shape))
         logging.debug("Y.dtype : {0}".format(Y.dtype))
         
-        # target_template = <target>, <integer>
-        target_template = "{0}"
-        
-        # feature_value_template = <feature>:<value>, <integer>:<float>, feature index starts from 1
-        feature_value_template = " {0}:{1}"
-        
-        # each sample will be populated into this string variable
-        joachims_train_data = ""
+        # each sample will be populated into this list of strings
+        joachims_train_data_list = []        
         
         # for every sample
         for sample_index in range(X.shape[0]):
-            # add target, e.g. 2, adding +1 to make it 1-indexed instead of 0-indexed
-            joachims_train_data += target_template.format(Y[sample_index] + 1)
-            
             # add feature:value, e.g. 1:1.33
-            for feature_index in range(X.shape[1]):
-                joachims_train_data += feature_value_template.format(feature_index + 1, X[sample_index, feature_index])
+            feature_value_string = " ".join(["%d:%f" % (feature_index + 1, X[sample_index, feature_index]) for feature_index in range(X.shape[1])])
             
-            # finally add newline for each sample
-            joachims_train_data += "\n"
+            # list of <target> <feature>:<value>
+            joachims_train_data_list.append("%d %s" % (Y[sample_index] + 1, feature_value_string))
+            
+            if (sample_index * 10) % X.shape[0] == 0:
+                logging.debug("converting : {0}0%".format((sample_index * 10) // X.shape[0]))
+                sys.stdout.flush()
+        
+        # join list sperated by newline
+        joachims_train_data = "\n".join(joachims_train_data_list)
+        
+        logging.debug("converting : 100%")
+        sys.stdout.flush()
         
         return joachims_train_data
 
@@ -151,26 +151,26 @@ class JoachimsSVM(object):
         logging.debug("X.shape : {0}".format(X.shape))
         logging.debug("X.dtype : {0}".format(X.dtype))
         
-        # target_template = <target>, <integer>
-        target_template = "{0}".format(target_placeholder)
-        
-        # feature_value_template = <feature>:<value>, <integer>:<float>, feature index starts from 1
-        feature_value_template = " {0}:{1}"
-        
-        # each sample will be populated into this string variable
-        joachims_test_data = ""
+        # each sample will be populated into this list of strings
+        joachims_test_data_list = []        
         
         # for every sample
         for sample_index in range(X.shape[0]):
-            # add target template which is just the target placeholder
-            joachims_test_data += target_template
-            
             # add feature:value, e.g. 1:1.33
-            for feature_index in range(X.shape[1]):
-                joachims_test_data += feature_value_template.format(feature_index + 1, X[sample_index, feature_index])
+            feature_value_string = " ".join(["%d:%f" % (feature_index + 1, X[sample_index, feature_index]) for feature_index in range(X.shape[1])])
             
-            # finally add newline for each sample
-            joachims_test_data += "\n"
+            # list of <target> <feature>:<value>
+            joachims_test_data_list.append("%d %s" % (target_placeholder, feature_value_string))
+            
+            if (sample_index * 10) % X.shape[0] == 0:
+                logging.debug("converting : {0}0%".format((sample_index * 10) // X.shape[0]))
+                sys.stdout.flush()
+        
+        # join list sperated by newline
+        joachims_test_data = "\n".join(joachims_test_data_list)
+        
+        logging.debug("converting : 100%")
+        sys.stdout.flush()
         
         return joachims_test_data
         
