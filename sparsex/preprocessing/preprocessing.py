@@ -131,15 +131,15 @@ class Preprocessing:
             # Transpose to get matrix A
             A = image_patches.T
 
-            # sigma = (1/(n-1)) * np.dot(A,A.T), where A = image_patches.T
-            sigma = (1.0 / (number_patches - 1)) * np.dot(A, A.T)
+            # sigma = np.dot(A,A.T) / (n-11), where A = image_patches.T
+            sigma = np.dot(A, A.T) / (number_patches - 1)
 
             # decompose and reconstruct
             u, s, v = np.linalg.svd(sigma, full_matrices=True)
 
             # whitening matrix
-            epsilon = 0.01
-            whitening_matrix = np.dot(u, np.dot((1.0 / (np.sqrt(np.diag(s)) + epsilon)), u.T))
+            epsilon = 0.001
+            whitening_matrix = np.dot(u, np.dot(np.diag(1/np.sqrt(s + epsilon)), u.T))
 
             # Awhite = W.A
             whitened_A = np.dot(whitening_matrix, A)
@@ -151,9 +151,9 @@ class Preprocessing:
             # from matplotlib import cm
             # plt.imshow(sigma, cmap=cm.Greys)
             # plt.show()
-            # subset = whitened_image_patches[np.random.rand(number_patches) > 0.97]
-            # print "...........", subset.shape
-            # plt.imshow(np.dot(whitened_image_patches.reshape(3249,-1).T, whitened_image_patches.reshape(3249,-1)), cmap=cm.Greys)
+            # plt.imshow(whitened_image_patches[1600].reshape(8,8), cmap=cm.Greys)
+            # plt.show()
+            # plt.imshow(np.dot(whitened_image_patches.T, whitened_image_patches), cmap=cm.Greys)
             # plt.show()
 
             # returning shape (number_patches, patch_side**2) for single image
@@ -183,10 +183,13 @@ class Preprocessing:
         return patches
 
 
-    def get_whitened_patches_from_image_array(self, image_array, image_size=(64,64), patch_size=(8,8), multiple_images=False):
-        """Returns ((n'-p+1)*(m'-p+1),p,p) whitened_patches from (n,m) image, (n',m') imsize, (p,p) patch."""
+    def pipeline(self, image_array, image_size=(64,64), patch_size=(8,8), normalize=True, whiten=True, multiple_images=False):
+        """Returns ((n'-p+1)*(m'-p+1),p**2) patches from (n,m) image, (n',m') imsize, (p,p) patch size for single image."""
         resized_image_array = self.get_resized_image(image_array, image_size, multiple_images)
         patches = self.extract_patches(resized_image_array, patch_size, multiple_images)
-        normalized_patches = self.get_contrast_normalized_patches(patches, multiple_images)
-        whitened_patches = self.get_whitened_patches(normalized_patches, multiple_images)
-        return whitened_patches
+        if normalize:
+            patches = self.get_contrast_normalized_patches(patches, multiple_images)
+        elif whiten:
+            patches = self.get_contrast_normalized_patches(patches, multiple_images)
+            patches = self.get_whitened_patches(patches, multiple_images)
+        return patches

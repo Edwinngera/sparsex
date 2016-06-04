@@ -101,7 +101,7 @@ def test_whitening(image_filename, show_montage=True, save_montage=True):
     return whitened_patches
     
 
-def test_preprocessing_combined_pipeline(image_filename, show_montage=True, save_montage=True):
+def test_pipeline(image_filename, show_montage=True, save_montage=True):
     print "### Preprocessing Combined Pipeline Test"
 
     # get image array
@@ -111,7 +111,7 @@ def test_preprocessing_combined_pipeline(image_filename, show_montage=True, save
     preprocessing = Preprocessing()
 
     # whiten patches using combined pipeline
-    whitened_patches = preprocessing.get_whitened_patches_from_image_array(image_array)
+    whitened_patches = preprocessing.pipeline(image_array, normalize=True, whiten=True, multiple_images=False)
 
     print "original image shape :\n", image_array.shape
 
@@ -141,4 +141,4 @@ if __name__ == "__main__":
     test_whitening(image_filename, show_montage=True, save_montage=True)
 
     # # test combined pipeline
-    # test_preprocessing_combined_pipeline(image_filename, show_montage=True, save_montage=True)
+    # test_pipeline(image_filename, show_montage=True, save_montage=True)

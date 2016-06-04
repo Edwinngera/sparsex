@@ -54,17 +54,15 @@ def test_whitening(image_array):
     logging.info("test_whitening: Success")
 
 
-def test_get_whitened_patches_from_image_array(image_array):
+def test_pipeline(image_array):
     preprocessing = Preprocessing()
-    whitened_patches = preprocessing.get_whitened_patches_from_image_array(image_array=image_array,
-                                                                           image_size=(64,64),
-                                                                           patch_size=(8,8),
-                                                                           multiple_images=True)
+    preprocessed_patches = preprocessing.pipeline(image_array=image_array, image_size=(64,64), patch_size=(8,8),
+                                                  normalize=True, whiten=True, multiple_images=True)
     
     # (number_images, number_patches, patch_side**2)
-    assert whitened_patches.ndim == 3, "test_get_whitened_patches_from_image_array: Failed.\whitened_patches.ndim is {0} instead of 3".format(whitened_patches.ndim)
-    logging.debug("whitened_patches.shape: {0}".format(whitened_patches.shape))
-    logging.info("test_get_whitened_patches_from_image_array: Success")
+    assert preprocessed_patches.ndim == 3, "test_pipeline: Failed.\preprocessed_patches.ndim is {0} instead of 3".format(preprocessed_patches.ndim)
+    logging.debug("preprocessed_patches.shape: {0}".format(preprocessed_patches.shape))
+    logging.info("test_pipeline: Success")
 
 
 if __name__ == "__main__":
@@ -93,5 +91,5 @@ if __name__ == "__main__":
     # test whitening
     test_whitening(image_array)
     
-    # test whitened patches from image_array
-    test_get_whitened_patches_from_image_array(image_array)
+    # test pipeline
+    test_pipeline(image_array)
