@@ -10,30 +10,34 @@ config_params = {
     "preprocess_whitening" : True,
     "feature_extraction_library" : SparseCoding.SPAMS,
     "feature_extraction_params": {
+        'encoding_algorithm':'omp',
         'K':10,
-        'lambda1':0.15,
-        'numThreads':-1,
-        'batchsize':400,
+        'L':5,
         'iter':10,
+        'batchsize':1,
+        'lambda1':0.11,
+        'numThreads':-1,
         'verbose':False, 
         'return_reg_path':False, 
-        'mode':spams.PENALTY
+        'mode':spams.PENALTY,
+        'eps':1.0
     },
     "feature_extraction_output_model_filename" : "/home/nitish/mas_course_ss2015/assignments/sparsex/sparsex/training/trained_feature_extraction_model_spams.pkl",
     "feature_extraction_sign_split" :True,
     "feature_extraction_pooling" : True,
-    "feature_extraction_pooling_filter_size" : (10,10),
+    "feature_extraction_pooling_filter_size" : (12,12),
     "classification_library" : Classifier.JOACHIMS_SVM,
     "classification_params" : {
         "c":0.1,
         "t":0,
-        "d":0
+        "d":0,
+        "g":0.1
     },
     "classification_training_repeats":1,
     "classification_output_model_filename" : "/home/nitish/mas_course_ss2015/assignments/sparsex/sparsex/training/trained_classification_model_joachimssvm.pkl",
     "random_seed":2902,
     "validation":True,
-    "validation_split":0.25,
+    "validation_split":0.3,
     "cross_validation":False,
     "cross_validation_folds":3
 }

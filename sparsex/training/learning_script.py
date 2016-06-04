@@ -126,30 +126,23 @@ def preprocess(image_array, config_params):
     return patches
     
 
-def extract_features(patches, config_params):
-    logging.info("feature_extraction")
+def train_sparse_feature_extractor(patches, config_params):
+    logging.info("training feature extractor")
+    
+    
     sparse_coding = SparseCoding(library_name=config_params["feature_extraction_library"],
-                                      model_filename=None,
-                                      **config_params["feature_extraction_params"])
+                                     model_filename=None,
+                                     **config_params["feature_extraction_params"])
 
-    # learning dictionary
-    learn_dictionary = sparse_coding.learn_dictionary(patches, multiple_images=True)
+    sparse_coding.learn_dictionary(patches, multiple_images=True)
     logging.debug("dictionary_shape: {0}".format(sparse_coding.get_dictionary().shape))
-
-    # extract sparse_features
-    sparse_features = sparse_coding.pipeline(patches, sign_split=True, pooling=True,
-                                             pooling_size=config_params["feature_extraction_pooling_filter_size"], multiple_images=True)
-    logging.debug("sparse_features.shape: {0}".format(sparse_features.shape))
 
     # save model
     logging.info("saving sparse coding model : {0}".format(config_params["feature_extraction_output_model_filename"]))
     sparse_coding.save_model(config_params["feature_extraction_output_model_filename"])
 
-    # reshape (number_image, number_features)
-    sparse_features = sparse_features.reshape(sparse_features.shape[0], -1)
-
-    logging.info("done, feature_extraction")
-    return sparse_features
+    logging.info("done, training feature extractor")
+    return sparse_coding
     
     
 def train_classifier(X, Y, config_params):
@@ -174,8 +167,11 @@ def validate(X_train, Y_train, X_test, Y_test, config_params):
     # preprocess 
     patches = preprocess(X_train, config_params)
 
-    # extract features
-    sparse_X_train = extract_features(patches, config_params)
+    # train sparse feature extractor
+    sparse_coding = train_sparse_feature_extractor(patches, config_params)
+
+    # extract sparse features
+    sparse_X_train = sparse_coding.pipeline(patches, sign_split=True, pooling=True, pooling_size=config_params["feature_extraction_pooling_filter_size"], reshape_2d=True, multiple_images=True)
 
     # repeat the training data
     sparse_X_train = np.tile(sparse_X_train, (config_params["classification_training_repeats"],1))
@@ -188,8 +184,8 @@ def validate(X_train, Y_train, X_test, Y_test, config_params):
     # preprocess 
     patches = preprocess(X_test, config_params)
 
-    # extract features
-    sparse_X_test = extract_features(patches, config_params)
+    # extract sparse features
+    sparse_X_test = sparse_coding.pipeline(patches, sign_split=True, pooling=True, pooling_size=config_params["feature_extraction_pooling_filter_size"], reshape_2d=True, multiple_images=True)
 
     # get predictions
     Y_predict = classifier.get_predictions(sparse_X_test)
@@ -199,6 +195,8 @@ def validate(X_train, Y_train, X_test, Y_test, config_params):
     total_predicitions = Y_test.shape[0]
     percentage_correct = (correct_predictions * 100.0) / total_predicitions
 
+    logging.debug("Y_test    : {0}".format(Y_test))
+    logging.debug("Y_predict : {0}".format(Y_predict))
     logging.info("PREDICTION_RATE: {0}% ... {1} / {2}".format(percentage_correct, correct_predictions, total_predicitions))
 
 
@@ -230,18 +228,20 @@ def main():
             ## training
             X_train, Y_train = X_raw[train_index], Y_raw[train_index]
             X_test, Y_test = X_raw[test_index], Y_raw[test_index]
-            
             validate(X_train, Y_train, X_test, Y_test, config_params)
     
     else:
-        # no validation, only training
+        ## no validation, only training
         X_train, Y_train = X_raw, Y_raw
         
-        # preprocess
-        patches = preprocess(X_raw, config_params)
+        # preprocess 
+        patches = preprocess(X_train, config_params)
 
-        # extract features
-        sparse_X_train = extract_features(patches, config_params)
+        # train sparse feature extractor
+        sparse_coding = train_sparse_feature_extractor(patches, config_params)
+
+        # extract sparse features
+        sparse_X_train = sparse_coding.pipeline(patches, sign_split=True, pooling=True, pooling_size=config_params["feature_extraction_pooling_filter_size"], reshape_2d=True, multiple_images=True)
 
         # repeat the training data
         sparse_X_train = np.tile(sparse_X_train, (config_params["classification_training_repeats"],1))
@@ -249,6 +249,7 @@ def main():
 
         # train classifier
         classifier = train_classifier(sparse_X_train, Y_train, config_params)
+
 
 
 

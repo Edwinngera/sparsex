@@ -327,13 +327,24 @@ class Spams(object):
         return pooled_features        
         
         
-    def pipeline(self, patches, sign_split=True, pooling=True, pooling_size=(3,3), multiple_images=False):
+    def pipeline(self, patches, sign_split=True, pooling=True, pooling_size=(3,3), reshape_2d=False, multiple_images=False):
         """Returns (n/s**2,2k) feature map from (n,p**2), sign_split, pooling, (s,s) pooling_size, (k,p**2) internal dictionary for single image."""
         features = self.get_sparse_features(patches, multiple_images)
+        
         if sign_split:
             features = self.get_sign_split_features(features, multiple_images)
+        
         if pooling:
             features = self.get_pooled_features(features, pooling_size, multiple_images)
+        
+        if reshape_2d and multiple_images:
+            # reshape (number_images, number_features)
+            features = features.reshape(features.shape[0], -1)
+        
+        elif reshape2d and not multiple_images:
+            # reshape (1, number_features)
+            features = features.reshape(1, -1)
+        
         return features
 
 
