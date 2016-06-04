@@ -183,6 +183,9 @@ class Spams(object):
                 logging.debug("encoding progress : {0}0%".format((patch_index * 10) // patches.shape[0]))
                 sys.stdout.flush()
         
+        logging.debug("encoding progress : 100%")
+        sys.stdout.flush()
+        
         if multiple_images:
             # precautionary reshape back to original shape, since its possible the patches referenced here may be used
             # elsewhere, therefore they will be reshaped due to the manipulations made above in multple images.
