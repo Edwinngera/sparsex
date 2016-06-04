@@ -187,9 +187,8 @@ class Preprocessing:
         """Returns ((n'-p+1)*(m'-p+1),p**2) patches from (n,m) image, (n',m') imsize, (p,p) patch size for single image."""
         resized_image_array = self.get_resized_image(image_array, image_size, multiple_images)
         patches = self.extract_patches(resized_image_array, patch_size, multiple_images)
-        if normalize:
+        if normalize or whiten:
             patches = self.get_contrast_normalized_patches(patches, multiple_images)
-        elif whiten:
-            patches = self.get_contrast_normalized_patches(patches, multiple_images)
+        if whiten:
             patches = self.get_whitened_patches(patches, multiple_images)
         return patches
