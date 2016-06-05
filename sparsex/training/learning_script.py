@@ -1,12 +1,14 @@
 from ..preprocessing.preprocessing import Preprocessing
 from ..feature_extraction.feature_extraction import SparseCoding
 from ..classification.classification import Classifier
-from ..customutils.customutils import get_image_from_file
+from ..customutils.customutils import get_image_from_file, save_image
 from scipy.misc import imresize
 from sklearn.cross_validation import StratifiedKFold
 import sys, argparse, os, logging, imghdr
 import numpy as np
 import sparsex_train_config
+# from matplotlib import pyplot as plt
+# from matplotlib import cm
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -77,7 +79,21 @@ def get_dataset_dictionary(dataset_path):
     dataset_dict["classes_list"] = classes_list
     
     logging.info("total classes : {0}, total images: {1}".format(number_classes, number_images))
-    logging.info("done, generating dataset dictionary")    
+    logging.info("done, generating dataset dictionary")
+    
+    # for key,value in dataset_dict.iteritems():
+    #     if isinstance(key, int):
+    #         for image_path in dataset_dict[key]["image_paths"]:
+    #             plt.imshow(get_image_from_file(image_path).astype(np.int), interpolation='nearest', cmap=cm.Greys)
+    #             plt.show()
+    #             
+    #             print get_image_from_file(image_path).shape
+    #             print get_image_from_file(image_path).dtype
+    #             print get_image_from_file(image_path).astype(np.uint8).dtype
+    #             print get_image_from_file(image_path).astype(np.uint8)[36:48,78:96]
+    #             save_image(get_image_from_file(image_path), "/home/nitish/mas_course_ss2015/assignments/sparsex/datasets/yale_face_b_ext_cropped/test.pgm")
+    #             break
+    #     break
     return dataset_dict
 
 

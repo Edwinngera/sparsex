@@ -1,7 +1,7 @@
 from ..tests.preprocessing_test import test_whitening
 from ..customutils.customutils import write_dictionary_to_pickle_file, read_dictionary_from_pickle_file, is_perfect_square, isqrt
 from skimage.util.shape import view_as_windows
-import spams, os, sys, logging
+import spams, os, sys, logging, time
 import numpy as np
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -171,7 +171,22 @@ class Spams(object):
         logging.debug("number_images * number_patches (total_patches): {0}".format(patches.shape[0]))
         sys.stdout.flush()
         
+        # time keeping
+        start_time = time.time()
+        percent_time = time.time()
+        
         for patch_index in range(patches.shape[0]):
+            # # debug code
+            # # check if the patches is entirely zero
+            # patches_non_zero_count = np.sum(~(patches[patch_index].ravel() == 0))
+            # if patches_non_zero_count == 0:
+            #     single_encoding = np.zeros(dictionary_size, dtype=float)
+            # 
+            # else:
+            #     # encoding_function returns (dictionary_size, 1) for one sample of (number_features, 1) but is scipy.sparse
+            #     # convert sparse matrix to full matrix using toarray()
+            #     single_encoding = self.encoding_function(np.asfortranarray(patches[patch_index][:,np.newaxis]), self.params['D'], **self.encoding_params).toarray()
+            
             # encoding_function returns (dictionary_size, 1) for one sample of (number_features, 1) but is scipy.sparse
             # convert sparse matrix to full matrix using toarray()
             single_encoding = self.encoding_function(np.asfortranarray(patches[patch_index][:,np.newaxis]), self.params['D'], **self.encoding_params).toarray()
@@ -179,11 +194,24 @@ class Spams(object):
             # column matrix is populated into encoding as row matrix by flattnening it (ravel).
             encoding[patch_index, :] = single_encoding.ravel()
             
-            if (patch_index * 10) % patches.shape[0] == 0:
-                logging.debug("encoding progress : {0}0%".format((patch_index * 10) // patches.shape[0]))
+            if (patch_index * 100) % patches.shape[0] == 0:
+                # basic debug to check if encoding is working
+                now_time = time.time()
+                percent_diff = now_time - percent_time
+                time_elapsed = now_time - start_time
+                percent_time = now_time
+                logging.debug("encoding progress : {0}%, {1} second/percent, {2} seconds elapsed".format((patch_index * 100) // patches.shape[0], percent_diff, time_elapsed))
+                encoding_non_zero_count = np.sum(~(encoding[patch_index].ravel() == 0))
+                patches_non_zero_count = np.sum(~(patches[patch_index].ravel() == 0))
+                logging.debug("encoding non-zero count : {0} / {1}, patches non-zero count  : {2} / {3}".format(encoding_non_zero_count, encoding[patch_index].shape[0], patches_non_zero_count, patches[patch_index].shape[0]))
                 sys.stdout.flush()
         
-        logging.debug("encoding progress : 100%")
+        # final time keeping
+        end_time = time.time()
+        percent_diff = end_time - percent_time
+        time_elapsed = end_time - start_time
+        
+        logging.debug("encoding progress : 100%, {0} second/percent, {1} seconds elapsed".format(percent_diff, time_elapsed))
         sys.stdout.flush()
         
         if multiple_images:

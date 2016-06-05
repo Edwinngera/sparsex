@@ -1,6 +1,9 @@
 from sklearn.feature_extraction.image import extract_patches_2d
 from scipy.misc import imresize
 import numpy as np
+# from matplotlib import pyplot as plt
+# from matplotlib import cm
+
 
 class Preprocessing:
     def __init__(self):
@@ -27,7 +30,12 @@ class Preprocessing:
             # for every image in the array, resize it and populate the empty resized array
             for image_index in range(number_images):
                 resized_image_array[image_index] = imresize(image_array[image_index], image_size)
-
+                
+                # verify images
+                # if np.random.rand() > 0.98:
+                #     plt.imshow(image_array[image_index])
+                #     # plt.imshow(resized_image_array[image_index], cmap=cm.Greys)
+                #     plt.show()
         else:
             # resize image array
             resized_image_array = imresize(image_array, image_size)
@@ -147,14 +155,15 @@ class Preprocessing:
             # Transpose to get back normalized image_patches
             whitened_image_patches = whitened_A.T
 
-            # from matplotlib import pyplot as plt
-            # from matplotlib import cm
+            # for patch in whitened_image_patches:
+            # patches_non_zero_count = np.sum(~(patches[patch_index].ravel() == 0))
             # plt.imshow(sigma, cmap=cm.Greys)
             # plt.show()
             # plt.imshow(whitened_image_patches[1600].reshape(8,8), cmap=cm.Greys)
             # plt.show()
-            # plt.imshow(np.dot(whitened_image_patches.T, whitened_image_patches), cmap=cm.Greys)
-            # plt.show()
+            # if np.random.rand() > 0.95:
+            #     plt.imshow(np.dot(whitened_image_patches.T, whitened_image_patches), cmap=cm.Greys)
+            #     plt.show()
 
             # returning shape (number_patches, patch_side**2) for single image
             return whitened_image_patches
