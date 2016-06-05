@@ -100,9 +100,6 @@ def get_dataset_from_dataset_dict(dataset_dict, standard_size=(64,64)):
         for image_path in class_image_paths:
             X[X_index] = imresize(get_image_from_file(image_path),standard_size)
             X_index += 1
-            
-            break
-        break
 
     logging.info("X.shape: {0}".format(X.shape))
     logging.info("Y.shape: {0}".format(Y.shape))
