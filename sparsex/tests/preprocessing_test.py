@@ -1,10 +1,13 @@
-from ..customutils.customutils import save_image, get_image_from_file, get_giant_patch_image, resize_image_to_64x64
+from ..customutils.customutils import save_image, get_image_from_file, get_giant_patch_image, resize_image_to_64x64, save_image, isqrt
 from ..preprocessing.preprocessing import Preprocessing
 from PIL import Image
 from skimage.util.montage import montage2d
 from scipy.misc import imshow, imsave
 import numpy as np
 import os
+
+from matplotlib import pyplot as plt
+from matplotlib import cm
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -49,13 +52,14 @@ def test_patch_extraction(image_filename, show_montage=True, save_montage=True):
 
     # get resized image array
     resized_image_array = test_resizing_image(image_filename, show_montage, save_montage)
-    
+
     # get patches
     print "Extracting patches"
     patches = preprocessing.extract_patches(resized_image_array, patch_size=(8,8))
     print patches.shape
 
-    show_and_save_montage_of_patches(patches, show_montage, save_montage,
+    reshape_size = (patches.shape[0], isqrt(patches.shape[1]), isqrt(patches.shape[1]))
+    show_and_save_montage_of_patches(patches.reshape(reshape_size), show_montage, save_montage,
                                      os.path.join(THIS_FILE_PATH, "./data/03_patch_extraction_montage.jpg"))
 
     return patches
@@ -77,9 +81,22 @@ def test_contrast_normalization(image_filename, show_montage=True, save_montage=
     print "Normalized patches variance"
     print normalized_patches.reshape((normalized_patches.shape[0], -1)).var(axis=1)[:10]
 
-    show_and_save_montage_of_patches(normalized_patches, show_montage, save_montage,
+    reshape_size = (normalized_patches.shape[0], isqrt(normalized_patches.shape[1]), isqrt(normalized_patches.shape[1]))
+    print normalized_patches.shape
+    print reshape_size
+    show_and_save_montage_of_patches(normalized_patches.reshape(reshape_size), show_montage, save_montage,
                                      os.path.join(THIS_FILE_PATH, "./data/04_normalized_patches_montage.jpg"))
 
+    # show correlation
+    if show_montage:
+        plt.imshow(np.dot(normalized_patches.T, normalized_patches), cmap=cm.Greys)
+        plt.show()
+        
+    # save correlation
+    if save_montage:
+        save_image(np.dot(normalized_patches.T, normalized_patches),
+                   os.path.join(THIS_FILE_PATH, "./data/04_normalized_patches_correlation.jpg"))
+    
     return normalized_patches
 
 
@@ -95,11 +112,22 @@ def test_whitening(image_filename, show_montage=True, save_montage=True):
     whitened_patches = preprocessing.get_whitened_patches(normalized_patches)
     print whitened_patches.shape
 
-    show_and_save_montage_of_patches(whitened_patches, show_montage, save_montage,
+    reshape_size = (whitened_patches.shape[0], isqrt(whitened_patches.shape[1]), isqrt(whitened_patches.shape[1]))
+    show_and_save_montage_of_patches(whitened_patches.reshape(reshape_size), show_montage, save_montage,
                                      os.path.join(THIS_FILE_PATH, "./data/05_whitened_patches_montage.jpg"))
 
+    # show correlation
+    if show_montage:
+        plt.imshow(np.dot(whitened_patches.T, whitened_patches), cmap=cm.Greys)
+        plt.show()
+
+    # save correlation
+    if save_montage:
+        save_image(np.dot(whitened_patches.T, whitened_patches),
+                   os.path.join(THIS_FILE_PATH, "./data/05_whitened_patches_correlation.jpg"))
+
     return whitened_patches
-    
+
 
 def test_pipeline(image_filename, show_montage=True, save_montage=True):
     print "### Preprocessing Combined Pipeline Test"
@@ -127,7 +155,7 @@ def test_pipeline(image_filename, show_montage=True, save_montage=True):
 
 if __name__ == "__main__":
     image_filename = os.path.realpath(os.path.join(THIS_FILE_PATH, "./data/yaleB01_P00A-005E-10.pgm"))
-    
+
     # # test resizing image
     # test_resizing_image(image_filename, show_image=True, save_image=True)
 

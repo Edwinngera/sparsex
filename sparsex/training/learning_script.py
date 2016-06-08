@@ -216,13 +216,20 @@ def validate(X_train, Y_train, X_test, Y_test, config_params):
 def main():
     config_params = get_config_params()
     
-    # validate config_params
+    # validate config_params (pending)
 
-    # convert dataset to a dictionary containing classes, images paths, other meta-data
-    dataset_dict = get_dataset_dictionary(config_params["dataset_path"])
-    
-    # get data
-    X_raw, Y_raw = get_dataset_from_dataset_dict(dataset_dict, config_params["preprocess_resize"])
+    # get data from dataset_extraction_function or from dataset path
+    if config_params["dataset_extraction_function"] == None:
+        logging.info("extracting data from dataset_path")
+        dataset_dict = get_dataset_dictionary(config_params["dataset_path"])
+        X_raw, Y_raw = get_dataset_from_dataset_dict(dataset_dict, config_params["preprocess_resize"])
+    else:
+        logging.info("extracting data from dataset_extraction_function")
+        X, Y = config_params["dataset_extraction_function"]()
+        X_raw, Y_raw = X, Y
+        logging.debug("number_classes: {0}".format(len(set(Y_raw))))
+        logging.debug("number_images: {0}".format(Y_raw.shape[0]))
+        logging.info("done extracting data")
     
     if config_params["validation"] and not config_params["cross_validation"] :
         # single validation

@@ -19,7 +19,11 @@ sparsex/tests/data/01_original_image.jpg
 sparsex/tests/data/02_resized_image.jpg
 sparsex/tests/data/03_patch_extraction_montage.jpg
 sparsex/tests/data/04_normalized_patches_montage.jpg
+sparsex/tests/data/04_normalized_patches_correlation.jpg
 sparsex/tests/data/05_whitened_patches_montage.jpg
+sparsex/tests/data/05_whitened_patches_correlation.jpg
+sparsex/tests/data/06_dictionary_element.jpg
+sparsex/tests/data/06_dictionary_montage.jpg
 
 # Feature extraction tests outputs
 sparsex/tests/data/feature_extraction_model_spams.pkl

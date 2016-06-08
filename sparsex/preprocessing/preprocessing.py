@@ -1,8 +1,12 @@
+from ..customutils.customutils import isqrt
 from sklearn.feature_extraction.image import extract_patches_2d
 from scipy.misc import imresize
 import numpy as np
-# from matplotlib import pyplot as plt
-# from matplotlib import cm
+import logging, os, sys
+
+# debug
+from matplotlib import pyplot as plt
+from matplotlib import cm
 
 
 class Preprocessing:
@@ -30,11 +34,12 @@ class Preprocessing:
             # for every image in the array, resize it and populate the empty resized array
             for image_index in range(number_images):
                 resized_image_array[image_index] = imresize(image_array[image_index], image_size)
-                
-                # verify images
+
+                # ### debug
                 # if np.random.rand() > 0.98:
-                #     plt.imshow(image_array[image_index])
-                #     # plt.imshow(resized_image_array[image_index], cmap=cm.Greys)
+                #     plt.imshow(image_array[image_index], cmap=cm.Greys)
+                #     plt.show()
+                #     plt.imshow(resized_image_array[image_index], cmap=cm.Greys)
                 #     plt.show()
         else:
             # resize image array
@@ -67,7 +72,7 @@ class Preprocessing:
             # for every image in the array, resize it and populate the empty resized array
             for image_index in range(number_images):
                 patches[image_index] = extract_patches_2d(image_array[image_index], patch_size)
-                
+
             # flatten the patches to standardized shape (number_images, number_patches, patch_side**2)
             patches = patches.reshape(number_images, number_patches, -1)
 
@@ -79,7 +84,7 @@ class Preprocessing:
 
             # extract patches for single image
             patches = extract_patches_2d(image_array, patch_size)
-            
+
             # flatten the patches to (number_patches, patch_side ** 2)
             patches = patches.reshape(number_patches, -1)
 
@@ -105,10 +110,10 @@ class Preprocessing:
 
             # reshape based on [Zim15] i.e. (number_images * number_patches, p**2)
             patches = patches.reshape(number_images * number_patches, -1)
-            
+
             # normalize and overwrite patches onto the original patches
             patches = (patches - patches.mean(axis=1)[:, np.newaxis]) / (np.sqrt(patches.var(axis=1))[:, np.newaxis] + 0.01)
-            
+
             # reshape into original shape i.e. (number_images, number_patches, p**2)
             patches = patches.reshape(number_images, number_patches, -1)
 
@@ -146,24 +151,30 @@ class Preprocessing:
             u, s, v = np.linalg.svd(sigma, full_matrices=True)
 
             # whitening matrix
-            epsilon = 0.001
+            epsilon = 0.00001
             whitening_matrix = np.dot(u, np.dot(np.diag(1/np.sqrt(s + epsilon)), u.T))
 
             # Awhite = W.A
             whitened_A = np.dot(whitening_matrix, A)
 
-            # Transpose to get back normalized image_patches
+            # Transpose to get back the proper shape
             whitened_image_patches = whitened_A.T
 
-            # for patch in whitened_image_patches:
-            # patches_non_zero_count = np.sum(~(patches[patch_index].ravel() == 0))
-            # plt.imshow(sigma, cmap=cm.Greys)
-            # plt.show()
-            # plt.imshow(whitened_image_patches[1600].reshape(8,8), cmap=cm.Greys)
-            # plt.show()
-            # if np.random.rand() > 0.95:
-            #     plt.imshow(np.dot(whitened_image_patches.T, whitened_image_patches), cmap=cm.Greys)
-            #     plt.show()
+            ### debug 1, non zero check
+            if np.random.rand() > 0.95:
+                random_index = np.random.randint(whitened_image_patches.shape[0])
+                logging.debug("debug non zero check, random patch plot")
+                plt.imshow(whitened_image_patches[random_index].reshape(isqrt(whitened_image_patches.shape[1]),isqrt(whitened_image_patches.shape[1])), cmap=cm.Greys)
+                plt.show()
+
+            ### debug 2, correlations
+            if np.random.rand() > 0.95:
+                logging.debug("debug correlations, sigma plot")
+                plt.imshow(sigma, cmap=cm.Greys)
+                plt.show()
+                logging.debug("debug correlations, correlations plot")
+                plt.imshow(np.dot(whitened_image_patches.T, whitened_image_patches), cmap=cm.Greys)
+                plt.show()
 
             # returning shape (number_patches, patch_side**2) for single image
             return whitened_image_patches
@@ -176,7 +187,7 @@ class Preprocessing:
             # store shapes
             number_images = patches.shape[0]
 
-            # whiten the pages for every image
+            # whiten the patches for every image
             for image_index in range(number_images):
                 patches[image_index] = whiten_image_patches(patches[image_index])
 

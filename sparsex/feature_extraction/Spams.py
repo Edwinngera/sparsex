@@ -4,36 +4,41 @@ from skimage.util.shape import view_as_windows
 import spams, os, sys, logging, time
 import numpy as np
 
+from matplotlib import pyplot as plt
+from matplotlib import cm
+from skimage.util.montage import montage2d
+from scipy.misc import imshow, imsave
+
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
 class Spams(object):
-    
+
     DEFAULT_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
                              "../tests/data/feature_extraction_model_spams.pkl"))
     DEFAULT_TRAINED_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
                                      "../tests/data/trained_feature_extraction_test_model_spams.pkl"))
     STANDARD_TRAINED_MODEL_FILENAME = os.path.realpath(os.path.join(THIS_FILE_PATH,
                                      "../training/trained_feature_extraction_model_spams.pkl"))
-    
+
     # train dl params
     TRAIN_DL_PARAMS = ['K', 'D', 'lambda1', 'numThread', 'batchsize', 'iter', 'verbose']
-    
+
     # encoding params
     LASSO_ENCODING_PARAMS = ['L', 'lambda1', 'lambda2', 'mode', 'pos', 'ols',' numThreads',
                              'length_path', 'verbose', 'cholesky', 'return_reg_path']
     OMP_ENCODING_PARAMS = ['L', 'eps', 'lambda1', 'return_reg_path', 'numThreads']
-    
+
     # default params
     DEFAULT_MODEL_PARAMS = {'K':10, 'lambda1':0.15, 'numThreads':-1, 'batchsize':400, 'iter':10,
                             'verbose':False, 'return_reg_path':False, 'mode':spams.PENALTY,
                             'encoding_algorithm':'omp'}
-    
+
     def __init__(self, model_filename=None, **kwargs):
         if model_filename == None:
             self.params = Spams.DEFAULT_MODEL_PARAMS
         else:
             self.load_model(model_filename)
-            
+
         self.params.update(kwargs)
         self._extract_params()
 
@@ -44,7 +49,7 @@ class Spams(object):
         for train_param_name in Spams.TRAIN_DL_PARAMS:
             if train_param_name in self.params:
                 self.train_params[train_param_name] = self.params[train_param_name]
-                
+
         # choose the encoding params
         # NOTE : choose encoding_function based on the algorithm chosen
         if self.params['encoding_algorithm'] == 'lasso':
@@ -53,7 +58,7 @@ class Spams(object):
         else:
             _encoding_params = Spams.OMP_ENCODING_PARAMS
             self.encoding_function = spams.omp
-        
+
         # extract the encoding params from the global params
         self.encoding_params = {}
         for encoding_param_name in _encoding_params:
@@ -71,26 +76,26 @@ class Spams(object):
 
     def learn_dictionary(self, patches, multiple_images=False):
         """Returns None from (n,p**2) patches for a single image."""
-        
+
         # store original shape
         original_patches_shape = patches.shape
-        
+
         if multiple_images:
             # expecting (number_images, number_patches, patch_side**2)
             assert patches.ndim == 3, "patches.ndim is {0} instead of 3".format(patches.ndim)
-            
+
             # store shapes
             number_images = original_patches_shape[0]
             number_patches = original_patches_shape[1]
-            
+
             # reshape patches, dictionary is learnt on each patch so it does not matter which image it comes from
             # therefore, flatten the array to (number_images * number_patches, patch_side**2)
             patches = patches.reshape(number_images * number_patches, -1)
-            
+
         else:
             # expecting (number_patches, patch_side**2)
             assert patches.ndim == 2, "patches.ndim is {0} instead of 2".format(patches.ndim)
-            
+
         # spams.trainDL expects X to be (p**2,n) with n patches and p**2 features,
         # which is opposite to the convention used in sparsex. Therefore we transpose it.
         X = patches.T
@@ -98,15 +103,15 @@ class Spams(object):
         # spams.trainDL expects arrays to be in fortran order. Rememeber to reconvert it to 'C' order when
         # in the get_dictionary mehtod.
         X = np.asfortranarray(X)
-        
+
         # updating the params so that the next time trainDL uses the already learnt dictionary from params.
         # D is of shape (p**2, k) which is opposite to the sparse shape convention. We will need to transpose D
         # in the get_dictionary method.
         self.params['D'] = spams.trainDL(X, **self.train_params)
-        
+
         # update params
         self._extract_params()
-        
+
         if multiple_images:
             # precautionary reshape back to original shape, since its possible the patches referenced here may be used
             # elsewhere, therefore they will be reshaped due to the manipulations made above in multple images.
@@ -115,7 +120,22 @@ class Spams(object):
         else:
             # no reshaping required
             pass
-        
+
+        # debug dictionary montage and element
+        # D.shape = (k, p**2)
+        D = self.params['D'].T
+        p = isqrt(D.shape[1])
+        D = D.reshape(D.shape[0], p, p)
+        montage_D = montage2d(D)
+        logging.debug(montage_D.shape)
+        plt.imshow(montage2d(D), cmap=cm.Greys)
+        plt.show()
+        imsave(os.path.join(THIS_FILE_PATH, "../tests/data/06_dictionary_montage.jpg"), montage2d(D))
+        random_index = np.random.randint(D.shape[0])
+        plt.imshow(D[random_index], cmap=cm.Greys)
+        plt.show()
+        imsave(os.path.join(THIS_FILE_PATH, "../tests/data/06_dictionary_element.jpg"), D[32])
+
         # return None
         return
 
@@ -125,30 +145,31 @@ class Spams(object):
         # transpose D from (p**2, k) to (k, p**2) to adhere to sparsex shape convention.
         # CAUTION!!! array.T seems to be changing order from C to F and vice versa.
         D = self.params['D'].T
-        
+
         # convert D to contiguous array from fortran array.
         return np.ascontiguousarray(D)
-        
+
 
     def get_sparse_features(self, patches, multiple_images=False):
         """Returns (n,k) encoding from (n,p**2) patches and (k,p**2) internal dictionary for single image."""
-        
+
         # store original shape
         original_patches_shape = patches.shape
-        
+
         if multiple_images:
             # expecting (number_images, number_patches, patch_side**2)
             assert patches.ndim == 3, "patches.ndim is {0} instead of 3".format(patches.ndim)
-        
+
             # store shapes
             number_images = original_patches_shape[0]
             number_patches = original_patches_shape[1]
-            
+
             # reshape patches, sparse encoding is done on each patch and does not depend on image.
             patches = patches.reshape(number_images * number_patches, -1)
-        
+
         else:
             # expecting (number_patches, patch_side**2)
+            number_patches = original_patches_shape[0]
             assert patches.ndim == 2, "patches.ndim is {0} instead of 2".format(patches.ndim)
 
         # get dictionary_size
@@ -162,95 +183,91 @@ class Spams(object):
             raise ValueError(e.message + "\n" \
                 + "Sparsex Note : It is possible the feature extraction dictionary has not yet been learnt for this model. " \
                 + "Train the feature extraction model at least once to prevent this error.")
-        
+
         # create empty encoding array
-        # shape is transposed (number_images * number_patches, dictionary_size)    
+        # shape is transposed (number_images * number_patches, dictionary_size)
         encoding = np.empty((patches.shape[0], dictionary_size), dtype=float)
-        
+
         logging.debug("get sparse encoding")
-        logging.debug("number_images * number_patches (total_patches): {0}".format(patches.shape[0]))
+        logging.debug("patches.shape = number_images * number_patches x number_features: {0}".format(patches.shape))
+        logging.debug("encoding.shape = number_images * number_patches x dictionary_size : {0}".format(encoding.shape))
         sys.stdout.flush()
-        
+
         # time keeping
         start_time = time.time()
-        percent_time = time.time()
-        
-        for patch_index in range(patches.shape[0]):
-            # # debug code
-            # # check if the patches is entirely zero
-            # patches_non_zero_count = np.sum(~(patches[patch_index].ravel() == 0))
-            # if patches_non_zero_count == 0:
-            #     single_encoding = np.zeros(dictionary_size, dtype=float)
-            # 
-            # else:
-            #     # encoding_function returns (dictionary_size, 1) for one sample of (number_features, 1) but is scipy.sparse
-            #     # convert sparse matrix to full matrix using toarray()
-            #     single_encoding = self.encoding_function(np.asfortranarray(patches[patch_index][:,np.newaxis]), self.params['D'], **self.encoding_params).toarray()
-            
-            # encoding_function returns (dictionary_size, 1) for one sample of (number_features, 1) but is scipy.sparse
+        progress_tick_time = time.time()
+        progress_tick = -1
+
+        # iterate over all patches in steps of number_patches
+        for patch_index in range(0, patches.shape[0], number_patches):
+            # encoding_function returns (dictionary_size, number_patches_in_subset) for one sample of (number_features, 1) but is scipy.sparse
             # convert sparse matrix to full matrix using toarray()
-            single_encoding = self.encoding_function(np.asfortranarray(patches[patch_index][:,np.newaxis]), self.params['D'], **self.encoding_params).toarray()
-            
+            # this will fail if number_patches == 1, since patches[patch_index:patch_index + number_patches] will convert into a 1d matrix
+            single_encoding = self.encoding_function(np.asfortranarray(patches[patch_index:patch_index + number_patches].T), self.params['D'], **self.encoding_params).toarray()
+
             # column matrix is populated into encoding as row matrix by flattnening it (ravel).
-            encoding[patch_index, :] = single_encoding.ravel()
-            
-            if (patch_index * 100) % patches.shape[0] == 0:
-                # basic debug to check if encoding is working
+            encoding[patch_index:patch_index + number_patches] = single_encoding.T
+
+            if (patch_index * 100) // patches.shape[0] > progress_tick:
+                # progress stuff
+                progress_tick = (patch_index * 100) // patches.shape[0]
                 now_time = time.time()
-                percent_diff = now_time - percent_time
+                progress_tick_diff = now_time - progress_tick_time
+                progress_tick_time = now_time
                 time_elapsed = now_time - start_time
-                percent_time = now_time
-                logging.debug("encoding progress : {0}%, {1} second/percent, {2} seconds elapsed".format((patch_index * 100) // patches.shape[0], percent_diff, time_elapsed))
+                logging.debug("encoding progress : {0}%, {1} seconds/percent, {2} seconds elapsed".format(progress_tick, progress_tick_diff, time_elapsed))
+
+                # patch / encoding being == 0 check
                 encoding_non_zero_count = np.sum(~(encoding[patch_index].ravel() == 0))
                 patches_non_zero_count = np.sum(~(patches[patch_index].ravel() == 0))
                 logging.debug("encoding non-zero count : {0} / {1}, patches non-zero count  : {2} / {3}".format(encoding_non_zero_count, encoding[patch_index].shape[0], patches_non_zero_count, patches[patch_index].shape[0]))
                 sys.stdout.flush()
-        
+
         # final time keeping
         end_time = time.time()
-        percent_diff = end_time - percent_time
+        progress_tick_diff = end_time - progress_tick_time
         time_elapsed = end_time - start_time
-        
-        logging.debug("encoding progress : 100%, {0} second/percent, {1} seconds elapsed".format(percent_diff, time_elapsed))
+
+        logging.debug("encoding progress : 100%, {0} second/percent, {1} seconds elapsed".format(progress_tick_diff, time_elapsed))
         sys.stdout.flush()
-        
+
         if multiple_images:
             # precautionary reshape back to original shape, since its possible the patches referenced here may be used
             # elsewhere, therefore they will be reshaped due to the manipulations made above in multple images.
             # Although X has its flags changed, patches retains its original flags.
             patches = patches.reshape(original_patches_shape)
-            
+
             # reshape encoding to (number_images, number_patches, k)
             encoding = encoding.reshape(number_images, number_patches, -1)
-            
+
         else:
             # no reshaping required
             pass
-            
+
         # convert encoding to contiguous array from fortran array
         # returning shape (number_images, number_patches, k) for multiple images
         # returning shape (number_patches, k) for single image
         return np.ascontiguousarray(encoding)
-        
-        
+
+
         # # spams excepts X to be (p**2,n) with n patches and p**2 features,
         # # which is opposite to the convention used in sparsex. Therefore we transpose it.
         # X = patches.T
-        # 
+        #
         # # spams.trainDL expects arrays to be in fortran order. Rememeber to reconvert it to 'C' order when
         # # in the get_dictionary mehtod.
         # X = np.asfortranarray(X)
-        # 
+        #
         # try:
         #     # get encoding, which is a sparse matrix
         #     encoding = self.encoding_function(X, self.params['D'], **self.encoding_params)
-        #     
+        #
         #     # convert the sparse matrix to a full matrix
         #     encoding = encoding.toarray()
-        #     
+        #
         #     # tranpose encoding (k,n) to (n,k) to adhere to sparsex shape convention.
         #     encoding = encoding.T
-        #     
+        #
         # except KeyError:
         #     raise KeyError("It is possible feature extraction dictionary has not yet been learnt for this model. " \
         #                  + "Train the feature extraction model at least once to prevent this error.")
@@ -258,21 +275,21 @@ class Spams(object):
         #     raise ValueError(e.message + "\n" \
         #         + "Sparsex Note : It is possible the feature extraction dictionary has not yet been learnt for this model. " \
         #         + "Train the feature extraction model at least once to prevent this error.")
-        #     
+        #
         # finally:
         #     if multiple_images:
         #         # precautionary reshape back to original shape, since its possible the patches referenced here may be used
         #         # elsewhere, therefore they will be reshaped due to the manipulations made above in multple images.
         #         # Although X has its flags changed, patches retains its original flags.
         #         patches = patches.reshape(original_patches_shape)
-        #         
+        #
         #         # reshape encoding to (number_images, number_patches, k)
         #         encoding = encoding.reshape(number_images, number_patches, -1)
-        #         
+        #
         #     else:
         #         # no reshaping required
         #         pass
-        #     
+        #
         #     # convert encoding to contiguous array from fortran array
         #     # returning shape (number_images, number_patches, k) for multiple images
         #     # returning shape (number_patches, k) for single image
@@ -287,7 +304,7 @@ class Spams(object):
         if multiple_images:
             # expecting (number_images, number_patches, k)
             assert encoding.ndim == 3, "encoding.ndim is {0} instead of 3".format(encoding.ndim)
-        
+            
             # store shapes
             number_images = original_encoding_shape[0]
             number_patches = original_encoding_shape[1]
@@ -296,7 +313,7 @@ class Spams(object):
             
             # reshape encoding, sign split is done on each patch and does not depend on image.
             encoding = encoding.reshape(number_images * number_patches, -1)
-        
+            
         else:
             # expecting (number_patches, k)
             assert encoding.ndim == 2, "encoding.ndim is {0} instead of 2".format(encoding.ndim)
@@ -312,14 +329,14 @@ class Spams(object):
         if multiple_images:
             # precautionary reshape of encoding to original shape in case it may be used elsewhere
             encoding = encoding.reshape(original_encoding_shape)
-            
+
             # reshape sign_split_features to (number_images, number_patches, 2k)
             sign_split_features = sign_split_features.reshape(number_images, number_patches, -1)
         
         else:
             # no reshaping required
             pass
-            
+        
         # returning shape (number_images, number_patches, 2*k) for multiple images.
         # returning shape (number_patches, 2*k) for single image.
         return sign_split_features
@@ -331,7 +348,7 @@ class Spams(object):
         def pool_features(input_feature_map):
             # expecting shape (sqrt_number_patches, sqrt_number_patches, number_features)
             assert input_feature_map.ndim == 3, "input_feature_map.ndim is {0} instead of 3".format(input_feature_map.ndim)
-        
+            
             # get windows (57,57,20) to (3,3,1,19,19,20)
             input_feature_map_windows = view_as_windows(input_feature_map,
                                                         window_shape=(filter_size[0], filter_size[1], input_feature_map.shape[-1]),
@@ -364,7 +381,7 @@ class Spams(object):
         if multiple_images:
             # expecting (number_images, number_patches, number_features)
             assert encoding.ndim == 3, "encoding.ndim is {0} instead of 3".format(encoding.ndim)
-        
+            
             # store shapes
             number_images, number_patches, number_features = original_encoding_shape
             
@@ -405,7 +422,7 @@ class Spams(object):
         
         # returning shape (number_images, number_patches/filter_side**2, number_features) for multiple images
         # returning shape (number_patches/filter_side**2, number_features) for single image
-        return pooled_features        
+        return pooled_features
         
         
     def pipeline(self, patches, sign_split=True, pooling=True, pooling_size=(3,3), reshape_2d=False, multiple_images=False):
