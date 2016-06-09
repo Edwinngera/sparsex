@@ -150,20 +150,23 @@ class Spams(object):
             # no reshaping required
             pass
 
-        # ### debug dictionary montage and element
-        # ### D.shape = (k, p**2)
-        # D = self.params['D'].T
-        # p = isqrt(D.shape[1])
-        # D = D.reshape(D.shape[0], p, p)
-        # montage_D = montage2d(D)
-        # logging.debug(montage_D.shape)
-        # plt.imshow(montage2d(D), cmap=cm.Greys)
-        # plt.show()
-        # imsave(os.path.join(THIS_FILE_PATH, "../tests/data/06_dictionary_montage.jpg"), montage2d(D))
-        # random_index = np.random.randint(D.shape[0])
+        ### debug dictionary montage and element
+        ### D.shape = (k, p**2)
+        D = self.params['D'].T
+        p = isqrt(D.shape[1])
+        D = D.reshape(D.shape[0], p, p)
+        montage_D = montage2d(D)
+        random_index = np.random.randint(D.shape[0])
+        
+        # save dictionary images
+        imsave(os.path.join(THIS_FILE_PATH, "../tests/data/06_dictionary_montage.jpg"), montage2d(D))
+        imsave(os.path.join(THIS_FILE_PATH, "../tests/data/06_dictionary_element.jpg"), D[random_index])
+
+        # ### show dictionary images
         # plt.imshow(D[random_index], cmap=cm.Greys)
         # plt.show()
-        # imsave(os.path.join(THIS_FILE_PATH, "../tests/data/06_dictionary_element.jpg"), D[random_index])
+        # plt.imshow(montage2d(D), cmap=cm.Greys)
+        # plt.show()
 
         # return None
         return
