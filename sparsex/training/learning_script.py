@@ -29,7 +29,7 @@ def get_dataset_dictionary(dataset_path):
     # get list of directories in dataset path which will become the class names
     # sorting is also to make sure that the order is always the same during different iterations
     dataset_dirs = sorted([d for d in os.listdir(dataset_path) 
-                    if not os.path.isfile(os.path.join(dataset_path, d))])
+                          if not os.path.isfile(os.path.join(dataset_path, d))])
     
     # create dict
     # dataset_dict = {
@@ -58,7 +58,7 @@ def get_dataset_dictionary(dataset_path):
         # get full paths of all images within the class_path. Check if its a file.
         image_paths = sorted([os.path.join(class_path, image) for image in os.listdir(class_path)
                               if os.path.isfile(os.path.join(class_path, image)) and
-                                 imghdr.what(os.path.join(class_path, image)) != None])
+                              imghdr.what(os.path.join(class_path, image)) != None])
         number_images_in_class = len(image_paths)
         number_images += number_images_in_class
         
@@ -102,7 +102,6 @@ def get_dataset_from_dataset_dict(dataset_dict, standard_size=(64,64)):
     number_images = dataset_dict["number_images"]
     number_classes = dataset_dict["number_classes"]
     
-    
     # shape (number_images, image_size[0], image_size[1])
     X = np.empty((number_images, standard_size[0], standard_size[1]), dtype=float)
     Y = np.array(dataset_dict["classes_list"], dtype=int)
@@ -124,6 +123,23 @@ def get_dataset_from_dataset_dict(dataset_dict, standard_size=(64,64)):
     return X, Y
 
 
+def get_dataset(config_params):
+    if config_params["dataset_extraction_function"] == None:
+        logging.info("extracting data from dataset_path")
+        dataset_dict = get_dataset_dictionary(config_params["dataset_path"])
+        X_raw, Y_raw = get_dataset_from_dataset_dict(dataset_dict, config_params["preprocess_resize"])
+        logging.info("done extracting data")
+    else:
+        logging.info("extracting data from dataset_extraction_function")
+        X, Y = config_params["dataset_extraction_function"]()
+        X_raw, Y_raw = X, Y
+        logging.debug("number_classes: {0}".format(len(set(Y_raw))))
+        logging.debug("number_images: {0}".format(Y_raw.shape[0]))
+        logging.info("done extracting data")
+        
+    return X_raw, Y_raw
+
+
 def preprocess(image_array, config_params):
     logging.info("preprocessing")
     preprocessing = Preprocessing()
@@ -142,35 +158,64 @@ def preprocess(image_array, config_params):
 def train_sparse_feature_extractor(patches, config_params):
     logging.info("training feature extractor")
     
-    
-    sparse_coding = SparseCoding(library_name=config_params["feature_extraction_library"],
+    if config_params["feature_extraction_input_mode_filename"] != None:
+        logging.info("loading dictionary from model file: {0}".format(config_params["feature_extraction_input_mode_filename"]))
+        # initialize sparse_coding object
+        sparse_coding = SparseCoding(library_name=config_params["feature_extraction_library"],
+                                     model_filename=config_params["feature_extraction_input_mode_filename"],
+                                     **config_params["feature_extraction_params"])
+        
+        # dictionary shape
+        logging.debug("dictionary_shape: {0}".format(sparse_coding.get_dictionary().shape))
+
+        logging.info("done, loading dictionary from model file")
+        
+    else:
+        # initialize sparse_coding object
+        sparse_coding = SparseCoding(library_name=config_params["feature_extraction_library"],
                                      model_filename=None,
                                      **config_params["feature_extraction_params"])
+        
+        # learn dictionary
+        sparse_coding.learn_dictionary(patches, multiple_images=True)
+        logging.debug("dictionary_shape: {0}".format(sparse_coding.get_dictionary().shape))
 
-    sparse_coding.learn_dictionary(patches, multiple_images=True)
-    logging.debug("dictionary_shape: {0}".format(sparse_coding.get_dictionary().shape))
+        # save model
+        logging.info("saving sparse coding model : {0}".format(config_params["feature_extraction_output_model_filename"]))
+        sparse_coding.save_model(config_params["feature_extraction_output_model_filename"])
 
-    # save model
-    logging.info("saving sparse coding model : {0}".format(config_params["feature_extraction_output_model_filename"]))
-    sparse_coding.save_model(config_params["feature_extraction_output_model_filename"])
-
-    logging.info("done, training feature extractor")
+        logging.info("done, training feature extractor")
+        
     return sparse_coding
     
     
 def train_classifier(X, Y, config_params):
     logging.info("training classifier")
-    classifier = Classifier(library_name=config_params["classification_library"],
-                            **config_params["classification_params"])
     
-    # train
-    classifier.train(X,Y)
+    if config_params["classification_input_model_filename"] != None:
+        logging.info("loading classification model file: {0}".format(config_params["classification_input_model_filename"]))
     
-    # save model
-    logging.info("saving classification model : {0}".format(config_params["classification_output_model_filename"]))
-    classifier.save_model(config_params["classification_output_model_filename"])
+        # initialize classifier object
+        classifier = Classifier(library_name=config_params["classification_library"],
+                                model_filename=config_params["classification_input_model_filename"],
+                                **config_params["classification_params"])
+        
+        logging.info("done, loading classifier from model file")
+        
+    else:
+        # initialize classifier object
+        classifier = Classifier(library_name=config_params["classification_library"],
+                                model_filename=None,
+                                **config_params["classification_params"])
     
-    logging.info("done, training classifier")
+        # train
+        classifier.train(X,Y)
+        
+        # save model
+        logging.info("saving classification model : {0}".format(config_params["classification_output_model_filename"]))
+        classifier.save_model(config_params["classification_output_model_filename"])
+    
+        logging.info("done, training classifier")
     
     return classifier
 
@@ -218,18 +263,8 @@ def main():
     
     # validate config_params (pending)
 
-    # get data from dataset_extraction_function or from dataset path
-    if config_params["dataset_extraction_function"] == None:
-        logging.info("extracting data from dataset_path")
-        dataset_dict = get_dataset_dictionary(config_params["dataset_path"])
-        X_raw, Y_raw = get_dataset_from_dataset_dict(dataset_dict, config_params["preprocess_resize"])
-    else:
-        logging.info("extracting data from dataset_extraction_function")
-        X, Y = config_params["dataset_extraction_function"]()
-        X_raw, Y_raw = X, Y
-        logging.debug("number_classes: {0}".format(len(set(Y_raw))))
-        logging.debug("number_images: {0}".format(Y_raw.shape[0]))
-        logging.info("done extracting data")
+    # get dataset
+    X_raw, Y_raw = get_dataset(config_params)
     
     if config_params["validation"] and not config_params["cross_validation"] :
         # single validation
