@@ -184,7 +184,7 @@ def validate(X_train, Y_train, X_test, Y_test, config_params):
     sparse_coding = train_sparse_feature_extractor(patches, config_params)
 
     # extract sparse features
-    sparse_X_train = sparse_coding.pipeline(patches, sign_split=True, pooling=True, pooling_size=config_params["feature_extraction_pooling_filter_size"], reshape_2d=True, multiple_images=True)
+    sparse_X_train = sparse_coding.pipeline(patches, sign_split=True, pooling=True, pooling_size=config_params["feature_extraction_pooling_filter_size"], multiple_images=True)
 
     # repeat the training data
     sparse_X_train = np.tile(sparse_X_train, (config_params["classification_training_repeats"],1))
@@ -198,7 +198,7 @@ def validate(X_train, Y_train, X_test, Y_test, config_params):
     patches = preprocess(X_test, config_params)
 
     # extract sparse features
-    sparse_X_test = sparse_coding.pipeline(patches, sign_split=True, pooling=True, pooling_size=config_params["feature_extraction_pooling_filter_size"], reshape_2d=True, multiple_images=True)
+    sparse_X_test = sparse_coding.pipeline(patches, sign_split=True, pooling=True, pooling_size=config_params["feature_extraction_pooling_filter_size"], multiple_images=True)
 
     # get predictions
     Y_predict = classifier.get_predictions(sparse_X_test)

@@ -43,10 +43,10 @@ class SparseCoding(object):
         """Returns (n,2*k) feature_vector from (n,k) feature_vector."""
         return self.library.get_sign_split_features(sparse_features, multiple_images)
 
-    def pipeline(self, patches, sign_split=True, pooling=True, pooling_size=(3,3), reshape_2d=False, multiple_images=False):
+    def pipeline(self, patches, sign_split=True, pooling=True, pooling_size=(3,3), multiple_images=False):
         """Returns (n/s**2,2k) feature map from (n,p**2), sign_split, pooling, (s,s) pooling_size, (k,p**2) internal dictionary for single image."""
         # need to determine if there must be a default value for pooling_size
-        return self.library.pipeline(patches, sign_split, pooling, pooling_size, reshape_2d, multiple_images)
+        return self.library.pipeline(patches, sign_split, pooling, pooling_size, multiple_images)
         
 
 

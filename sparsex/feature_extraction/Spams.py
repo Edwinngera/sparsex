@@ -1,6 +1,7 @@
 from ..tests.preprocessing_test import test_whitening
 from ..customutils.customutils import write_dictionary_to_pickle_file, read_dictionary_from_pickle_file, is_perfect_square, isqrt
 from skimage.util.shape import view_as_windows
+from sklearn.preprocessing import minmax_scale
 import spams, os, sys, logging, time
 import numpy as np
 
@@ -264,6 +265,8 @@ class Spams(object):
         sys.stdout.flush()
 
         if multiple_images:
+            
+            
             # precautionary reshape back to original shape, since its possible the patches referenced here may be used
             # elsewhere, therefore they will be reshaped due to the manipulations made above in multple images.
             # Although X has its flags changed, patches retains its original flags.
@@ -457,9 +460,27 @@ class Spams(object):
         return pooled_features
         
         
-    def pipeline(self, patches, sign_split=True, pooling=True, pooling_size=(3,3), reshape_2d=False, multiple_images=False):
+    def feature_scaling(self, features, multiple_images):
+        if multiple_images:
+            # (number_images, number_patches, number_features)
+            features_shape = features.shape
+            # (number_image * number_patches, number_features)
+            features = features.reshape(features_shape[0] * features_shape[1], -1)
+            # scale features to range [0,1]
+            features = minmax_scale(features, axis=1)
+            # reshape and return
+            return features.reshape(features_shape)
+        else:
+            # (number_patches, number_features)
+            return minmax_scale(features, axis=1)
+
+    
+    def pipeline(self, patches, sign_split=True, pooling=True, pooling_size=(3,3), multiple_images=False):
         """Returns (n/s**2,2k) feature map from (n,p**2), sign_split, pooling, (s,s) pooling_size, (k,p**2) internal dictionary for single image."""
-        features = self.get_sparse_features(patches, multiple_images)
+        features = self.get_sparse_features(patches, multiple_images)        
+        
+        if self.params['pipeline_pre_pooling_feature_scaling']:
+            features = self.feature_scaling(features, multiple_images)
         
         if sign_split:
             features = self.get_sign_split_features(features, multiple_images)
@@ -467,14 +488,18 @@ class Spams(object):
         if pooling:
             features = self.get_pooled_features(features, pooling_size, multiple_images)
         
-        if reshape_2d and multiple_images:
+        # reshape to 2d
+        if multiple_images:
             # reshape (number_images, number_features)
             features = features.reshape(features.shape[0], -1)
         
-        elif reshape2d and not multiple_images:
+        else:
             # reshape (1, number_features)
             features = features.reshape(1, -1)
-        
+            
+        if self.params['pipeline_post_pooling_feature_standardization']:
+            feature = ((features  - features.mean(axis=1)[:, np.newaxis]) / (np.sqrt(features.var(axis=1))[:, np.newaxis] + 0.01))
+            
         return features
 
 
