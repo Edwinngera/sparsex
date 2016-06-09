@@ -31,7 +31,8 @@ class Spams(object):
     # default params
     DEFAULT_MODEL_PARAMS = {'K':10, 'lambda1':0.15, 'numThreads':-1, 'batchsize':400, 'iter':10,
                             'verbose':False, 'return_reg_path':False, 'mode':spams.PENALTY,
-                            'encoding_algorithm':'omp'}
+                            'encoding_algorithm':'omp', 'subsampling':True, 'subsampling_ratio':0.1,
+                            'max_subsamples':100000}
 
     def __init__(self, model_filename=None, **kwargs):
         if model_filename == None:
@@ -76,7 +77,8 @@ class Spams(object):
 
     def learn_dictionary(self, patches, multiple_images=False):
         """Returns None from (n,p**2) patches for a single image."""
-
+        logging.info("learning dictionary")
+        
         # store original shape
         original_patches_shape = patches.shape
 
@@ -96,9 +98,36 @@ class Spams(object):
             # expecting (number_patches, patch_side**2)
             assert patches.ndim == 2, "patches.ndim is {0} instead of 2".format(patches.ndim)
 
+        # subsampling
+        if self.params['subsampling']:
+            # validate subsampling ratio
+            subsampling_ratio = self.params['subsampling_ratio']
+            assert 0 < subsampling_ratio <= 1, "spams subsampling ratio is {0} instead of being in range (0,1].".format(subsampling_ratio)
+            
+            # validate max_subsamples
+            max_subsamples = self.params['max_subsamples']
+            assert max_subsamples > 0, "spams max_subsamples is {0} instead of being > 0.".format(max_subsamples)
+            
+            logging.info("subsampling for dictionary learning with {0} subsampling_ratio and {1} max_subsamples".format(subsampling_ratio, max_subsamples))
+            
+            # generate subsamples
+            number_total_patches = patches.shape[0]
+            number_subsampled_patches = min(int(number_total_patches * subsampling_ratio), max_subsamples)
+            subsampled_patches_indexes = np.random.permutation(number_total_patches)[:number_subsampled_patches] # choose first n random indexes
+            patches_ = patches[subsampled_patches_indexes]
+            
+            logging.debug("subsampling, randomly choosing {0} subsampled patches from {1} patches.".format(number_subsampled_patches, number_total_patches))
+            logging.debug("subsampled_patches.shape: {0}".format(patches_.shape))
+        
+        else:
+            logging.info("no subsampling for dictionary learning")
+            patches_ = patches
+            logging.debug("patches.shape: {0}".format(patches_.shape))
+            
+            
         # spams.trainDL expects X to be (p**2,n) with n patches and p**2 features,
         # which is opposite to the convention used in sparsex. Therefore we transpose it.
-        X = patches.T
+        X = patches_.T
 
         # spams.trainDL expects arrays to be in fortran order. Rememeber to reconvert it to 'C' order when
         # in the get_dictionary mehtod.
@@ -121,20 +150,20 @@ class Spams(object):
             # no reshaping required
             pass
 
-        # debug dictionary montage and element
-        # D.shape = (k, p**2)
-        D = self.params['D'].T
-        p = isqrt(D.shape[1])
-        D = D.reshape(D.shape[0], p, p)
-        montage_D = montage2d(D)
-        logging.debug(montage_D.shape)
-        plt.imshow(montage2d(D), cmap=cm.Greys)
-        plt.show()
-        imsave(os.path.join(THIS_FILE_PATH, "../tests/data/06_dictionary_montage.jpg"), montage2d(D))
-        random_index = np.random.randint(D.shape[0])
-        plt.imshow(D[random_index], cmap=cm.Greys)
-        plt.show()
-        imsave(os.path.join(THIS_FILE_PATH, "../tests/data/06_dictionary_element.jpg"), D[32])
+        # ### debug dictionary montage and element
+        # ### D.shape = (k, p**2)
+        # D = self.params['D'].T
+        # p = isqrt(D.shape[1])
+        # D = D.reshape(D.shape[0], p, p)
+        # montage_D = montage2d(D)
+        # logging.debug(montage_D.shape)
+        # plt.imshow(montage2d(D), cmap=cm.Greys)
+        # plt.show()
+        # imsave(os.path.join(THIS_FILE_PATH, "../tests/data/06_dictionary_montage.jpg"), montage2d(D))
+        # random_index = np.random.randint(D.shape[0])
+        # plt.imshow(D[random_index], cmap=cm.Greys)
+        # plt.show()
+        # imsave(os.path.join(THIS_FILE_PATH, "../tests/data/06_dictionary_element.jpg"), D[random_index])
 
         # return None
         return

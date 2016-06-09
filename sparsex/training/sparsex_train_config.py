@@ -26,7 +26,8 @@ config_params = {
         'verbose':False, 
         'return_reg_path':False, 
         'mode':spams.PENALTY,
-        'eps':1.0
+        'eps':1.0,
+        'subsampling':True, 'subsampling_ratio':0.1, 'max_subsamples':100000
     },
     "feature_extraction_output_model_filename" : "/home/nitish/mas_course_ss2015/assignments/sparsex/sparsex/training/trained_feature_extraction_model_spams.pkl",
     "feature_extraction_sign_split" :True,

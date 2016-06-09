@@ -160,21 +160,21 @@ class Preprocessing:
             # Transpose to get back the proper shape
             whitened_image_patches = whitened_A.T
 
-            ### debug 1, non zero check
-            if np.random.rand() > 0.95:
-                random_index = np.random.randint(whitened_image_patches.shape[0])
-                logging.debug("debug non zero check, random patch plot")
-                plt.imshow(whitened_image_patches[random_index].reshape(isqrt(whitened_image_patches.shape[1]),isqrt(whitened_image_patches.shape[1])), cmap=cm.Greys)
-                plt.show()
-
-            ### debug 2, correlations
-            if np.random.rand() > 0.95:
-                logging.debug("debug correlations, sigma plot")
-                plt.imshow(sigma, cmap=cm.Greys)
-                plt.show()
-                logging.debug("debug correlations, correlations plot")
-                plt.imshow(np.dot(whitened_image_patches.T, whitened_image_patches), cmap=cm.Greys)
-                plt.show()
+            # ### debug 1, non zero check
+            # if np.random.rand() > 0.95:
+            #     random_index = np.random.randint(whitened_image_patches.shape[0])
+            #     logging.debug("debug non zero check, random patch plot")
+            #     plt.imshow(whitened_image_patches[random_index].reshape(isqrt(whitened_image_patches.shape[1]),isqrt(whitened_image_patches.shape[1])), cmap=cm.Greys)
+            #     plt.show()
+            # 
+            # ### debug 2, correlations
+            # if np.random.rand() > 0.95:
+            #     logging.debug("debug correlations, sigma plot")
+            #     plt.imshow(sigma, cmap=cm.Greys)
+            #     plt.show()
+            #     logging.debug("debug correlations, correlations plot")
+            #     plt.imshow(np.dot(whitened_image_patches.T, whitened_image_patches), cmap=cm.Greys)
+            #     plt.show()
 
             # returning shape (number_patches, patch_side**2) for single image
             return whitened_image_patches
