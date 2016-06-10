@@ -48,6 +48,7 @@ sparsex/classification/joachims/temp/*
 
 # Training
 sparsex/training/*.pkl
+sparsex/training/models/*.pkl
 
 # Atom Remote
 .ftpconfig
