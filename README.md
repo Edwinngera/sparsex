@@ -61,20 +61,16 @@ Sparsex also uses third-party software libraries and their respective license te
 * Training, config file, maybe use command line like arguments for configrations. For example -D for user provided dictionary.
 * Training, config file validation of arguments. Cross check with default parameters.
 * Training, replace training logging with logging within core sparsex classes.
-* Training, script file, split into train and test set
-* Training, script file, get results on test set
 * Training, script file, maybe use command line arguments and --help.
+* Training, take input model files from feature extraction and classification.
+* Training, cross validation options for choosing to retrain dictionary or not.
+* Training, cross validation need not re-preprocess the data.
 * Feature extraction, standardize/normalize features option after encoding and pooling.
-* Feature extraction, think about using inheritance or composition.
-* Feature extraction, change learn_dictionary method argument name from whitened_patches to something more generic.
 * Feature extraction, spams, figure out which parameters to use.
 * Feature extraction, spams, loading and saving models. Catch and handle exceptions properly.
 * Feature extraction, spams, when updating self.params with kwargs. Try to handle exceptions and wrong keyword arguments.
-* Feature extraction, spams, choose between different decomposition/encoding approaches.
-* Feature extraction, spams, identify and extract all parameters from kwargs for train_params and encoding_params.
 * Feature extraction, spams, think about how to handle sparse matrices. Will expanding it cause memory issues?
-* Feature extraction, spams, look into the FutureWarning about that keeps coming up.  
-``` /usr/local/lib/python2.7/dist-packages/spams.py:1783: FutureWarning: comparison to `None` will result in an elementwise object comparison in the future. if D == None:```
+* Feature extraction, spams, look into the FutureWarning about that keeps coming up. ```/usr/local/lib/python2.7/dist-packages/spams.py:1783: FutureWarning: comparison to None will result in an elementwise object comparison in the future. if D == None:```
 * Classification, the classifier needs to know how many features it is requires so that we can put a check if number of incoming/input features is the same as number of features required by the classifier.
 * Classification, try obtaining sparse pooled features in order to construct sparse joachimsSVM format input data.
 * Pipeline, server configuration state.
@@ -97,22 +93,13 @@ Sparsex also uses third-party software libraries and their respective license te
 * Project, saving models with pickle.HIGHEST_PROTOCOL
 * Project, look through code for method or variable name inconsistencies.
 * Project, shift into new-style classes.
-* Project, arguments sent into methods should not be altered in case those argument values are used eleswhere. Create new variables to store manipulations of the arguments.
+* Project, arguments sent into methods should not be altered in case those argument values are used elsewhere. Create new variables to store manipulations of the arguments.
 * Project, continuity functionality such that model file is saved after every batch or iteration.
 * Project, create a .sparsex home folder for temp files and avoiding permission issues.
 * Tests, making feature extraction tests more dynamic. Tests are working great but its just that if we need to be able to test different things then there is no API to do it.
 * Tests, installation test using virtual environments or docker.
 * Tests, use PyUnit.
 * Tests, add feature_extraction tests for spams.
-
-
-### Doubts
-* SVMLight, is it possible to give string.io or other forms of file streams as arguments to shell commands using subprocess instead of file names. This may cause doubling of the memory when loading to and from the file.
-* SVMLight, will uploading only executable to git work on other systems?
-* SVMLight, use pre-made python interfaces by other developers?
-* Continguous vs Fortran arrays.
-* Spams, encoding using only one processor?
-* Massive amounts of features when pooling size is (3,3)
 
 
 ### Possible Issues

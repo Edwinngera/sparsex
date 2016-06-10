@@ -177,7 +177,7 @@ class JoachimsSVM(object):
         
     ## convert from svm_light format
     def _convert_joachims_output_to_predictions(self, joachims_output):
-        logging.debug("joachims_output : \n{0}".format(joachims_output))
+        # logging.debug("joachims_output : \n{0}".format(joachims_output))
         
         # find out number of samples and create np.array(int)
         # subtracting last element, it appears split('\n') seems to yield an additional line

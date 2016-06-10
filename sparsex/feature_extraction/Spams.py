@@ -265,8 +265,6 @@ class Spams(object):
         sys.stdout.flush()
 
         if multiple_images:
-            
-            
             # precautionary reshape back to original shape, since its possible the patches referenced here may be used
             # elsewhere, therefore they will be reshaped due to the manipulations made above in multple images.
             # Although X has its flags changed, patches retains its original flags.
@@ -333,6 +331,8 @@ class Spams(object):
 
     def get_sign_split_features(self, encoding, multiple_images=False):
         """Returns (n,2k) features from (n,k) encoding for single image."""
+        logging.info("performing sign slit features")
+        sys.stdout.flush()
         
         original_encoding_shape = encoding.shape
         
@@ -379,6 +379,8 @@ class Spams(object):
 
     def get_pooled_features(self, encoding, filter_size, multiple_images=False):
         """Returns (n/s**2,f) pooled features from (n,f) features and (s,s) filter size for single image."""
+        logging.info("performing pooling")
+        sys.stdout.flush()
         
         def pool_features(input_feature_map):
             # expecting shape (sqrt_number_patches, sqrt_number_patches, number_features)
@@ -475,12 +477,9 @@ class Spams(object):
             return minmax_scale(features, axis=1)
 
     
-    def pipeline(self, patches, sign_split=True, pooling=True, pooling_size=(3,3), multiple_images=False):
+    def pipeline(self, patches, sign_split=True, pooling=True, pooling_size=(3,3), post_pooling_standardization=False, multiple_images=False):
         """Returns (n/s**2,2k) feature map from (n,p**2), sign_split, pooling, (s,s) pooling_size, (k,p**2) internal dictionary for single image."""
-        features = self.get_sparse_features(patches, multiple_images)        
-        
-        if self.params['pipeline_pre_pooling_feature_scaling']:
-            features = self.feature_scaling(features, multiple_images)
+        features = self.get_sparse_features(patches, multiple_images)
         
         if sign_split:
             features = self.get_sign_split_features(features, multiple_images)
@@ -497,8 +496,11 @@ class Spams(object):
             # reshape (1, number_features)
             features = features.reshape(1, -1)
             
-        if self.params['pipeline_post_pooling_feature_standardization']:
-            feature = ((features  - features.mean(axis=1)[:, np.newaxis]) / (np.sqrt(features.var(axis=1))[:, np.newaxis] + 0.01))
+        if post_pooling_standardization:
+            logging.info("performing post pooling standardization")
+            logging.debug("features sum before standardization: {0}".format(np.sum(features)))
+            features = ((features  - features.mean(axis=1)[:, np.newaxis]) / (np.sqrt(features.var(axis=1))[:, np.newaxis] + 0.01))
+            logging.debug("features sum after standardization: {0}".format(np.sum(features)))
             
         return features
 
