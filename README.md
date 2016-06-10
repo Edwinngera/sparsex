@@ -211,6 +211,10 @@ Sparsex also uses third-party software libraries and their respective license te
 
 1. Ubuntu Tips & Tricks
     * [stdout to file and to console](http://www.linuxquestions.org/questions/linux-software-2/bash-how-to-redirect-output-to-file-and-still-have-it-on-screen-412611/)
+    * [How To Use SSHFS to Mount Remote File Systems Over SSH](https://www.digitalocean.com/community/tutorials/how-to-use-sshfs-to-mount-remote-file-systems-over-ssh)
+        * Give read access to /etc/fuse.conf with ```chmod a+r /etc/fuse.conf```
+        * Enable option of ```non_user_access``` in /etc/fuse.conf
+        * If you're using editiors like Atom, then you will need to run them as root inorder to save files.
 
 1. Python Tips & Tricks
     * [Inheritance Versus Composition](http://learnpythonthehardway.org/book/ex44.html)
