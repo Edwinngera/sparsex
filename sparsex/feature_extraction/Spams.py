@@ -331,7 +331,7 @@ class Spams(object):
 
     def get_sign_split_features(self, encoding, multiple_images=False):
         """Returns (n,2k) features from (n,k) encoding for single image."""
-        logging.info("performing sign slit features")
+        logging.info("performing sign split features")
         sys.stdout.flush()
         
         original_encoding_shape = encoding.shape
@@ -379,8 +379,8 @@ class Spams(object):
 
     def get_pooled_features(self, encoding, filter_size, multiple_images=False):
         """Returns (n/s**2,f) pooled features from (n,f) features and (s,s) filter size for single image."""
-        logging.info("performing pooling")
-        sys.stdout.flush()
+        
+        pool_type = "max_vanilla"
         
         def pool_features(input_feature_map):
             # expecting shape (sqrt_number_patches, sqrt_number_patches, number_features)
@@ -396,14 +396,20 @@ class Spams(object):
                                                                            filter_size[0]**2,
                                                                            input_feature_map.shape[-1]))
 
-            # calculate norms (9, 361, 20) to (9,361)
-            input_feature_map_window_norms = np.linalg.norm(input_feature_map_windows, ord=2, axis=-1)
 
-            # calculate indexes of max norms per window (9,361) to (9,1). One max index per window.
-            max_norm_indexes = np.argmax(input_feature_map_window_norms, axis=-1)
+            if pool_type == "max_norm":
+                # calculate norms (9, 361, 20) to (9,361)
+                input_feature_map_window_norms = np.linalg.norm(input_feature_map_windows, ord=2, axis=-1)
+                
+                # calculate indexes of max norms per window (9,361) to (9,1). One max index per window.
+                max_norm_indexes = np.argmax(input_feature_map_window_norms, axis=-1)
+                
+                # max pooled features are the features that have max norm indexes (9, 361, 20) to (9,20). One max index per window.
+                pooled_feature_map = input_feature_map_windows[np.arange(input_feature_map_windows.shape[0]), max_norm_indexes]
 
-            # max pooled features are the features that have max norm indexes (9, 361, 20) to (9,20). One max index per window.
-            pooled_feature_map = input_feature_map_windows[np.arange(input_feature_map_windows.shape[0]), max_norm_indexes]
+            elif pool_type == "max_vanilla":
+                # (9, 361, 20) to (9,20), pixel wise max
+                pooled_feature_map = np.max(input_feature_map_windows, axis=1)
 
             # return pooled feature map
             return pooled_feature_map
