@@ -1,7 +1,7 @@
 from ..feature_extraction.feature_extraction import SparseCoding, Spams, SklearnDL
 from ..customutils.customutils import read_dictionary_from_pickle_file, write_dictionary_to_pickle_file
 from ..customutils.customutils import read_string_from_file, write_string_to_file
-import os, sys, subprocess, logging, re
+import os, sys, subprocess, logging, re, time
 import numpy as np
 from ..tests.preprocessing_test import test_whitening
 
@@ -122,6 +122,8 @@ class JoachimsSVM(object):
         logging.debug("Y.shape : {0}".format(Y.shape))
         logging.debug("Y.dtype : {0}".format(Y.dtype))
         
+        start_time = time.time()
+        
         # each sample will be populated into this list of strings
         joachims_train_data_list = []        
         
@@ -141,6 +143,8 @@ class JoachimsSVM(object):
         joachims_train_data = "\n".join(joachims_train_data_list)
         
         logging.debug("converting : 100%")
+        end_time = time.time()
+        logging.info("convert_train_data_to_joachims_train_data, time elapsed: {0}".format(end_time - start_time))
         sys.stdout.flush()
         
         return joachims_train_data
@@ -150,6 +154,8 @@ class JoachimsSVM(object):
     def _convert_test_data_to_joachims_test_data(self, X, target_placeholder=1):
         logging.debug("X.shape : {0}".format(X.shape))
         logging.debug("X.dtype : {0}".format(X.dtype))
+        
+        start_time = time.time()
         
         # each sample will be populated into this list of strings
         joachims_test_data_list = []        
@@ -170,6 +176,8 @@ class JoachimsSVM(object):
         joachims_test_data = "\n".join(joachims_test_data_list)
         
         logging.debug("converting : 100%")
+        end_time = time.time()
+        logging.info("convert_test_data_to_joachims_test_data, time elapsed: {0}".format(end_time - start_time))
         sys.stdout.flush()
         
         return joachims_test_data

@@ -54,10 +54,10 @@ config_params = {
     },
     "classification_training_repeats":1,
     
-    "random_seed":2902,
+    "random_seed":np.random.randint(100000),
     "validation":True,
     "validation_split":0.3,
     "cross_validation":False,
-    "cross_validation_folds":3
+    "cross_validation_relearn_dictionary":False
 }
 

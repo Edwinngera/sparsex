@@ -334,6 +334,8 @@ class Spams(object):
         logging.info("performing sign split features")
         sys.stdout.flush()
         
+        start_time = time.time()
+        
         original_encoding_shape = encoding.shape
         
         if multiple_images:
@@ -346,31 +348,41 @@ class Spams(object):
             number_samples = number_images * number_patches
             number_features = original_encoding_shape[2]
             
+            # Ignoring for memory efficiency
             # reshape encoding, sign split is done on each patch and does not depend on image.
-            encoding = encoding.reshape(number_images * number_patches, -1)
+            # encoding = encoding.reshape(number_images * number_patches, -1)
+            
+            sign_split_features = np.empty((number_images, number_patches, 2 * number_features), dtype=np.float)
+            
+            for image_index in range(number_images):
+                sign_split_features[image_index, :, :number_features] = np.maximum(encoding[image_index, :], 0)
+                sign_split_features[image_index, :, number_features:] = -np.minimum(encoding[image_index, :], 0)
+            
+            # Ignoring for memory efficiency
+            # precautionary reshape of encoding to original shape in case it may be used elsewhere
+            # encoding = encoding.reshape(original_encoding_shape)
+
+            # Ignoring for memory efficiency
+            # reshape sign_split_features to (number_images, number_patches, 2k)
+            # sign_split_features = sign_split_features.reshape(number_images, number_patches, -1)
             
         else:
             # expecting (number_patches, k)
             assert encoding.ndim == 2, "encoding.ndim is {0} instead of 2".format(encoding.ndim)
             
             # store shapes
-            number_samples = original_encoding_shape[0]
+            number_patches = original_encoding_shape[0]
             number_features = original_encoding_shape[1]
             
-        sign_split_features = np.empty((number_samples, 2 * number_features))
-        sign_split_features[:, :number_features] = np.maximum(encoding, 0)
-        sign_split_features[:, number_features:] = -np.minimum(encoding, 0)
+            sign_split_features = np.empty((number_patches, 2 * number_features), dtype=np.float)
+            
+            sign_split_features[:, :number_features] = np.maximum(encoding, 0)
+            sign_split_features[:, number_features:] = -np.minimum(encoding, 0)
         
-        if multiple_images:
-            # precautionary reshape of encoding to original shape in case it may be used elsewhere
-            encoding = encoding.reshape(original_encoding_shape)
-
-            # reshape sign_split_features to (number_images, number_patches, 2k)
-            sign_split_features = sign_split_features.reshape(number_images, number_patches, -1)
         
-        else:
-            # no reshaping required
-            pass
+        end_time = time.time()
+        logging.info("sign split features, time elapsed: {0}".format(end_time - start_time))
+        sys.stdout.flush()
         
         # returning shape (number_images, number_patches, 2*k) for multiple images.
         # returning shape (number_patches, 2*k) for single image.
@@ -379,6 +391,8 @@ class Spams(object):
 
     def get_pooled_features(self, encoding, filter_size, multiple_images=False):
         """Returns (n/s**2,f) pooled features from (n,f) features and (s,s) filter size for single image."""
+        
+        start_time = time.time()
         
         pool_type = "max_vanilla"
         
@@ -462,6 +476,9 @@ class Spams(object):
             
             # get pooled features
             pooled_features = pool_features(encoding_map)
+        
+        end_time = time.time()
+        logging.info("get_pooled_features, time elapsed: {0}".format(end_time - start_time))
         
         # returning shape (number_images, number_patches/filter_side**2, number_features) for multiple images
         # returning shape (number_patches/filter_side**2, number_features) for single image

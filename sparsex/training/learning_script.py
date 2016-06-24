@@ -1,14 +1,16 @@
 from ..preprocessing.preprocessing import Preprocessing
 from ..feature_extraction.feature_extraction import SparseCoding
 from ..classification.classification import Classifier
-from ..customutils.customutils import get_image_from_file, save_image
+from ..customutils.customutils import get_image_from_file, save_image, write_dictionary_to_pickle_file
 from scipy.misc import imresize
 from sklearn.cross_validation import StratifiedKFold
+from sklearn.metrics import confusion_matrix
 import sys, argparse, os, logging, imghdr
 import numpy as np
 import sparsex_train_config
 # from matplotlib import pyplot as plt
 # from matplotlib import cm
+from scipy.misc import imsave
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -266,6 +268,19 @@ def validate(X_train, Y_train, X_test, Y_test, config_params):
     logging.debug("Y_test    : {0}".format(Y_test))
     logging.debug("Y_predict : {0}".format(Y_predict))
     logging.info("PREDICTION_RATE: {0}% ... {1} / {2}".format(percentage_correct, correct_predictions, total_predicitions))
+    
+    # cm = confusion_matrix(Y_test, Y_predict)
+    # # cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+    # imsave(os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/confusion_matrix.png")), cm)
+    # imsave(os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/confusion_matrix.jpg")), cm)
+    
+    confusion_matrix_dict = {
+        "Y_test":Y_test,
+        "Y_predict":Y_predict
+    }
+    write_dictionary_to_pickle_file(os.path.realpath(os.path.join(THIS_FILE_PATH, "../tests/data/confusion_matrix_dict.pkl")),
+                                    confusion_matrix_dict)
+    
 
 
 def main():
@@ -294,6 +309,13 @@ def main():
             X_train, Y_train = X_raw[train_index], Y_raw[train_index]
             X_test, Y_test = X_raw[test_index], Y_raw[test_index]
             validate(X_train, Y_train, X_test, Y_test, config_params)
+            
+            # relearn dictionary
+            if config_param["cross_validation_relearn_dictionary"]:
+                pass
+            # don't relearn dictionary
+            else:
+                config_params["feature_extraction_input_mode_filename"] = config_params["feature_extraction_output_model_filename"]
     
     else:
         ## no validation, only training
