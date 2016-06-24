@@ -82,8 +82,6 @@ Sparsex also uses third-party software libraries and their respective license te
 * Pipeline, catch TypeError in server-client communication for when wrong data format is being set.
 * Pipeline, catch all known Server related errors so that sockets and client connections can be cleanly terminated.
 * Preprocessing, Inplace = True/False option for some of the preprocessing steps. Perhaps for memory conservation.
-* Preprocessing, since normalization is a part of whitening, we need to make sure that normalization is not done twice and also make sure that if normalization=False and whitening=True, then we must normalize as well.
-* Preprocessing, choose appropriate value for adding in the denominator to prevent divide by zero in contrast normalization. Currently it is 0.01.
 * Project, installing numpy and other hard to install packages.
 * Project, pip installable.
 * Project, use subprocess instead of threads.

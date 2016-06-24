@@ -95,6 +95,8 @@ class Preprocessing:
 
     def get_contrast_normalized_patches(self, patches, multiple_images=False):
         """Returns (n,p**2) normalized_patches from (n,p**2) patches for single image."""
+        
+        epsilon = 0.1
 
         # From [Zim15], While implementing contrast normalization, we subtract the pixel mean of each patch after extraction
         # and divide by the standard deviation of all it's pixels. Before the division, we add a small value alpha to the pixel variance
@@ -112,7 +114,7 @@ class Preprocessing:
             patches = patches.reshape(number_images * number_patches, -1)
 
             # normalize and overwrite patches onto the original patches
-            patches = (patches - patches.mean(axis=1)[:, np.newaxis]) / (np.sqrt(patches.var(axis=1))[:, np.newaxis] + 0.01)
+            patches = (patches - patches.mean(axis=1)[:, np.newaxis]) / (np.sqrt(patches.var(axis=1))[:, np.newaxis] + epsilon)
 
             # reshape into original shape i.e. (number_images, number_patches, p**2)
             patches = patches.reshape(number_images, number_patches, -1)
@@ -123,7 +125,7 @@ class Preprocessing:
 
             # normalize and overwrite patches onto the original patches
             # shape is already consistent
-            patches = (patches - patches.mean(axis=1)[:, np.newaxis]) / (np.sqrt(patches.var(axis=1))[:, np.newaxis] + 0.01)
+            patches = (patches - patches.mean(axis=1)[:, np.newaxis]) / (np.sqrt(patches.var(axis=1))[:, np.newaxis] + epsilon)
 
         # returning shape (number_images, number_patches, patch_side**2) for multiple_images
         # returning shape (number_patches, patch_side**2) for single image
@@ -132,6 +134,8 @@ class Preprocessing:
 
     def get_whitened_patches(self, patches, multiple_images=False):
         """Return (n,p**2) whitened_patches from (n,p**2) patches for single image."""
+        
+        epsilon = 0.00001
 
         def whiten_image_patches(image_patches):
             # expecting (number_patches, patch_side**2)
@@ -151,7 +155,6 @@ class Preprocessing:
             u, s, v = np.linalg.svd(sigma, full_matrices=True)
 
             # whitening matrix
-            epsilon = 0.00001
             whitening_matrix = np.dot(u, np.dot(np.diag(1/np.sqrt(s + epsilon)), u.T))
 
             # Awhite = W.A
