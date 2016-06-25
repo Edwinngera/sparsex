@@ -51,7 +51,13 @@ Sparsex also uses third-party software libraries and their respective license te
 * Pipeline, split requests into meta-data and data so that the server can make sure meta-data is in perfect order before transfer of data/dataset.
 
 #### Backlog
+* Preprocessing, return the standardization parameters done on training data so that standardization of test data is done with the same parameters.
+* Preprocessing, since we whiten all the patches of the images together, should we normalize the images together?
+* Feature extraction, standardize the encodings before pooling. Currently standardize each patch individually.
+* Training, use sparse matrices.
+* Training, when writing to file for joachim's training data use the svmlight-loader library.
 * Pipeline, handle different color channels.
+* Training, consider converting training pipeline to a single image pipeline to overcome memory issues and also the part of remembering standardization parameters before pooling.
 * Pipeline, handle h5 files in requests for training datasets.
 * Pipeline, add "checksum" functionality in request and response messages for data (image / image_array) verfication.
 * Pipeline, make sure all/most data types for the data bytes are handled.
@@ -63,9 +69,7 @@ Sparsex also uses third-party software libraries and their respective license te
 * Training, replace training logging with logging within core sparsex classes.
 * Training, script file, maybe use command line arguments and --help.
 * Training, take input model files from feature extraction and classification.
-* Training, cross validation options for choosing to retrain dictionary or not.
 * Training, cross validation need not re-preprocess the data.
-* Feature extraction, standardize/normalize features option after encoding and pooling.
 * Feature extraction, spams, figure out which parameters to use.
 * Feature extraction, spams, loading and saving models. Catch and handle exceptions properly.
 * Feature extraction, spams, when updating self.params with kwargs. Try to handle exceptions and wrong keyword arguments.
