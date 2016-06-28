@@ -1,6 +1,7 @@
 from ..feature_extraction.feature_extraction import SparseCoding, Spams, SklearnDL
 from ..customutils.customutils import read_dictionary_from_pickle_file, write_dictionary_to_pickle_file
 from ..customutils.customutils import read_string_from_file, write_string_to_file
+from .joachims.svmlight_loader.svmlight_loader import load_svmlight_file, dump_svmlight_file
 import os, sys, subprocess, logging, re, time
 import numpy as np
 from ..tests.preprocessing_test import test_whitening
@@ -56,11 +57,14 @@ class JoachimsSVM(object):
         assert X.ndim == 2, "JoachimsSVM training data X.ndim is %d instead of 2" %X.ndim
         assert Y.ndim == 1, "JoachimsSVM training data Y.ndim is %d instead of 1" %Y.ndim
         
-        # convert X and Y into joachims train data format and write to file
-        joachims_train_data = self._convert_train_data_to_joachims_train_data(X, Y)
-        write_string_to_file(JoachimsSVM.TEMP_TRAIN_FILENAME, joachims_train_data)
-        
-        #write_string_to_file(JoachimsSVM.TEMP_MODEL_FILENAME, "")
+        # # convert X and Y into joachims train data format and write to file
+        # joachims_train_data = self._convert_train_data_to_joachims_train_data(X, Y)
+        # write_string_to_file(JoachimsSVM.TEMP_TRAIN_FILENAME, joachims_train_data)
+        start_time = time.time()
+        Y_one_indexed = Y + 1
+        dump_svmlight_file(X, Y_one_indexed, JoachimsSVM.TEMP_TRAIN_FILENAME, zero_based=False)
+        end_time = time.time()
+        logging.info("dump_svmlight_file, TRAIN, time elapsed: {0}".format(end_time - start_time))
         
         # train the svm model using the train data, model is written to the temp file.
         try:
@@ -85,9 +89,14 @@ class JoachimsSVM(object):
     def get_predictions(self, X):
         assert X.ndim == 2, "JoachimsSVM prediction data X.ndim is %d instead of 2" %X.ndim
         
-        # convert X into joachims test data format and write to file
-        joachims_test_data = self._convert_test_data_to_joachims_test_data(X)
-        write_string_to_file(JoachimsSVM.TEMP_TEST_FILENAME, joachims_test_data)
+        # # convert X into joachims test data format and write to file
+        # joachims_test_data = self._convert_test_data_to_joachims_test_data(X)
+        # write_string_to_file(JoachimsSVM.TEMP_TEST_FILENAME, joachims_test_data)
+        start_time = time.time()
+        Y = np.ones(X.shape[0], dtype=int)
+        dump_svmlight_file(X, Y, JoachimsSVM.TEMP_TEST_FILENAME, zero_based=False)
+        end_time = time.time()
+        logging.info("dump_svmlight_file, TEST, time elapsed: {0}".format(end_time - start_time))
         
         # since we are trying to get predictions, we need a valid model file
         if self.params["model"] == "" or self.params["model"] == None:

@@ -32,6 +32,7 @@ sparsex/tests/data/feature_extraction_model_sklearndl.pkl
 # Classification tests outputs
 sparsex/tests/data/classification_model_sklearnsvc.pkl
 sparsex/tests/data/classification_model_joachimssvm.pkl
+sparsex/tests/data/confusion_matrix_dict.pkl
 
 # SVM_Light
 sparsex/classification/joachims/svm_light/svm_classify
@@ -43,8 +44,9 @@ sparsex/classification/joachims/svm_light/svm_learn.o
 sparsex/classification/joachims/svm_light/svm_learn_main.o
 sparsex/classification/joachims/svm_light/*
 
-# Joachims temp
+# Joachims
 sparsex/classification/joachims/temp/*
+sparsex/classification/joachims/svmlight_loader/build
 
 # Training
 sparsex/training/*.pkl

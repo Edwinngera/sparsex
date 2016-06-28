@@ -98,6 +98,7 @@ Sparsex also uses third-party software libraries and their respective license te
 * Project, arguments sent into methods should not be altered in case those argument values are used elsewhere. Create new variables to store manipulations of the arguments.
 * Project, continuity functionality such that model file is saved after every batch or iteration.
 * Project, create a .sparsex home folder for temp files and avoiding permission issues.
+* Project, include svmlight_loader for installation.
 * Tests, making feature extraction tests more dynamic. Tests are working great but its just that if we need to be able to test different things then there is no API to do it.
 * Tests, installation test using virtual environments or docker.
 * Tests, use PyUnit.
